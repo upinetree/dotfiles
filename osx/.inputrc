@@ -1,0 +1,8 @@
+# Ask before displaying >40 items
+set completion-query-items 40
+
+# Ignore case for the command-line-completion functionality
+set completion-ignore-case on
+
+# Show all instead of beeping first
+set show-all-if-ambiguous on

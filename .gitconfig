@@ -1,0 +1,59 @@
+[user]
+	name = upinetree
+	email = essequake@gmail.com
+
+[color]
+	ui = auto
+
+[core]
+	excludesfile = /Users/upinetree/.gitignore
+  precomposeunicode = true
+	quotepath = false
+
+[push]
+	default = matching
+
+[credential]
+	helper = cache --timeout=1800
+
+[alias]
+	st = status -uall
+	ft = fetch
+	co = checkout
+	br = branch -a
+
+	# add
+	ad = add
+	ada = add -A
+
+	# commit
+	cm = commit
+	ca = commit -a
+	cam = commit -am
+	camend = commit --amend	# amends commit log
+
+	# diff
+	df = diff
+	dc = diff --cached
+
+	# log / show
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	ls = log --stat
+	lp = log -p
+	sh = show
+
+	# origin
+	ado = remote add origin
+	sho = remote show origin
+	pom = push -u origin master
+
+[diff]
+  tool = meld
+
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
