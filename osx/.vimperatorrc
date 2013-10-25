@@ -1,0 +1,39 @@
+"3.7.1 (created: 2013/05/22 20:32:57)
+
+set hintchars=zhjklasdfgyuiopqwertnmxcvb
+set ignorecase
+set titlestring=
+
+source! "C:\\Users\\TakuyaMatsumoto\\_vimperatorrc.local"
+
+:style -name commandline-ime chrome://* #liberator-commandline-command input {ime-mode: inactive;}
+
+" vim: set ft=vimperator:
+
+"=============================================
+" Appearance Config
+"=============================================
+" Hint
+highlight Hint z-index:5000; font-size:12px; color:DarkSlateGray; background-color:rgba(255, 250, 205, 1.0); border-color:ButtonShadow; border-width:1px; border-style:solid; border-radius:2px; padding:0px 2px; position:absolute; font-family: Menlo, Consolas, Monaco, monospace; text-transform: lowercase;
+
+highlight HintElem background-color:rgba(0, 191, 255, 0.6); border-width:0px; border-radius:3px;
+highlight HintActive background-color:rgba(175, 238, 238, 0.6); border-width:0px; border-radius:3px;
+
+let g:smooziee_scroll_amount="300"
+let g:smooziee_scroll_interval="15"
+
+
+"=============================================
+" Key Config
+"=============================================
+" noremap j 2j
+" noremap k 2k
+
+noremap <C-h> <C-p>
+noremap <C-l> <C-n>
+
+" OSのキーバインドを再現
+nnoremap <C-a> <S-Esc><C-a><S-Esc>
+inoremap <C-a> <S-Esc><C-a><S-Esc>
+
+map <C-R> :source ~/.vimperatorrc
