@@ -1,8 +1,11 @@
 # Path Settings
 #------------------
 export PATH=/usr/local/bin:$PATH
-export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH=$HOME/.rbenv/bin:$PATH
+export PATH=$HOME/.rbenv/shims:$PATH
+
 eval "$(rbenv init -)"
+source ~/.rbenv/completions/rbenv.bash
 
 export DYLD_LIBRARY_PATH=/usr/local/opt/cairo/lib
 
@@ -56,7 +59,7 @@ alias fgrep='fgrep --color=auto'
 alias whence='type -a' 				# where, of a sort
 alias vi='vim'
 alias be='bundle exec'
-alias nicorepo='~/Repositories/nicorepo/bin/nicorepo'
+alias nicorepo='~/Scripts/nicorepo/bin/nicorepo'
 
 # tmuxinator
 source ~/.tmuxinator/tmuxinator.bash
