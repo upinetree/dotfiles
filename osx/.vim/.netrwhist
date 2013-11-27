@@ -1,0 +1,8 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =6
+let g:netrw_dirhist_1='/Users/upinetree/Repositories/nicorepo/spec'
+let g:netrw_dirhist_2='/Users/upinetree/Repositories/nicorepo/lib'
+let g:netrw_dirhist_3='/Users/upinetree/Repositories/nicorepo'
+let g:netrw_dirhist_4='/Users/upinetree/Repositories/nicorepo/spec'
+let g:netrw_dirhist_5='/Users/upinetree/Scripts/nicorepo/lib/nicorepo/cli'
+let g:netrw_dirhist_6='/Users/upinetree/Repositories/nicorepo/lib/nicorepo/cli'
