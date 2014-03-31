@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+# note:
+# git の pre-commit Hook です。
+# checks にある文字列をチェックしてくれます。
+# .git/hooks/pre-commit に配置してください
+
+# memo:
+# 動かない場合は権限つけてみてください。
+# chmod +x .git/hooks/pre-commit
+
+#invalid byte sequence in US-ASCII (ArgumentError) などで怒られる場合は shell に以下を足してください
+# export LANGUAGE=en_US.UTF-8
+# export LANG=en_US.UTF-8
+# export LC_ALL=en_US.UTF-8
+
+
+spec_hits = []
+
+checks = {
+  '_spec\.rb$' => [/focus:( *)true/, /save_and_open_page/],
+  '\.rb$' => [/binding\.pry/, /debugger/],
+  '\.*$' => [/<<</, />>>/]
+}
+ignore_file_pattern = '\.gem'
+
+# Find the names of all the filenames that have been (A)dded (C)opied or (M)odified
+filenames = `git diff --cached --name-only`.split("\n")
+
+filenames.each do |filename|
+  next if filename.match ignore_file_pattern
+  next unless File.exists?(filename)
+
+  checks.each do |filename_pattern, patterns|
+    next unless filename.match filename_pattern
+    file_contents = File.read(filename)
+    patterns.each do |contents_pattern|
+      if contents_pattern =~ file_contents
+        # Add the relevant change with line number to the spec_hits array
+        spec_hits.push "#{filename}:" + "includes #{contents_pattern}"
+      end
+    end
+  end
+end
+
+if spec_hits.any?
+  puts "\e[33m>>> Please remove the following problems from these files before committing\e[0m"
+  puts spec_hits.join("\n")
+end
+
+exit 1 if spec_hits.any?
