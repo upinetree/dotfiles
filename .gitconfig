@@ -7,8 +7,11 @@
 
 [core]
 	excludesfile = /Users/upinetree/.gitignore
-  precomposeunicode = true
+	precomposeunicode = true
 	quotepath = false
+
+[pull]
+	rebase = true
 
 [push]
 	default = matching
@@ -17,17 +20,18 @@
 	helper = cache --timeout=1800
 
 [alias]
-	st = status -uall
+	st = status -sbu
 	ft = fetch
 	co = checkout
-	br = branch -a
+	br = branch
 
 	# add
 	ad = add
+	adp = add -p
 	ada = add -A
 
 	# commit
-	cm = commit
+	ci = commit -v
 	ca = commit -a
 	cam = commit -am
 	camend = commit --amend	# amends commit log
@@ -38,6 +42,7 @@
 
 	# log / show
 	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	lga = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
 	ls = log --stat
 	lp = log -p
 	sh = show
@@ -52,8 +57,10 @@
 
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+	path =
 
 [mergetool "sourcetree"]
 	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
+
+[heroku]
