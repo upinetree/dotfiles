@@ -7,6 +7,9 @@ source! "C:\\Users\\TakuyaMatsumoto\\_vimperatorrc.local"
 
 :style -name commandline-ime chrome://* #liberator-commandline-command input {ime-mode: inactive;}
 
+" Hatena Bookmark 拡張
+javascript if (typeof hBookmark != 'undefined') liberator.loadScript('chrome://hatenabookmark/content/vimperator/plugin/hatenabookmark.js', {__proto__: this});
+
 " vim: set ft=vimperator:
 
 "=============================================

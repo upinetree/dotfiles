@@ -41,10 +41,10 @@ pik use 200
 
 # external apps
 #---------------------
-alias subl "C:/Programs/SublimeText2/sublime_text.exe"
+alias s "C:/Programs/SublimeText2/sublime_text.exe"
 alias vsenv cmdsource "C:/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/Tools/VsDevCmd.bat"
 
 alias git C:/Git/bin/git.exe
 set TERM=msys
 
-alias nicorepo ruby $HOME\Repositories\nicorepo\bin\nicorepo
+alias ni "ruby $HOME\Repositories\nicorepo\bin\nicorepo i"
