@@ -65,6 +65,7 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 NeoBundle 'Shougo/neosnippet.vim'
 NeoBundle 'Shougo/neosnippet-snippets'
 NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'tsukkee/unite-help'
 NeoBundle 'h1mesuke/unite-outline'
 NeoBundle 'tpope/vim-fugitive'
@@ -113,4 +114,17 @@ let g:wildfire_objects = ["i'", 'i"', "i)", "i]", "i}", "ip", "it", "i>"]
 " Align
 
 let g:Align_xstrlen = 3
+
+"-------------------------------------------------
+" Unite
+
+let g:unite_enable_start_insert=1
+
+nnoremap [unite]  <Nop>
+nmap     <Space>u [unite]
+
+nnoremap <silent> [unite]m :<C-u>Unite file_mru<CR>
+nnoremap <silent> [unite]b :<C-u>Unite buffer<CR>
+nnoremap <silent> [unite]a :<C-u>Unite file_rec -buffer-name=files file<CR>
+nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=register register<CR>
 
