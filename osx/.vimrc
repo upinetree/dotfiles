@@ -73,6 +73,7 @@ NeoBundle 'gcmt/wildfire.vim'
 " NeoBundle 'kien/ctrlp.vim'
 NeoBundle 'flazz/vim-colorschemes'
 NeoBundle 'Align'
+NeoBundle "tyru/caw.vim"
 
 " You can specify revision/branch/tag.
 NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
@@ -127,4 +128,10 @@ nnoremap <silent> [unite]m :<C-u>Unite file_mru<CR>
 nnoremap <silent> [unite]b :<C-u>Unite buffer<CR>
 nnoremap <silent> [unite]a :<C-u>Unite file_rec -buffer-name=files file<CR>
 nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=register register<CR>
+
+"-------------------------------------------------
+" Caw
+
+nmap <Space>c <Plug>(caw:i:toggle)
+vmap <Space>c <Plug>(caw:i:toggle)
 
