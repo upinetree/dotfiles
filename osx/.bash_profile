@@ -7,7 +7,7 @@ export PATH=$HOME/bin:$PATH
 
 # rbenv
 export PATH=$HOME/.rbenv/bin:$PATH
-export PATH=$HOME/.rbenv/shims:$PATH
+# export PATH=$HOME/.rbenv/shims:$PATH
 eval "$(rbenv init -)"
 source ~/.rbenv/completions/rbenv.bash
 
@@ -82,6 +82,7 @@ alias fgrep='fgrep --color=auto'
 alias whence='type -a' 				# where, of a sort
 alias vi='vim'
 alias be='bundle exec'
+alias bi='bundle install --path vendor/bundle'
 alias ni='~/bin/nicorepo/bin/nicorepo i'
 alias s='subl'
 
