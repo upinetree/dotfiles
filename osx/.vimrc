@@ -4,10 +4,9 @@
 syntax enable
 set t_Co=256
 set background=dark
-" colorscheme solarized
-" let g:solarized_termcolors=256
-" colorscheme desert
-colorscheme molokai
+" colorscheme molokai
+" colorscheme hybrid
+colorscheme lucius
 
 set whichwrap=b,s,<,>,[,],~
 set number
