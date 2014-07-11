@@ -148,15 +148,18 @@ alias l='ls'
 
 # Misc :)
 alias src='source ~/.zshrc'
+alias zshrc='vim ~/.zshrc'
 alias grep='grep --color=auto'		# show differences in colour
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
+alias v='vim'
 alias vi='vim'
 alias be='bundle exec'
 alias bi='bundle install --path vendor/bundle'
 alias ni='nicorepo i'
 alias s='subl'
 alias g='git'
+alias f='fg'
 
 # tmuxinator
 # source ~/.tmuxinator/tmuxinator.bash
