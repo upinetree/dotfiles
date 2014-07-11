@@ -98,6 +98,8 @@ fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
 autoload -U compinit
 compinit -u
 
+eval "$(hub alias -s)"
+
 # Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
 
