@@ -86,6 +86,7 @@ NeoBundle 'Shougo/neosnippet.vim'
 NeoBundle 'Shougo/neosnippet-snippets'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/neomru.vim'
+NeoBundle 'Shougo/vimshell'
 NeoBundle 'tsukkee/unite-help'
 NeoBundle 'h1mesuke/unite-outline'
 NeoBundle 'tpope/vim-fugitive'
@@ -96,9 +97,6 @@ NeoBundle 'gcmt/wildfire.vim'
 NeoBundle 'flazz/vim-colorschemes'
 NeoBundle 'Align'
 NeoBundle "tyru/caw.vim"
-
-" You can specify revision/branch/tag.
-NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
 
 NeoBundle 'Shougo/vimproc.vim', {
     \ 'build' : {
