@@ -13,6 +13,9 @@ source! "C:\\Users\\TakuyaMatsumoto\\_vimperatorrc.local"
 " はてなブックマーク拡張
 javascript if (typeof hBookmark != 'undefined') liberator.loadScript('chrome://hatenabookmark/content/vimperator/plugin/hatenabookmark.js', {__proto__: this});
 
+set gui=nonavigation
+
+
 "=============================================
 " Appearance Config
 "=============================================
