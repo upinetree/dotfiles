@@ -100,6 +100,15 @@ NeoBundle "tyru/caw.vim"
 " You can specify revision/branch/tag.
 NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
 
+NeoBundle 'Shougo/vimproc.vim', {
+    \ 'build' : {
+    \     'windows' : 'tools\\update-dll-mingw',
+    \     'cygwin' : 'make -f make_cygwin.mak',
+    \     'mac' : 'make -f make_mac.mak',
+    \     'unix' : 'make -f make_unix.mak',
+    \    },
+    \ }
+
 " Required:
 filetype plugin indent on
 
@@ -148,6 +157,7 @@ nmap     <Space>u [unite]
 
 nnoremap <silent> [unite]m :<C-u>Unite file_mru<CR>
 nnoremap <silent> [unite]b :<C-u>Unite buffer<CR>
+nnoremap <silent> [unite]g :<C-u>Unite file_rec/git<CR>
 nnoremap <silent> [unite]a :<C-u>Unite file_rec -buffer-name=files file<CR>
 nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=register register<CR>
 
