@@ -153,10 +153,10 @@ let g:unite_enable_start_insert=1
 nnoremap [unite]  <Nop>
 nmap     <Space>u [unite]
 
-nnoremap <silent> [unite]u :<C-u>Unite buffer file_mru<CR>
-nnoremap <silent> [unite]g :<C-u>Unite file_rec/git<CR>
-nnoremap <silent> [unite]a :<C-u>Unite file_rec/async<CR>
-nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=register register<CR>
+nnoremap <silent> [unite]u :<C-u>Unite -no-split buffer file_mru<CR>
+nnoremap <silent> [unite]g :<C-u>Unite -no-split file_rec/git<CR>
+nnoremap <silent> [unite]a :<C-u>Unite -no-split file_rec/async<CR>
+nnoremap <silent> [unite]y :<C-u>Unite -no-split -buffer-name=register register<CR>
 
 "-------------------------------------------------
 " Caw
