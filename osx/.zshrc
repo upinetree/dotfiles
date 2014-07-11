@@ -93,6 +93,11 @@ export PATH=/usr/local/lib/node_modules/karma/bin:$PATH
 # postgresql
 export PGDATA=/usr/local/var/postgres
 
+# git
+fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
+autoload -U compinit
+compinit -u
+
 # Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
 
