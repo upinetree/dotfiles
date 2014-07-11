@@ -29,6 +29,26 @@ set visualbell t_vb=
 
 nnoremap ; :
 
+" 括弧やクオートの自動補完
+inoremap {<Enter> {}<Left><CR><ESC><S-o>
+inoremap [<Enter> []<Left><CR><ESC><S-o>
+inoremap (<Enter> ()<Left><CR><ESC><S-o>
+inoremap { {}<LEFT>
+inoremap [ []<LEFT>
+inoremap ( ()<LEFT>
+inoremap " ""<LEFT>
+inoremap ' ''<LEFT>
+vnoremap { "zdi{<C-R>z}<ESC>
+vnoremap [ "zdi[<C-R>z]<ESC>
+vnoremap ( "zdi(<C-R>z)<ESC>
+vnoremap " "zdi"<C-R>z"<ESC>
+vnoremap ' "zdi'<C-R>z'<ESC>
+
+" %キーでカッコとかdo-endとかに飛ぶ
+if !exists('loaded_matchit')
+  runtime macros/matchit.vim
+endif
+
 " 全角記号文字の幅を設定
 set ambiwidth=double
 
