@@ -1,7 +1,10 @@
 "3.7.1 (created: 2013/05/22 20:32:57)
 
+" vim: set ft=vimperator:
+
 set hintchars=zhjklasdfgyuiopqwertnmxcvb
 set ignorecase
+set titlestring=
 set gui=nonavigation
 set complete=lS
 set suggestengines=go
@@ -15,7 +18,6 @@ source! "C:\\Users\\TakuyaMatsumoto\\_vimperatorrc.local"
 " Hatena Bookmark 拡張
 javascript if (typeof hBookmark != 'undefined') liberator.loadScript('chrome://hatenabookmark/content/vimperator/plugin/hatenabookmark.js', {__proto__: this});
 
-" vim: set ft=vimperator:
 
 "=============================================
 " Appearance Config
@@ -43,7 +45,7 @@ noremap <C-l> <C-n>
 nnoremap <C-a> <S-Esc><C-a><S-Esc>
 inoremap <C-a> <S-Esc><C-a><S-Esc>
 
-noremap c :copy 
+noremap c :copy
 map <C-R> :source ~/_vimperatorrc
 
 
