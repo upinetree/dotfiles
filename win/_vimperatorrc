@@ -9,6 +9,7 @@ set animations=true
 
 source! "C:\\Users\\TakuyaMatsumoto\\_vimperatorrc.local"
 
+" コマンドラインモードでIMEを自動OFF
 :style -name commandline-ime chrome://* #liberator-commandline-command input {ime-mode: inactive;}
 
 " Hatena Bookmark 拡張
