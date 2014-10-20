@@ -21,7 +21,7 @@ javascript if (typeof hBookmark != 'undefined') liberator.loadScript('chrome://h
 " Appearance Config
 "=============================================
 " Hint
-highlight Hint z-index:5000; font-size:12px; color:DarkSlateGray; background-color:rgba(255, 250, 205, 1.0); border-color:ButtonShadow; border-width:1px; border-style:solid; border-radius:2px; padding:0px 2px; position:absolute; font-family: Menlo, Consolas, Monaco, monospace; text-transform: lowercase;
+highlight Hint z-index:5000; font-size:12px; color:DarkSlateGray; background-color:rgba(255, 250, 205, 0.8); border-color:ButtonShadow; border-width:1px; border-style:solid; border-radius:2px; padding:0px 2px; position:absolute; font-family: Menlo, Consolas, Monaco, monospace; text-transform: lowercase;
 
 highlight HintElem background-color:rgba(0, 191, 255, 0.6); border-width:0px; border-radius:3px;
 highlight HintActive background-color:rgba(175, 238, 238, 0.6); border-width:0px; border-radius:3px;
