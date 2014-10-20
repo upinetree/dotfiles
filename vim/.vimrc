@@ -27,6 +27,8 @@ set incsearch
 set scrolloff=3
 set visualbell t_vb=
 
+inoremap <C-L> <ESC>
+vnoremap <C-L> <ESC>
 nnoremap ; :
 
 " 括弧やクオートの自動補完
