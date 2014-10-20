@@ -94,6 +94,7 @@ NeoBundle 'h1mesuke/unite-outline'
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'tpope/vim-endwise'
 NeoBundle 'kchmck/vim-coffee-script'
+NeoBundle "slim-template/vim-slim"
 NeoBundle 'gcmt/wildfire.vim'
 " NeoBundle 'kien/ctrlp.vim'
 NeoBundle 'flazz/vim-colorschemes'
