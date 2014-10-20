@@ -43,4 +43,33 @@ noremap <C-l> <C-n>
 nnoremap <C-a> <S-Esc><C-a><S-Esc>
 inoremap <C-a> <S-Esc><C-a><S-Esc>
 
+noremap c :copy 
 map <C-R> :source ~/_vimperatorrc
+
+
+"=============================================
+" copy.js
+"=============================================
+javascript <<EOM
+  redmine_ticket_subject = function() {
+    subject = content.document.getElementsByClassName('subject')[0].textContent;
+    return subject.replace(/^\s*|\s*$/g, "");
+  }
+
+  ticket_on_redmine = function() {
+    return content.document.URL + '\n"' + redmine_ticket_subject() + '"';
+  }
+
+  new_ticket_on_redmine = function() {
+    return "[NEW TICKET!!] " + ticket_on_redmine();
+  }
+
+  liberator.globalVariables.copy_templates = [
+    { label: 'title', value: '%TITLE%' },
+    { label: 'plain', value: '"%TITLE%" %URL%' },
+    { label: 'redmine', value: 'subject and url from issue page', custom: ticket_on_redmine, map: ',r' },
+    { label: 'redmine_new', value: 'new ticket on redmine', custom: new_ticket_on_redmine },
+    { label: 'markdown', value: '[%TITLE%](%URL%)', map: ',y' },
+    { label: 'wiki', value: '[[%TITLE%|%URL%]]' }
+  ];
+EOM
