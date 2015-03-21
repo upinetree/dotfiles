@@ -66,6 +66,10 @@ au WinEnter * let w:m2 = matchadd("TabString", '^\t+')
 " disable emphasis on markdown
 autocmd! FileType markdown hi! def link markdownItalic Normal
 
+" 自動的にquickfix-windowを開く（位置調整済み）
+autocmd! QuickFixCmdPost *grep* belowright cwindow
+
+
 "-------------------------------------------------
 " NeoBundle
 
