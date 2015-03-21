@@ -31,6 +31,14 @@ inoremap <C-L> <ESC>
 vnoremap <C-L> <ESC>
 nnoremap ; :
 
+nnoremap <Space>w :<C-u>w<CR>
+nnoremap <Space>q :<C-u>q<CR>
+nnoremap <Space>Q :<C-u>bd<CR>
+nnoremap <Space>n :<C-u>noh<CR>
+nnoremap <Space>t :<C-u>tabnew<CR>
+nnoremap <C-n> gt
+nnoremap <C-p> gT
+
 " 括弧やクオートの自動補完
 inoremap {<Enter> {}<Left><CR><ESC><S-o>
 inoremap [<Enter> []<Left><CR><ESC><S-o>
