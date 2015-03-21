@@ -96,12 +96,14 @@ NeoBundle 'h1mesuke/unite-outline'
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'tpope/vim-endwise'
 NeoBundle 'kchmck/vim-coffee-script'
-NeoBundle "slim-template/vim-slim"
 NeoBundle 'gcmt/wildfire.vim'
-" NeoBundle 'kien/ctrlp.vim'
 NeoBundle 'flazz/vim-colorschemes'
 NeoBundle 'Align'
 NeoBundle "tyru/caw.vim"
+NeoBundle "tpope/vim-haml"
+NeoBundle 'slim-template/vim-slim'
+NeoBundle 'AndrewRadev/vim-eco'
+NeoBundle 's3rvac/vim-syntax-redminewiki'
 
 NeoBundle 'Shougo/vimproc.vim', {
     \ 'build' : {
