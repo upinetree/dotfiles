@@ -45,7 +45,7 @@ noremap <C-l> <C-n>
 nnoremap <C-a> <S-Esc><C-a><S-Esc>
 inoremap <C-a> <S-Esc><C-a><S-Esc>
 
-noremap c :copy
+noremap c :copy 
 map <C-R> :source ~/_vimperatorrc
 
 
@@ -54,7 +54,7 @@ map <C-R> :source ~/_vimperatorrc
 "=============================================
 javascript <<EOM
   redmine_ticket_subject = function() {
-    subject = content.document.getElementsByClassName('subject')[0].textContent;
+    subject = content.document.getElementsByClassName('subject')[0].getElementsByTagName('h3')[0].textContent;
     return subject.replace(/^\s*|\s*$/g, "");
   }
 
