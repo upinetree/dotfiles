@@ -1,7 +1,6 @@
 .DS_Store
 *.swp
 u8
-.ruby-version
 .bundle
 vendor/bundle
 vendor/bundler
