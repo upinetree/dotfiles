@@ -36,6 +36,10 @@ nnoremap <Space>q :<C-u>q<CR>
 nnoremap <Space>Q :<C-u>bd<CR>
 nnoremap <Space>n :<C-u>noh<CR>
 nnoremap <Space>t :<C-u>tabnew<CR>
+nnoremap <Space>h <C-w>h
+nnoremap <Space>j <C-w>j
+nnoremap <Space>k <C-w>k
+nnoremap <Space>l <C-w>l
 nnoremap <C-n> gt
 nnoremap <C-p> gT
 
@@ -115,6 +119,7 @@ NeoBundle "tyru/caw.vim"
 NeoBundle "tpope/vim-haml"
 NeoBundle 'slim-template/vim-slim'
 NeoBundle 'AndrewRadev/vim-eco'
+NeoBundle 'timcharper/textile.vim'
 NeoBundle 's3rvac/vim-syntax-redminewiki'
 
 NeoBundle 'Shougo/vimproc.vim', {
