@@ -6,7 +6,7 @@ config nudgePercentOf screenSize
 config resizePercentOf screenSize
 
 # aliases
-alias pushkey ctrl;alt;cmd
+alias pushkey alt
 
 # Resize Bindings
 # bind right:alt       resize +10% +0
@@ -19,11 +19,11 @@ alias pushkey ctrl;alt;cmd
 # bind down:ctrl;alt   resize +0   -10% bottom-right
 
 # Push Bindings
-bind right:${pushkey}   push right bar-resize:screenSizeX/2
-bind left:${pushkey}    push left  bar-resize:screenSizeX/2
-bind up:${pushkey}      push up    bar-resize:screenSizeY/2
-bind down:${pushkey}    push down  bar-resize:screenSizeY/2
-bind f:${pushkey}       push up    bar-resize:screenSizeX
+bind l:${pushkey}  push right bar-resize:screenSizeX/2
+bind h:${pushkey}  push left  bar-resize:screenSizeX/2
+bind k:${pushkey}  push up    bar-resize:screenSizeY/2
+bind j:${pushkey}  push down  bar-resize:screenSizeY/2
+bind f:${pushkey}  push up    bar-resize:screenSizeX
 
 # Nudge Bindings
 # bind right:shift;alt nudge +10% +0
@@ -41,12 +41,11 @@ bind f:${pushkey}       push up    bar-resize:screenSizeX
 # bind down:ctrl;alt;cmd  throw down  resize
 
 # Focus Bindings
-# bind right:cmd    focus right
-# bind left:cmd     focus left
-# bind up:cmd       focus up
-# bind down:cmd     focus down
-# bind up:cmd;alt   focus behind
-# bind down:cmd;alt focus behind
+# bind right:${pushkey} focus right
+# bind left:${pushkey}  focus left
+# bind up:${pushkey}    focus up
+# bind down:${pushkey}  focus down
+bind tab:${pushkey} focus behind
 
 # Window Hints
-bind esc:cmd hint
+bind esc:${pushkey} hint
