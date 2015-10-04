@@ -10,7 +10,8 @@ set complete=lS
 set suggestengines=go
 set animations=true
 
-source! "C:\\Users\\TakuyaMatsumoto\\_vimperatorrc.local"
+" source! "C:\\Users\\TakuyaMatsumoto\\_vimperatorrc.local"
+source! "~/.vimperatorrc"
 
 " コマンドラインモードでIMEを自動OFF
 :style -name commandline-ime chrome://* #liberator-commandline-command input {ime-mode: inactive;}
@@ -46,7 +47,7 @@ nnoremap <C-a> <S-Esc><C-a><S-Esc>
 inoremap <C-a> <S-Esc><C-a><S-Esc>
 
 noremap c :copy 
-map <C-R> :source ~/_vimperatorrc
+map <C-R> :source ~/.vimperatorrc
 
 
 "=============================================
