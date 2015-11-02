@@ -90,6 +90,7 @@ source $ZSH/oh-my-zsh.sh
 # default path
 export PATH=/usr/local/bin:$PATH
 export PATH=$HOME/bin:$PATH
+export PATH=$HOME/.nodebrew/current/bin:$PATH
 
 # rbenv
 export PATH=$HOME/.rbenv/bin:$PATH
@@ -98,7 +99,7 @@ eval "$(rbenv init -)"
 source ~/.rbenv/completions/rbenv.zsh
 
 # npm
-export PATH=/usr/local/lib/node_modules/karma/bin:$PATH
+# export PATH=/usr/local/lib/node_modules/karma/bin:$PATH
 
 # postgresql
 export PGDATA=/usr/local/var/postgres
@@ -166,6 +167,7 @@ alias ni='nicorepo i'
 alias s='subl'
 alias g='git'
 alias f='fg'
+alias vssh='vagrant ssh'
 
 # tmuxinator
 # source ~/.tmuxinator/tmuxinator.bash
