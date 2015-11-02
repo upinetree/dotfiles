@@ -9,6 +9,7 @@
   excludesfile = /Users/tmatsumoto/.gitignore
   precomposeunicode = true
   quotepath = false
+  editor = vim
 
 [pull]
   rebase = true
@@ -32,13 +33,12 @@
 
   # commit
   ci = commit -v
-  ca = commit -a
-  cam = commit -am
-  camend = commit --amend # amends commit log
+  cm = commit -m
+  cam = commit --amend # amends commit log
 
   # diff
   df = diff
-  dc = diff --cached
+  dfc = diff --cached
 
   # log / show
   lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
@@ -48,19 +48,5 @@
   sh = show
 
   # origin
-  ado = remote add origin
-  sho = remote show origin
-  pom = push -u origin master
-
-[diff]
-  tool = meld
-
-[difftool "sourcetree"]
-  cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-  path =
-
-[mergetool "sourcetree"]
-  cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-  trustExitCode = true
-
-[heroku]
+  rad = remote add
+  rsh = remote show
