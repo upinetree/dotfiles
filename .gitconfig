@@ -17,11 +17,8 @@
 [push]
   default = current
 
-[credential]
-	helper = osxkeychain
-
 [alias]
-  st = status -sbu
+  st = status -su
   ft = fetch
   co = checkout
   br = branch
