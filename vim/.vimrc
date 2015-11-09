@@ -93,27 +93,27 @@ call neobundle#begin(expand('~/.vim/bundle/'))
 NeoBundleFetch 'Shougo/neobundle.vim'
 
 " My Bundles here:
-NeoBundle 'Shougo/neosnippet.vim'
-NeoBundle 'Shougo/neosnippet-snippets'
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'Shougo/neomru.vim'
-NeoBundle 'Shougo/vimshell'
-NeoBundle 'tsukkee/unite-help'
-NeoBundle 'h1mesuke/unite-outline'
-NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'tpope/vim-endwise'
-NeoBundle 'kchmck/vim-coffee-script'
-NeoBundle 'gcmt/wildfire.vim'
-NeoBundle 'flazz/vim-colorschemes'
-NeoBundle 'Align'
-NeoBundle "tyru/caw.vim"
 NeoBundle "tpope/vim-haml"
-NeoBundle 'slim-template/vim-slim'
+NeoBundle "tyru/caw.vim"
+NeoBundle 'Align'
 NeoBundle 'AndrewRadev/vim-eco'
-NeoBundle 'timcharper/textile.vim'
-NeoBundle 's3rvac/vim-syntax-redminewiki'
+NeoBundle 'Shougo/neomru.vim'
+NeoBundle 'Shougo/neosnippet-snippets'
+NeoBundle 'Shougo/neosnippet.vim'
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/vimshell'
+NeoBundle 'flazz/vim-colorschemes'
+NeoBundle 'gcmt/wildfire.vim'
+NeoBundle 'h1mesuke/unite-outline'
+NeoBundle 'kchmck/vim-coffee-script'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'ntpeters/vim-better-whitespace'
+NeoBundle 's3rvac/vim-syntax-redminewiki'
+NeoBundle 'slim-template/vim-slim'
+NeoBundle 'timcharper/textile.vim'
+NeoBundle 'tpope/vim-endwise'
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'tsukkee/unite-help'
 
 NeoBundle 'Shougo/vimproc.vim', {
     \ 'build' : {
