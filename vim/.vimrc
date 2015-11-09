@@ -112,6 +112,7 @@ NeoBundle 'slim-template/vim-slim'
 NeoBundle 'AndrewRadev/vim-eco'
 NeoBundle 'timcharper/textile.vim'
 NeoBundle 's3rvac/vim-syntax-redminewiki'
+NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'ntpeters/vim-better-whitespace'
 
 NeoBundle 'Shougo/vimproc.vim', {
@@ -182,3 +183,14 @@ nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=register register<CR>
 nmap <Space>c <Plug>(caw:i:toggle)
 vmap <Space>c <Plug>(caw:i:toggle)
 
+
+"-------------------------------------------------
+" IndentGuides
+
+let g:indent_guides_enable_on_vim_startup=1
+let g:indent_guides_guide_size=1
+let g:indent_guides_start_level = 2
+let indent_guides_color_change_percent = 5
+let indent_guides_auto_colors = 0
+autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=darkgrey ctermbg=236
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=darkgrey ctermbg=237
