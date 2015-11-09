@@ -66,15 +66,6 @@ endif
 " 全角記号文字の幅を設定
 set ambiwidth=double
 
-" spaces & tabs highlighting
-highlight WhitespaceEOL term=underline ctermbg=red guibg=red
-au BufWinEnter * let w:m1 = matchadd("WhitespaceEOL", '\s\+$')
-au WinEnter * let w:m1 = matchadd("WhitespaceEOL", '\s\+$')
-
-highlight TabString ctermbg=red guibg=red
-au BufWinEnter * let w:m2 = matchadd("TabString", '^\t+')
-au WinEnter * let w:m2 = matchadd("TabString", '^\t+')
-
 " disable emphasis on markdown
 autocmd! FileType markdown hi! def link markdownItalic Normal
 
@@ -121,6 +112,7 @@ NeoBundle 'slim-template/vim-slim'
 NeoBundle 'AndrewRadev/vim-eco'
 NeoBundle 'timcharper/textile.vim'
 NeoBundle 's3rvac/vim-syntax-redminewiki'
+NeoBundle 'ntpeters/vim-better-whitespace'
 
 NeoBundle 'Shougo/vimproc.vim', {
     \ 'build' : {
