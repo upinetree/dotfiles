@@ -139,6 +139,10 @@ export LESSOPEN='| /usr/local/bin/src-hilite-lesspipe.sh %s'
 # Don't put duplicate lines in the history.
 export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
 
+# Sources
+#------------------
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # Aliases
 #------------------
 
