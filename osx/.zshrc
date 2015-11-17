@@ -115,6 +115,10 @@ export PATH="/usr/local/heroku/bin:$PATH"
 # for ruby build
 export CC=clang
 
+# go
+export GOPATH=$HOME/.go
+export PATH=$PATH:$GOPATH/bin
+
 # Shell Options
 #------------------
 
