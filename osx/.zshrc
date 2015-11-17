@@ -176,6 +176,7 @@ alias s='subl'
 alias g='git'
 alias f='fg'
 alias vssh='vagrant ssh'
+alias ghl='ghq look $(ghq list | fzf)'
 
 # tmuxinator
 # source ~/.tmuxinator/tmuxinator.bash
@@ -189,4 +190,3 @@ alias pg-start='pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/ser
 alias pg-stop='pg_ctl -D /usr/local/var/postgres stop -s -m fast'
 # parallel:prepare does not work when mysql partitioning is applied
 # alias rake_parallel_spec='be rake db:migrate parallel:prepare parallel:spec'
-
