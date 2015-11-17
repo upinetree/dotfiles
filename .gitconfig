@@ -50,3 +50,6 @@
   # origin
   rad = remote add
   rsh = remote show
+
+[ghq]
+	root = /Users/tmatsumoto/repo
