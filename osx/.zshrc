@@ -176,7 +176,7 @@ alias s='subl'
 alias g='git'
 alias f='fg'
 alias vssh='vagrant ssh'
-alias ghl='ghq look $(ghq list | fzf)'
+alias cdg='cd $(ghq list -p | fzf)'
 
 # tmuxinator
 # source ~/.tmuxinator/tmuxinator.bash
