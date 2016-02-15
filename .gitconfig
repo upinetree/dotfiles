@@ -15,7 +15,7 @@
   rebase = true
 
 [push]
-  default = matching
+  default = current
 
 [credential]
 	helper = osxkeychain
