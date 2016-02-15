@@ -177,6 +177,7 @@ alias g='git'
 alias f='fg'
 alias vssh='vagrant ssh'
 alias cdg='cd $(ghq list -p | fzf)'
+alias mysql_="mysql --pager='less -S'"
 
 # tmuxinator
 # source ~/.tmuxinator/tmuxinator.bash
