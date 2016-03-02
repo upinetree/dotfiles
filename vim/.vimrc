@@ -103,7 +103,6 @@ NeoBundle 'Shougo/neosnippet.vim'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'flazz/vim-colorschemes'
-NeoBundle 'gcmt/wildfire.vim'
 NeoBundle 'h1mesuke/unite-outline'
 NeoBundle 'kchmck/vim-coffee-script'
 NeoBundle 'nathanaelkane/vim-indent-guides'
@@ -153,11 +152,6 @@ smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
 if has('conceal')
   set conceallevel=2 concealcursor=i
 endif
-
-"-------------------------------------------------
-" wildfire.vim
-
-let g:wildfire_objects = ["i'", 'i"', "i)", "i]", "i}", "ip", "it", "i>"]
 
 "-------------------------------------------------
 " Align
