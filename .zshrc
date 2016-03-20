@@ -148,4 +148,4 @@ setopt share_history
 # Sources
 #------------------
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-[ -f ~/.aliases.zsh ] && source ~/.aliases.zsh
+[ -f ~/.zsh/.aliases.zsh ] && source ~/.zsh/.aliases.zsh
