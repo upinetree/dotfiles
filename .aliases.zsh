@@ -40,8 +40,6 @@ alias mysql_="mysql --pager='less -S'"
 
 # rake task chain
 alias db_fixup='be rake db:drop db:create db:migrate test_data:create'
-alias parallel_db_fixup='be rake parallel:drop parallel:create parallel:migrate'
-alias parallel_spec='be rake parallel:migrate parallel:spec'
 alias resql='mysql.server restart'
 alias pg-start='pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start'
 alias pg-stop='pg_ctl -D /usr/local/var/postgres stop -s -m fast'
