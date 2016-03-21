@@ -27,8 +27,8 @@ alias pg-stop='pg_ctl -D /usr/local/var/postgres stop -s -m fast'
 alias db_fixup='be rake db:drop db:create db:migrate test_data:create'
 
 # Misc :)
-alias src='source ~/.zshrc'
 alias zshrc='vim ~/.zshrc'
+alias reload='source ~/.zshrc'
 alias grep='grep --color=auto'		# show differences in colour
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
