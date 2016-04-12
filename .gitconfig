@@ -36,6 +36,9 @@
   cm = commit -m
   cam = commit --amend # amends commit log
 
+  # push
+  pushf = push --force-with-lease
+
   # diff
   df = diff
   dfc = diff --cached
@@ -46,10 +49,6 @@
   ls = log --stat
   lp = log -p --color
   sh = show --color
-
-  # origin
-  rad = remote add
-  rsh = remote show
 
 [ghq]
 	root = /Users/tmatsumoto/repo
