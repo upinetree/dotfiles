@@ -53,11 +53,7 @@ plugins=(git, rails)
 
 # User configuration
 
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-export PATH=$HOME/bin:$PATH
 # export MANPATH="/usr/local/man:$MANPATH"
-
-source $ZSH/oh-my-zsh.sh
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
@@ -84,68 +80,29 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# Path Settings
+# Sources
 #------------------
+source $ZSH/oh-my-zsh.sh
 
-# default path
-export PATH=/usr/local/bin:$PATH
-export PATH=$HOME/bin:$PATH
-export PATH=$HOME/.nodebrew/current/bin:$PATH
+[ -f ~/.zsh/.exports.zsh ] && source ~/.zsh/.exports.zsh
+[ -f ~/.zsh/.aliases.zsh ] && source ~/.zsh/.aliases.zsh
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# Miscs
+#------------------
 # rbenv
 export PATH=$HOME/.rbenv/bin:$PATH
 export PATH=$HOME/.rbenv/shims:$PATH    # for tmux $PATH ordering
 eval "$(rbenv init -)"
 source ~/.rbenv/completions/rbenv.zsh
 
-# npm
-# export PATH=/usr/local/lib/node_modules/karma/bin:$PATH
-
-# postgresql
-export PGDATA=/usr/local/var/postgres
-
 # git
 fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
 autoload -U compinit
 compinit -u
-
-# Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
-
-# for ruby build
-export CC=clang
-
-# go
-export GOPATH=$HOME/.go
-export PATH=$PATH:$GOPATH/bin
-
-# Shell Options
-#------------------
-
-export LANGUAGE='ja_JP.UTF-8'
-export LANG='ja_JP.UTF-8'
-export LC_ALL='ja_JP.UTF-8'
-export PAGER='less -Ou8'
-export EDITOR='vim'
-
-# ls colors
-export CLICOLOR=1
-export LSCOLORS=DxGxcxdxCxegedabagacad
-
-# source-highlight
-export LESS='-R'
-export LESSOPEN='| /usr/local/bin/src-hilite-lesspipe.sh %s'
-
-# Don't put duplicate lines in the history.
-export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
 
 # Histories
 #------------------
 setopt hist_ignore_dups
 # 複数端末感での共有
 setopt share_history
-
-# Sources
-#------------------
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-[ -f ~/.zsh/.aliases.zsh ] && source ~/.zsh/.aliases.zsh
