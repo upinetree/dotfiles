@@ -51,4 +51,4 @@
   sh = show --color
 
 [ghq]
-	root = /Users/tmatsumoto/repo
+	root = ~/repo
