@@ -16,6 +16,7 @@ alias gs='git st'
 alias gl='git lg'
 alias gadp='git adp'
 alias gci='git ci'
+alias gco='git co'
 
 # DBs
 alias my="mysql"
