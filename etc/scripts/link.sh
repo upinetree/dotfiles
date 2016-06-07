@@ -4,7 +4,7 @@ setup() {
 }
 
 run() {
-  setup_dirs
+  make_base_dirs
   unlink_all
   link_all
 }
@@ -19,7 +19,7 @@ detect_platform() {
   esac
 }
 
-setup_dirs() {
+make_base_dirs() {
   mkdir ~/.zsh
   mkdir ~/.vim
 
