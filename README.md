@@ -1,9 +1,13 @@
-# My dot files.
+# dotfiles
+
+## Requirement
+
+* Git
 
 ## Setup
 
 ```bash
-git clone git@github.com:upinetree/dotfiles.git ~/.dotfiles
+git clone https://github.com/upinetree/dotfiles.git ~/.dotfiles
 
-bash ~/.dotfiles/etc/install.sh
+bash ~/.dotfiles/etc/scripts/install.sh
 ```
