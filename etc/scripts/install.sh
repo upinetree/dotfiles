@@ -1,7 +1,9 @@
-detect_platform
-setup_dirs
-unlink_all
-link_all
+run() {
+  detect_platform
+  setup_dirs
+  unlink_all
+  link_all
+}
 
 detect_platform() {
   export PLATFORM
@@ -22,7 +24,7 @@ setup_dirs() {
   fi
 }
 
-unllink_all() {
+unlink_all() {
   unlink ~/.gemrc
   unlink ~/.gitconfig
   unlink ~/.gitignore
@@ -59,3 +61,5 @@ link_all() {
     ln -s ~/.dotfiles/osx/bin/login-shell         ~/bin/login-shell
   fi
 }
+
+run
