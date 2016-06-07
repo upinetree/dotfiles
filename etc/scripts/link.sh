@@ -1,3 +1,5 @@
+set -u
+
 setup() {
   detect_platform
   listup_dotfiles
