@@ -1,5 +1,9 @@
-run() {
+setup() {
   detect_platform
+  listup_dotfiles
+}
+
+run() {
   setup_dirs
   unlink_all
   link_all
@@ -25,41 +29,58 @@ setup_dirs() {
 }
 
 unlink_all() {
-  unlink ~/.gemrc
-  unlink ~/.gitconfig
-  unlink ~/.gitignore
-  unlink ~/.tmux.conf
-  unlink ~/.zshrc
-  unlink ~/.zsh/.aliases.zsh
-  unlink ~/.zsh/.exports.zsh
-  unlink ~/.vimrc
-  unlink ~/.vim/colors
-  unlink ~/.slate
-  unlink ~/.vimperatorrc
+  for dotfile_map in "${DOTFILE_MAPS[@]}"
+  do
+    src_dst=($dotfile_map)
 
-  if [ "$PLATFORM" = "osx" ]; then
-    unlink ~/bin/git-completion.bash
-    unlink ~/bin/login-shell
-  fi
+    echo "unlink ${src_dst[1]}"
+    eval "unlink ${src_dst[1]}"
+  done
 }
 
 link_all() {
-  ln -s ~/.dotfiles/.gemrc                      ~/.gemrc
-  ln -s ~/.dotfiles/.gitconfig                  ~/.gitconfig
-  ln -s ~/.dotfiles/.gitignore                  ~/.gitignore
-  ln -s ~/.dotfiles/.tmux.conf                  ~/.tmux.conf
-  ln -s ~/.dotfiles/.zshrc                      ~/.zshrc
-  ln -s ~/.dotfiles/.zsh/.aliases.zsh           ~/.zsh/.aliases.zsh
-  ln -s ~/.dotfiles/.zsh/.exports.zsh           ~/.zsh/.exports.zsh
-  ln -s ~/.dotfiles/.vimrc                      ~/.vimrc
-  ln -s ~/.dotfiles/.vim/colors                 ~/.vim/colors
+  for dotfile_map in "${DOTFILE_MAPS[@]}"
+  do
+    echo "ln -s $dotfile_map"
+    eval "ln -s $dotfile_map"
+  done
+}
+
+listup_dotfiles() {
+  export DOTFILE_MAPS
+  DOTFILE_MAPS=(
+    "~/.dotfiles/.gemrc            ~/.gemrc"
+    "~/.dotfiles/.gitconfig        ~/.gitconfig"
+    "~/.dotfiles/.gitignore        ~/.gitignore"
+    "~/.dotfiles/.tmux.conf        ~/.tmux.conf"
+    "~/.dotfiles/.zshrc            ~/.zshrc"
+    "~/.dotfiles/.zsh/.aliases.zsh ~/.zsh/.aliases.zsh"
+    "~/.dotfiles/.zsh/.exports.zsh ~/.zsh/.exports.zsh"
+    "~/.dotfiles/.vimrc            ~/.vimrc"
+    "~/.dotfiles/.vim/colors       ~/.vim/colors"
+  )
 
   if [ "$PLATFORM" = "osx" ]; then
-    ln -s ~/.dotfiles/osx/.slate                  ~/.slate
-    ln -s ~/.dotfiles/osx/.vimperatorrc           ~/.vimperatorrc
-    ln -s ~/.dotfiles/osx/bin/git-completion.bash ~/bin/git-completion.bash
-    ln -s ~/.dotfiles/osx/bin/login-shell         ~/bin/login-shell
+    DOTFILE_MAPS+=(
+      "~/.dotfiles/osx/.slate                  ~/.slate"
+      "~/.dotfiles/osx/.vimperatorrc           ~/.vimperatorrc"
+      "~/.dotfiles/osx/bin/git-completion.bash ~/bin/git-completion.bash"
+      "~/.dotfiles/osx/bin/login-shell         ~/bin/login-shell"
+    )
   fi
 }
 
+echo_conditions() {
+  echo "------- platform ------"
+  echo "$PLATFORM"
+  echo "--- target dotfiles ---"
+  for map in "${DOTFILE_MAPS[@]}"
+  do
+    echo "$map"
+  done
+  echo "-----------------------"
+}
+
+setup
+echo_conditions
 run
