@@ -9,5 +9,5 @@
 ```bash
 git clone https://github.com/upinetree/dotfiles.git ~/.dotfiles
 
-bash ~/.dotfiles/etc/scripts/install.sh
+cd ~/.dotfiles && make install
 ```
