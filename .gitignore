@@ -1,6 +1,7 @@
 .DS_Store
 *.swp
 *.swo
+-
 u8
 .bundle
 vendor/bundle
