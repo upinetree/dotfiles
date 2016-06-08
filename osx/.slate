@@ -32,8 +32,8 @@ bind f:${pushkey}  push up    bar-resize:screenSizeX
 # bind down:shift;alt  nudge +0   +10%
 
 # Throw Bindings
-# bind 1:ctrl;alt         throw 0 resize
-# bind 2:ctrl;alt         throw 1 resize
+bind 1:${pushkey}         throw 0 resize
+bind 2:${pushkey}         throw 1
 # bind 3:ctrl;alt         throw 2 resize
 # bind right:ctrl;alt;cmd throw right resize
 # bind left:ctrl;alt;cmd  throw left  resize
