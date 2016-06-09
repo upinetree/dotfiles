@@ -11,8 +11,12 @@
   quotepath = false
   editor = vim
 
+[fetch]
+  prune = true
+
 [pull]
   rebase = true
+  prune = true
 
 [push]
   default = current
@@ -51,4 +55,4 @@
   sh = show --color
 
 [ghq]
-	root = ~/repo
+  root = ~/repo
