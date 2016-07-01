@@ -13,8 +13,8 @@ export PATH=$HOME/.rbenv/shims:$PATH    # for tmux $PATH ordering
 eval "$(rbenv init -)"
 source ~/.rbenv/completions/rbenv.zsh
 
-# git
-fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
+# compinit
+fpath=($(brew --prefix)/share/zsh/site-functions $fpath) # from Homebrew
 autoload -U compinit
 compinit -u
 
