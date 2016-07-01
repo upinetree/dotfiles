@@ -51,15 +51,16 @@ link_all() {
 listup_dotfiles() {
   export DOTFILE_MAPS
   DOTFILE_MAPS=(
-    "~/.dotfiles/.gemrc            ~/.gemrc"
-    "~/.dotfiles/.gitconfig        ~/.gitconfig"
-    "~/.dotfiles/.gitignore        ~/.gitignore"
-    "~/.dotfiles/.tmux.conf        ~/.tmux.conf"
-    "~/.dotfiles/.zshrc            ~/.zshrc"
-    "~/.dotfiles/.zsh/.aliases.zsh ~/.zsh/.aliases.zsh"
-    "~/.dotfiles/.zsh/.exports.zsh ~/.zsh/.exports.zsh"
-    "~/.dotfiles/.vimrc            ~/.vimrc"
-    "~/.dotfiles/.vim/colors       ~/.vim/colors"
+    "~/.dotfiles/.gemrc              ~/.gemrc"
+    "~/.dotfiles/.gitconfig          ~/.gitconfig"
+    "~/.dotfiles/.gitignore          ~/.gitignore"
+    "~/.dotfiles/.tmux.conf          ~/.tmux.conf"
+    "~/.dotfiles/.zshrc              ~/.zshrc"
+    "~/.dotfiles/.zsh/.aliases.zsh   ~/.zsh/.aliases.zsh"
+    "~/.dotfiles/.zsh/.exports.zsh   ~/.zsh/.exports.zsh"
+    "~/.dotfiles/.zsh/.oh-my-zsh.zsh ~/.zsh/.oh-my-zsh.zsh"
+    "~/.dotfiles/.vimrc              ~/.vimrc"
+    "~/.dotfiles/.vim/colors         ~/.vim/colors"
   )
 
   if [ "$PLATFORM" = "osx" ]; then
