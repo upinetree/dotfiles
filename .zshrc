@@ -1,6 +1,6 @@
 # Sources
 #------------------
-[ -f ~/.zsh/.oh-my-zsh.zsh ] && source ~/.zsh/.oh-my-zsh.zsh
+[ -d ~/.oh-my-zsh ] && [ -f ~/.zsh/.oh-my-zsh.zsh ] && source ~/.zsh/.oh-my-zsh.zsh
 [ -f ~/.zsh/.exports.zsh ] && source ~/.zsh/.exports.zsh
 [ -f ~/.zsh/.aliases.zsh ] && source ~/.zsh/.aliases.zsh
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
