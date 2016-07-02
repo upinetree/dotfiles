@@ -1,15 +1,6 @@
 set -u
 
-# TODO: link.sh と共通化
-detect_platform() {
-  export PLATFORM
-  case "$(uname)" in
-    *Darwin*) PLATFORM='osx'     ;;
-    *Linux*)  PLATFORM='linux'   ;;
-    *)        echo 'Your platform is not supported'
-              exit 0 ;;
-  esac
-}
+. ./etc/scripts/lib.sh
 
 setup_zsh() {
   case "$PLATFORM" in
@@ -41,7 +32,7 @@ setup_zsh() {
 detect_platform
 
 if [ -f /bin/zsh ]; then
-  echo "Zsh is already installed"
+  echo "Zsh is already exists"
 else
   setup_zsh
 fi

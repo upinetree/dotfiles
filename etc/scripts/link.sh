@@ -1,5 +1,7 @@
 set -u
 
+. ./etc/scripts/lib.sh
+
 init() {
   detect_platform
   listup_dotfiles
@@ -9,16 +11,6 @@ run() {
   make_base_dirs
   unlink_all
   link_all
-}
-
-detect_platform() {
-  export PLATFORM
-  case "$(uname)" in
-    *Darwin*) PLATFORM='osx'     ;;
-    *Linux*)  PLATFORM='linux'   ;;
-    *)        echo 'Your platform is not supported'
-              exit 0 ;;
-  esac
 }
 
 make_base_dirs() {
