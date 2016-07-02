@@ -15,7 +15,7 @@ setup_zsh() {
   case "$PLATFORM" in
     osx)
       if which "brew" > /dev/null; then
-        echo brew install zsh
+        brew install zsh
       else
         echo "ERROR: homebrew is not exists"
         exit 1
