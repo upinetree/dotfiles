@@ -27,11 +27,25 @@ setup_zsh() {
       exit 1
       ;;
   esac
+
+  zsh_path="$(which zsh)"
+
+  if ! grep $zsh_path /etc/shells; then
+    echo "ERROR: \`$zsh_path\` should be appended in /etc/shells"
+    exit 1
+  fi
+
+  if chsh -s "$zsh_path"; then
+    echo "Setup Zsh is successfully finished!"
+  else
+    echo "Changing shell to $zsh_path is failed"
+  fi
 }
 
+## Entry Point
 detect_platform
 
-if [ -f /bin/zsh ]; then
+if which zsh > /dev/null; then
   echo "Zsh is already exists"
 else
   setup_zsh

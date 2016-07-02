@@ -76,6 +76,7 @@ echo_conditions() {
   echo "-----------------------"
 }
 
+## Entry Point
 init
 echo_conditions
 run
