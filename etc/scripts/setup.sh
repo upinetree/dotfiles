@@ -40,8 +40,8 @@ setup_zsh() {
 
 detect_platform
 
-if [ -f "/bin/zsh" ]; then
-  setup_zsh
-else
+if [ -f /bin/zsh ]; then
   echo "Zsh is already installed"
+else
+  setup_zsh
 fi
