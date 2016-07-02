@@ -1,6 +1,6 @@
 set -u
 
-setup() {
+init() {
   detect_platform
   listup_dotfiles
 }
@@ -84,6 +84,6 @@ echo_conditions() {
   echo "-----------------------"
 }
 
-setup
+init
 echo_conditions
 run

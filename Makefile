@@ -1,7 +1,12 @@
 help:
-	@echo "make install #=> link dotfiles"
+	@echo "make install  # setup and link"
+	@echo "make setup    # setup commands"
+	@echo "make link     # link dotfiles"
 
-install: link
+install: setup link
+
+setup:
+	@bash ./etc/scripts/setup.sh
 
 link:
-	bash ./etc/scripts/link.sh
+	@bash ./etc/scripts/link.sh
