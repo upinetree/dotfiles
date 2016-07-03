@@ -9,13 +9,15 @@ source ~/.zsh/.aliases.zsh
 # Miscs
 #------------------
 # rbenv
-export PATH=$HOME/.rbenv/bin:$PATH
-export PATH=$HOME/.rbenv/shims:$PATH    # for tmux $PATH ordering
-eval "$(rbenv init -)"
-source ~/.rbenv/completions/rbenv.zsh
+if [ -d ~/.rbenv ]; then
+  export PATH=$HOME/.rbenv/bin:$PATH
+  export PATH=$HOME/.rbenv/shims:$PATH    # for tmux $PATH ordering
+  eval "$(rbenv init -)"
+  source ~/.rbenv/completions/rbenv.zsh
+fi
 
 # compinit
-fpath=($(brew --prefix)/share/zsh/site-functions $fpath) # from Homebrew
+which brew > /dev/null && fpath=($(brew --prefix)/share/zsh/site-functions $fpath) # from Homebrew
 autoload -U compinit
 compinit -u
 
