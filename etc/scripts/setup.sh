@@ -35,8 +35,9 @@ setup_zsh() {
     exit 1
   fi
 
+  echo "To change shell to $zsh_path, type your password:"
   if chsh -s "$zsh_path"; then
-    echo "Setup Zsh is successfully finished!"
+    echo "Setup Zsh is successfully finished! Re-Login to apply it."
   else
     echo "Changing shell to $zsh_path is failed"
   fi
