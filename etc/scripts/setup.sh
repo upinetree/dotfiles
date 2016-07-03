@@ -30,7 +30,7 @@ setup_zsh() {
 
   zsh_path="$(which zsh)"
 
-  if ! grep $zsh_path /etc/shells; then
+  if ! grep -xq $zsh_path /etc/shells; then
     echo "ERROR: \`$zsh_path\` should be appended in /etc/shells"
     exit 1
   fi
