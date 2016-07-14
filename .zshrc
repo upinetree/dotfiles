@@ -17,7 +17,6 @@ setopt share_history
 # rbenv
 if [ -d ~/.rbenv ]; then
   export PATH=$HOME/.rbenv/bin:$PATH
-  export PATH=$HOME/.rbenv/shims:$PATH    # for tmux $PATH ordering
   eval "$(rbenv init -)"
   source ~/.rbenv/completions/rbenv.zsh
 fi
