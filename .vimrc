@@ -164,9 +164,8 @@ nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=register register<CR>
 "-------------------------------------------------
 " Caw
 
-nmap <Space>c <Plug>(caw:i:toggle)
-vmap <Space>c <Plug>(caw:i:toggle)
-
+nmap <Space>c <Plug>(caw:hatpos:toggle)
+vmap <Space>c <Plug>(caw:hatpos:toggle)
 
 "-------------------------------------------------
 " IndentGuides
