@@ -73,63 +73,53 @@ autocmd! QuickFixCmdPost *grep* belowright cwindow
 
 
 "-------------------------------------------------
-" NeoBundle
+" Dein.vim
 
-if has('vim_starting')
-  if &compatible
-    set nocompatible  " Be iMproved
-  endif
-
-  " Required:
-  set runtimepath+=~/.vim/bundle/neobundle.vim/
+if &compatible
+  set nocompatible               " Be iMproved
 endif
 
 " Required:
-call neobundle#begin(expand('~/.vim/bundle/'))
+set runtimepath^=~/.vim/bundle/repos/github.com/Shougo/dein.vim
 
-" Let NeoBundle manage NeoBundle
 " Required:
-NeoBundleFetch 'Shougo/neobundle.vim'
+call dein#begin(expand('~/.vim/bundle'))
 
-" My Bundles here:
-NeoBundle "tpope/vim-haml"
-NeoBundle "tyru/caw.vim"
-NeoBundle 'Align'
-NeoBundle 'AndrewRadev/vim-eco'
-NeoBundle 'Shougo/neomru.vim'
-NeoBundle 'Shougo/neosnippet-snippets'
-NeoBundle 'Shougo/neosnippet.vim'
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'Shougo/vimshell'
-NeoBundle 'flazz/vim-colorschemes'
-NeoBundle 'h1mesuke/unite-outline'
-NeoBundle 'kchmck/vim-coffee-script'
-NeoBundle 'nathanaelkane/vim-indent-guides'
-NeoBundle 'ntpeters/vim-better-whitespace'
-NeoBundle 's3rvac/vim-syntax-redminewiki'
-NeoBundle 'slim-template/vim-slim'
-NeoBundle 'timcharper/textile.vim'
-NeoBundle 'tpope/vim-endwise'
-NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'tsukkee/unite-help'
+" Let dein manage dein
+" Required:
+call dein#add('Shougo/dein.vim')
 
-NeoBundle 'Shougo/vimproc.vim', {
-    \ 'build' : {
-    \     'windows' : 'tools\\update-dll-mingw',
-    \     'cygwin' : 'make -f make_cygwin.mak',
-    \     'mac' : 'make -f make_mac.mak',
-    \     'unix' : 'make -f make_unix.mak',
-    \    },
-    \ }
+call dein#add('Align')
+call dein#add('AndrewRadev/vim-eco')
+call dein#add('Shougo/neomru.vim')
+call dein#add('Shougo/neosnippet-snippets')
+call dein#add('Shougo/neosnippet.vim')
+call dein#add('Shougo/unite.vim')
+call dein#add('Shougo/vimshell')
+call dein#add('flazz/vim-colorschemes')
+call dein#add('h1mesuke/unite-outline')
+call dein#add('kchmck/vim-coffee-script')
+call dein#add('nathanaelkane/vim-indent-guides')
+call dein#add('ntpeters/vim-better-whitespace')
+call dein#add('s3rvac/vim-syntax-redminewiki')
+call dein#add('slim-template/vim-slim')
+call dein#add('timcharper/textile.vim')
+call dein#add('tpope/vim-endwise')
+call dein#add('tpope/vim-fugitive')
+call dein#add('tpope/vim-haml')
+call dein#add('tsukkee/unite-help')
+call dein#add('tyru/caw.vim')
 
-call neobundle#end()
+" Required:
+call dein#end()
 
 " Required:
 filetype plugin indent on
 
-" If there are uninstalled bundles found on startup,
-" this will conveniently prompt you to install them.
-NeoBundleCheck
+" If you want to install not installed plugins on startup.
+"if dein#check_install()
+"  call dein#install()
+"endif
 
 "-------------------------------------------------
 " Neosnipet

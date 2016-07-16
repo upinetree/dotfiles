@@ -83,6 +83,12 @@ install_go() {
   esac
 }
 
+install_dein() {
+  curl https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh > installer.sh
+  sh ./installer.sh ~/.vim/bundle
+  rm -fv ./installer.sh
+}
+
 result() {
   local name="$1"
   if exists $name; then
@@ -130,6 +136,11 @@ if exists ghq; then
 else
   go get github.com/motemen/ghq
   result ghq
+fi
+
+if [ ! -d ~/.vim/bundle ]; then
+  install_dein
+  log success "dein.vim is installed. Launch vim to check it exactly succeeded"
 fi
 
 if [ "$PLATFORM" = "osx" ]; then
