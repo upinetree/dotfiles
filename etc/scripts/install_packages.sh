@@ -13,7 +13,7 @@ install_zsh() {
         brew install zsh
       else
         log error "ERROR: homebrew is not exists"
-        exit 1
+        return 1
       fi
       ;;
     linux)
@@ -23,12 +23,12 @@ install_zsh() {
         sudo yum -y install zsh
       else
         log error "ERROR: apt-get or yum is not exists"
-        exit 1
+        return 1
       fi
       ;;
     *)
       log error "ERROR: Your platform is not supported"
-      exit 1
+      return 1
       ;;
   esac
 
@@ -36,7 +36,7 @@ install_zsh() {
 
   if ! grep -xq $zsh_path /etc/shells; then
     log error "ERROR: \`$zsh_path\` should be appended in /etc/shells"
-    exit 1
+    return 1
   fi
 
   log info "To change shell to $zsh_path, type your password:"
