@@ -112,6 +112,13 @@ else
   result go
 fi
 
+if exists ghq; then
+  log info "ghq is already exists"
+else
+  go get github.com/motemen/ghq
+  result ghq
+fi
+
 if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
     log info "brew is already exists"
