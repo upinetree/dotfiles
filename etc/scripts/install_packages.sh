@@ -114,14 +114,14 @@ if exists rbenv; then
   log info "rbenv is already exists"
 else
   install_rbenv
-  log info "rbenv is deployed, Re-Login to apply it."
+  log success "rbenv is deployed, Re-Login to apply it."
 fi
 
 if exists fzf; then
   log info "fzf is already exists"
 else
   install_fzf
-  log info "fzf is deployed, Re-Login to apply it."
+  log success "fzf is deployed, Re-Login to apply it."
 fi
 
 if exists go; then
