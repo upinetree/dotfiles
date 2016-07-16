@@ -47,6 +47,11 @@ install_zsh() {
   fi
 }
 
+install_rbenv() {
+  git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
+  git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+}
+
 install_fzf() {
   git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
   bash ~/.fzf/install
@@ -96,6 +101,13 @@ if exists zsh; then
 else
   install_zsh
   result zsh
+fi
+
+if exists rbenv; then
+  log info "rbenv is already exists"
+else
+  install_rbenv
+  log info "rbenv is deployed, Re-Login to apply it."
 fi
 
 if exists fzf; then
