@@ -2,6 +2,10 @@ set -u
 
 . ./etc/scripts/lib.sh
 
+set_versions() {
+  export GO_VERSION="1.6.2"
+}
+
 install_zsh() {
   case "$PLATFORM" in
     osx)
@@ -52,6 +56,28 @@ install_brew() {
   ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 }
 
+install_go() {
+  case "$PLATFORM" in
+    osx)
+      brew install go
+      ;;
+    linux)
+      local tar="go$GO_VERSION.linux-amd64.tar.gz"
+
+      wget "https://storage.googleapis.com/golang/$tar"
+
+      sudo tar -C /usr/local -xf $tar
+      sudo ln -s /usr/local/go/bin/go* /usr/local/bin
+
+      rm -fv "$tar"
+      ;;
+    *)
+      log error "ERROR: Your platform is not supported"
+      return 1
+      ;;
+  esac
+}
+
 result() {
   local name="$1"
   if exists brew; then
@@ -63,6 +89,7 @@ result() {
 
 ## Entry Point
 detect_platform
+set_versions
 
 if exists zsh; then
   log info "Zsh is already exists"
@@ -76,6 +103,13 @@ if exists fzf; then
 else
   install_fzf
   result fzf
+fi
+
+if exists go; then
+  log info "go is already exists"
+else
+  install_go
+  result go
 fi
 
 if [ "$PLATFORM" = "osx" ]; then
