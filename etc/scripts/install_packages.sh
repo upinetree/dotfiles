@@ -50,7 +50,6 @@ install_zsh() {
 install_fzf() {
   git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
   bash ~/.fzf/install
-  source ~/.fzf.zsh
 }
 
 install_brew() {
@@ -103,7 +102,7 @@ if exists fzf; then
   log info "fzf is already exists"
 else
   install_fzf
-  result fzf
+  log info "fzf is deployed, Re-Login to apply it."
 fi
 
 if exists go; then
