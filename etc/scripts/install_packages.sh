@@ -80,7 +80,7 @@ install_go() {
 
 result() {
   local name="$1"
-  if exists brew; then
+  if exists $name; then
     log success "$name is successfully installed!"
   else
     log error "Failed to install $name"
