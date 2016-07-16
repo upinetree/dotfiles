@@ -50,6 +50,7 @@ install_zsh() {
 install_fzf() {
   git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
   bash ~/.fzf/install
+  source ~/.fzf.zsh
 }
 
 install_brew() {
