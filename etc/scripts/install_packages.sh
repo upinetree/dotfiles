@@ -2,7 +2,7 @@ set -u
 
 . ./etc/scripts/lib.sh
 
-setup_zsh() {
+install_zsh() {
   case "$PLATFORM" in
     osx)
       if which "brew" > /dev/null; then
@@ -49,5 +49,5 @@ detect_platform
 if which zsh > /dev/null; then
   echo "Zsh is already exists"
 else
-  setup_zsh
+  install_zsh
 fi
