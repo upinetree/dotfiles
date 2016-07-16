@@ -138,9 +138,11 @@ else
   result ghq
 fi
 
-if [ ! -d ~/.vim/bundle ]; then
+if [ -d ~/.vim/bundle ]; then
+  log info "dein.vim is already exists"
+else
   install_dein
-  log success "dein.vim is installed. Launch vim to check it exactly succeeded"
+  log success "dein.vim is installed. Launch vim and execute ':call dein#install()' to install plugins"
 fi
 
 if [ "$PLATFORM" = "osx" ]; then
