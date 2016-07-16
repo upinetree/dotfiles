@@ -37,10 +37,16 @@ install_zsh() {
 
   log info "To change shell to $zsh_path, type your password:"
   if chsh -s "$zsh_path"; then
-    log success "Setup Zsh is successfully finished! Re-Login to apply it."
+    log success "Zsh installation is successfully finished! Re-Login to apply it."
   else
     log warn "Changing shell to $zsh_path is failed"
   fi
+}
+
+install_fzf() {
+  git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+  bash ~/.fzf/install
+  log success "fzf installation is successfully finished!"
 }
 
 ## Entry Point
@@ -50,4 +56,10 @@ if which zsh > /dev/null; then
   log info "Zsh is already exists"
 else
   install_zsh
+fi
+
+if which fzf > /dev/null; then
+  log info "fzf is already exists"
+else
+  install_fzf
 fi
