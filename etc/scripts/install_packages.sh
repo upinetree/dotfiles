@@ -96,6 +96,7 @@ result() {
 detect_platform
 set_versions
 
+# TODO: ファイルに分割する
 if exists zsh; then
   log info "Zsh is already exists"
 else
