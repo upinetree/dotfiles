@@ -37,7 +37,7 @@ install_zsh() {
 
   log info "To change shell to $zsh_path, type your password:"
   if chsh -s "$zsh_path"; then
-    log success "Zsh installation is successfully finished! Re-Login to apply it."
+    log success "Changing shell to $zsh_path is successfully finished! Re-Login to apply it."
   else
     log warn "Changing shell to $zsh_path is failed"
   fi
@@ -46,12 +46,19 @@ install_zsh() {
 install_fzf() {
   git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
   bash ~/.fzf/install
-  log success "fzf installation is successfully finished!"
 }
 
 install_brew() {
   ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-  log success "Homebrew installation is successfully finished!"
+}
+
+result() {
+  local name="$1"
+  if exists brew; then
+    log success "$name is successfully installed!"
+  else
+    log error "Failed to install $name"
+  fi
 }
 
 ## Entry Point
@@ -61,18 +68,21 @@ if exists zsh; then
   log info "Zsh is already exists"
 else
   install_zsh
+  result zsh
 fi
 
 if exists fzf; then
   log info "fzf is already exists"
 else
   install_fzf
+  result fzf
 fi
 
 if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
-    log info "Homebrew is already exists"
+    log info "brew is already exists"
   else
     install_brew
+    result brew
   fi
 fi
