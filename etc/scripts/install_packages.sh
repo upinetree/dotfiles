@@ -5,7 +5,7 @@ set -u
 install_zsh() {
   case "$PLATFORM" in
     osx)
-      if which "brew" > /dev/null; then
+      if exists brew; then
         brew install zsh
       else
         log error "ERROR: homebrew is not exists"
@@ -13,9 +13,9 @@ install_zsh() {
       fi
       ;;
     linux)
-      if which "apt-get" > /dev/null; then
+      if exists apt-get; then
         sudo apt-get -y install zsh
-      elif which "yum" > /dev/null; then
+      elif exists yum; then
         sudo yum -y install zsh
       else
         log error "ERROR: apt-get or yum is not exists"
@@ -52,13 +52,13 @@ install_fzf() {
 ## Entry Point
 detect_platform
 
-if which zsh > /dev/null; then
+if exists zsh; then
   log info "Zsh is already exists"
 else
   install_zsh
 fi
 
-if which fzf > /dev/null; then
+if exists fzf; then
   log info "fzf is already exists"
 else
   install_fzf

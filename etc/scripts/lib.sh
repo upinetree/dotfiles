@@ -37,3 +37,7 @@ log() {
 
   echo -e "$open$color$text$close"
 }
+
+exists() {
+ which "$1" > /dev/null
+}
