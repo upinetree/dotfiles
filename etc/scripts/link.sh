@@ -27,7 +27,7 @@ unlink_all() {
   do
     src_dst=($dotfile_map)
 
-    echo "unlink ${src_dst[1]}"
+    log "unlink ${src_dst[1]}"
     eval "unlink ${src_dst[1]}"
   done
 }
@@ -35,7 +35,7 @@ unlink_all() {
 link_all() {
   for dotfile_map in "${DOTFILE_MAPS[@]}"
   do
-    echo "ln -s $dotfile_map"
+    log "ln -s $dotfile_map"
     eval "ln -s $dotfile_map"
   done
 }
@@ -66,14 +66,14 @@ listup_dotfiles() {
 }
 
 echo_conditions() {
-  echo "------- platform ------"
-  echo "$PLATFORM"
-  echo "--- target dotfiles ---"
+  log info "------- platform ------"
+  log info "$PLATFORM"
+  log info "--- target dotfiles ---"
   for map in "${DOTFILE_MAPS[@]}"
   do
-    echo "$map"
+    log info "$map"
   done
-  echo "-----------------------"
+  log info "-----------------------"
 }
 
 ## Entry Point

@@ -8,7 +8,7 @@ install_zsh() {
       if which "brew" > /dev/null; then
         brew install zsh
       else
-        echo "ERROR: homebrew is not exists"
+        log error "ERROR: homebrew is not exists"
         exit 1
       fi
       ;;
@@ -18,12 +18,12 @@ install_zsh() {
       elif which "yum" > /dev/null; then
         sudo yum -y install zsh
       else
-        echo "ERROR: apt-get or yum is not exists"
+        log error "ERROR: apt-get or yum is not exists"
         exit 1
       fi
       ;;
     *)
-      echo "ERROR: Your platform is not supported"
+      log error "ERROR: Your platform is not supported"
       exit 1
       ;;
   esac
@@ -31,15 +31,15 @@ install_zsh() {
   zsh_path="$(which zsh)"
 
   if ! grep -xq $zsh_path /etc/shells; then
-    echo "ERROR: \`$zsh_path\` should be appended in /etc/shells"
+    log error "ERROR: \`$zsh_path\` should be appended in /etc/shells"
     exit 1
   fi
 
-  echo "To change shell to $zsh_path, type your password:"
+  log info "To change shell to $zsh_path, type your password:"
   if chsh -s "$zsh_path"; then
-    echo "Setup Zsh is successfully finished! Re-Login to apply it."
+    log success "Setup Zsh is successfully finished! Re-Login to apply it."
   else
-    echo "Changing shell to $zsh_path is failed"
+    log warn "Changing shell to $zsh_path is failed"
   fi
 }
 
@@ -47,7 +47,7 @@ install_zsh() {
 detect_platform
 
 if which zsh > /dev/null; then
-  echo "Zsh is already exists"
+  log info "Zsh is already exists"
 else
   install_zsh
 fi
