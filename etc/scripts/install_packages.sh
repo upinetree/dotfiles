@@ -49,6 +49,11 @@ install_fzf() {
   log success "fzf installation is successfully finished!"
 }
 
+install_brew() {
+  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  log success "Homebrew installation is successfully finished!"
+}
+
 ## Entry Point
 detect_platform
 
@@ -62,4 +67,12 @@ if exists fzf; then
   log info "fzf is already exists"
 else
   install_fzf
+fi
+
+if [ "$PLATFORM" = "osx" ]; then
+  if exists brew; then
+    log info "Homebrew is already exists"
+  else
+    install_brew
+  fi
 fi
