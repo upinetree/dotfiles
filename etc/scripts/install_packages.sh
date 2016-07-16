@@ -126,4 +126,12 @@ if [ "$PLATFORM" = "osx" ]; then
     install_brew
     result brew
   fi
+
+  if exists brew; then
+    brew tap homebrew/versions
+    brew tap caskroom/homebrew-versions
+
+    brew install git go openssl readline reattach-to-user-namespace tmux vim
+    brew cask install dropbox firefox-ja google-chrome karabiner keepassx night-owl slate totalterminal
+  fi
 fi
