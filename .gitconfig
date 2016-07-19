@@ -56,3 +56,13 @@
 
 [ghq]
   root = ~/repo
+
+# NOTE: diff-highlightが後々デフォルトになったら削除
+[pager]
+	log = diff-highlight | less
+	show = diff-highlight | less
+	diff = diff-highlight | less
+
+# NOTE: diff-highlightが後々デフォルトになったら削除
+[diff]
+	compactionHeuristic = true

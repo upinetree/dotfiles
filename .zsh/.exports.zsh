@@ -1,6 +1,10 @@
 export PATH=$HOME/bin:$PATH
 export PATH=$HOME/.nodebrew/current/bin:$PATH
 
+# git
+# NOTE: diff-highlightが後々デフォルトになったら削除
+export PATH=/usr/local/share/git-core/contrib/diff-highlight:$PATH
+
 # postgresql
 export PGDATA=/usr/local/var/postgres
 
