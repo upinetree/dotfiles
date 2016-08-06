@@ -53,6 +53,7 @@ listup_dotfiles() {
     "~/.dotfiles/.zsh/.oh-my-zsh.zsh ~/.zsh/.oh-my-zsh.zsh"
     "~/.dotfiles/.vimrc              ~/.vimrc"
     "~/.dotfiles/.vim/colors         ~/.vim/colors"
+    "~/.dotfiles/bin/login-shell     ~/bin/login-shell"
   )
 
   if [ "$PLATFORM" = "osx" ]; then
@@ -60,7 +61,6 @@ listup_dotfiles() {
       "~/.dotfiles/osx/.slate                  ~/.slate"
       "~/.dotfiles/osx/.vimperatorrc           ~/.vimperatorrc"
       "~/.dotfiles/osx/bin/git-completion.bash ~/bin/git-completion.bash"
-      "~/.dotfiles/osx/bin/login-shell         ~/bin/login-shell"
     )
   fi
 }
