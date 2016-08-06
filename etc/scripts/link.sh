@@ -16,10 +16,7 @@ run() {
 make_base_dirs() {
   mkdir ~/.zsh
   mkdir ~/.vim
-
-  if [ "$PLATFORM" = "osx" ]; then
-    mkdir ~/bin
-  fi
+  mkdir ~/bin
 }
 
 unlink_all() {
