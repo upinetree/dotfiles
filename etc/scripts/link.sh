@@ -14,8 +14,8 @@ run() {
 }
 
 make_base_dirs() {
-  mkdir ~/.zsh
   mkdir ~/.vim
+  mkdir ~/.zsh
   mkdir ~/bin
 }
 
@@ -44,12 +44,12 @@ listup_dotfiles() {
     "~/.dotfiles/.gitconfig          ~/.gitconfig"
     "~/.dotfiles/.gitignore          ~/.gitignore"
     "~/.dotfiles/.tmux.conf          ~/.tmux.conf"
-    "~/.dotfiles/.zshrc              ~/.zshrc"
+    "~/.dotfiles/.vim/colors         ~/.vim/colors"
+    "~/.dotfiles/.vimrc              ~/.vimrc"
     "~/.dotfiles/.zsh/.aliases.zsh   ~/.zsh/.aliases.zsh"
     "~/.dotfiles/.zsh/.exports.zsh   ~/.zsh/.exports.zsh"
     "~/.dotfiles/.zsh/.oh-my-zsh.zsh ~/.zsh/.oh-my-zsh.zsh"
-    "~/.dotfiles/.vimrc              ~/.vimrc"
-    "~/.dotfiles/.vim/colors         ~/.vim/colors"
+    "~/.dotfiles/.zshrc              ~/.zshrc"
     "~/.dotfiles/bin/login-shell     ~/bin/login-shell"
   )
 
