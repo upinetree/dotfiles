@@ -8,9 +8,6 @@ export PATH=/usr/local/share/git-core/contrib/diff-highlight:$PATH
 # postgresql
 export PGDATA=/usr/local/var/postgres
 
-# Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
-
 # for ruby build
 export CC=clang
 if [ $(uname) = "Darwin" ]; then
