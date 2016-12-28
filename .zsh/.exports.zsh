@@ -13,6 +13,10 @@ export PATH="/usr/local/heroku/bin:$PATH"
 
 # for ruby build
 export CC=clang
+if [ $(uname) = "Darwin" ]; then
+  export CONFIGURE_OPTS="--with-opt-dir=`brew --prefix openssl`"
+  export RUBY_CONFIGURE_OPTS="--with-opt-dir=`brew --prefix openssl`"
+fi
 
 # go
 export GOPATH=$HOME/.go
