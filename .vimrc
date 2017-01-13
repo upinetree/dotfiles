@@ -12,6 +12,9 @@ set whichwrap=b,s,<,>,[,],~
 set number
 
 set autoindent
+set breakindent
+set breakindentopt=sbr
+set showbreak=>\ 
 set smarttab
 set expandtab
 set tabstop=2
