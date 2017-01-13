@@ -42,6 +42,7 @@ nnoremap <Space>h <C-w>h
 nnoremap <Space>j <C-w>j
 nnoremap <Space>k <C-w>k
 nnoremap <Space>l <C-w>l
+nnoremap <Space>e :<C-u>Explore<CR>
 nnoremap <C-n> gt
 nnoremap <C-p> gT
 
