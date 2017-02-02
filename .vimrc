@@ -38,8 +38,8 @@ nnoremap <Space>q :<C-u>q<CR>
 nnoremap <Space>Q :<C-u>bd<CR>
 nnoremap <Space>n :<C-u>noh<CR>
 nnoremap <Space>t :<C-u>tabnew<CR>
-nnoremap <Space>s :<C-u>new<CR>
 nnoremap <Space>e :<C-u>Explore<CR>
+nnoremap <Space>s :<C-u>Sexplore<CR>
 nnoremap <Space>h <C-w>h
 nnoremap <Space>j <C-w>j
 nnoremap <Space>k <C-w>k
