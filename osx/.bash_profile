@@ -1,32 +1,25 @@
 # Path Settings
 #------------------
 
-# default path
-export PATH=/usr/local/bin:$PATH
+# local bin path
 export PATH=$HOME/bin:$PATH
 
 # rbenv
-export PATH=$HOME/.rbenv/bin:$PATH
-# export PATH=$HOME/.rbenv/shims:$PATH
-eval "$(rbenv init -)"
-source ~/.rbenv/completions/rbenv.bash
+if [ -d ~/.rbenv ]; then
+  export PATH=$HOME/.rbenv/bin:$PATH
+  eval "$(rbenv init -)"
+  source ~/.rbenv/completions/rbenv.bash
+fi
 
 # postgresql
 export PGDATA=/usr/local/var/postgres
 
-# Rabbit
-# export DYLD_LIBRARY_PATH=/usr/local/opt/cairo/lib
-
-# Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
-
 # git
 source ~/bin/git-completion.bash
 
-# gcc setting for installing therubyracer gem
-export CC=/usr/local/Cellar/apple-gcc42/4.2.1-5666.3/bin/gcc-4.2
-export CXX=/usr/local/Cellar/apple-gcc42/4.2.1-5666.3/bin/g++-4.2
-export CPP=/usr/local/Cellar/apple-gcc42/4.2.1-5666.3/bin/cpp-4.2
+# golang
+export GOPATH=$HOME/.go
+export PATH=$PATH:$GOPATH/bin
 
 # Shell Options
 #------------------
@@ -64,15 +57,20 @@ alias rm='rm -i'
 # alias cp='cp -i'
 # alias mv='mv -i'
 
-# Default to human readable figures
+# File systems
 alias df='df -h'
-alias du='du -h'
 alias du1='du -h -d1'
-
-# Some shortcuts for different directory listings
+alias du='du -h'
+alias l='ls'
 alias ll='ls -aCFlh'
 alias ls='ls -ACF'
-alias l='ls'
+
+# DBs
+alias my="mysql"
+alias my_="mysql --pager='less -S'"
+alias my-restart='mysql.server restart'
+alias pg-start='pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start'
+alias pg-stop='pg_ctl -D /usr/local/var/postgres stop -s -m fast'
 
 # Misc :)
 alias src='source ~/.bash_profile'
@@ -82,18 +80,5 @@ alias fgrep='fgrep --color=auto'
 alias whence='type -a' 				# where, of a sort
 alias vi='vim'
 alias be='bundle exec'
-alias bi='bundle install --path vendor/bundle'
 alias ni='~/bin/nicorepo/bin/nicorepo i'
 alias s='subl'
-
-# tmuxinator
-# source ~/.tmuxinator/tmuxinator.bash
-
-# rake task chain
-alias db_fixup='be rake db:drop db:create db:migrate test_data:create'
-alias parallel_db_fixup='be rake parallel:drop parallel:create parallel:migrate'
-alias parallel_spec='be rake parallel:migrate parallel:spec'
-alias resql='mysql.server restart'
-# parallel:prepare does not work when mysql partitioning is applied
-# alias rake_parallel_spec='be rake db:migrate parallel:prepare parallel:spec'
-
