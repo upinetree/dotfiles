@@ -1,6 +1,11 @@
+# ZLE は emacs モード。vi モードはまだ慣れないので
+# fzf がキーバインドを設定する前に読み込むこと
+bindkey -e
+
 # Sources
 #------------------
 [ -d ~/.oh-my-zsh ] && source ~/.zsh/.oh-my-zsh.zsh
+[ -d ~/.zplug ]     && source ~/.zsh/.zplug.zsh
 [ -f ~/.fzf.zsh ]   && source ~/.fzf.zsh
 
 source ~/.zsh/.exports.zsh

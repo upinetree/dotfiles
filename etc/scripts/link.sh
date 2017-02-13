@@ -48,6 +48,7 @@ listup_dotfiles() {
     "~/.dotfiles/.vimrc              ~/.vimrc"
     "~/.dotfiles/.zsh/.aliases.zsh   ~/.zsh/.aliases.zsh"
     "~/.dotfiles/.zsh/.exports.zsh   ~/.zsh/.exports.zsh"
+    "~/.dotfiles/.zsh/.zplug.zsh     ~/.zsh/.zplug.zsh"
     "~/.dotfiles/.zsh/.oh-my-zsh.zsh ~/.zsh/.oh-my-zsh.zsh"
     "~/.dotfiles/.zshrc              ~/.zshrc"
     "~/.dotfiles/bin/login-shell     ~/bin/login-shell"

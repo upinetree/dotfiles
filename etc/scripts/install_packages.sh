@@ -98,6 +98,7 @@ detect_platform
 set_versions
 
 # TODO: ファイルに分割するなりして整理する
+# TODO: zplug化
 if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
     log info "brew is already exists"
