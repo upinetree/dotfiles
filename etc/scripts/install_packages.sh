@@ -111,7 +111,7 @@ if [ "$PLATFORM" = "osx" ]; then
     brew tap caskroom/homebrew-versions
 
     brew install git go openssl readline reattach-to-user-namespace tmux vim zsh
-    brew cask install dropbox firefox-ja google-chrome iterm2 keepassx licecap skitch slate
+    brew cask install dropbox firefox google-chrome iterm2 keepassx licecap skitch slate --language=ja
   fi
 fi
 
