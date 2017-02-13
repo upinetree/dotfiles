@@ -9,12 +9,7 @@ set_versions() {
 install_zsh() {
   case "$PLATFORM" in
     osx)
-      if exists brew; then
-        brew install zsh
-      else
-        log error "ERROR: homebrew is not exists"
-        return 1
-      fi
+      log info "zsh is installed in the homebrew installation phase"
       ;;
     linux)
       if exists apt-get; then
@@ -64,7 +59,7 @@ install_brew() {
 install_go() {
   case "$PLATFORM" in
     osx)
-      brew install go
+      log info "go is installed in the homebrew installation phase"
       ;;
     linux)
       local tar="go$GO_VERSION.linux-amd64.tar.gz"
@@ -98,11 +93,28 @@ result() {
   fi
 }
 
-## Entry Point
+# ================== Entry Point
 detect_platform
 set_versions
 
-# TODO: ファイルに分割する
+# TODO: ファイルに分割するなりして整理する
+if [ "$PLATFORM" = "osx" ]; then
+  if exists brew; then
+    log info "brew is already exists"
+  else
+    install_brew
+    result brew
+  fi
+
+  if exists brew; then
+    brew tap homebrew/versions
+    brew tap caskroom/homebrew-versions
+
+    brew install git go openssl readline reattach-to-user-namespace tmux vim zsh
+    brew cask install dropbox firefox-ja google-chrome iterm2 keepassx licecap skitch slate
+  fi
+fi
+
 if exists zsh; then
   log info "Zsh is already exists"
 else
@@ -143,21 +155,4 @@ if [ -d ~/.vim/bundle ]; then
 else
   install_dein
   log success "dein.vim is installed. Launch vim and execute ':call dein#install()' to install plugins"
-fi
-
-if [ "$PLATFORM" = "osx" ]; then
-  if exists brew; then
-    log info "brew is already exists"
-  else
-    install_brew
-    result brew
-  fi
-
-  if exists brew; then
-    brew tap homebrew/versions
-    brew tap caskroom/homebrew-versions
-
-    brew install git openssl readline reattach-to-user-namespace tmux vim
-    brew cask install dropbox firefox-ja google-chrome iterm2 keepassx licecap skitch slate
-  fi
 fi
