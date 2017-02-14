@@ -1,5 +1,4 @@
 export PATH=$HOME/bin:$PATH
-export PATH=$HOME/.nodebrew/current/bin:$PATH
 
 # git
 # NOTE: diff-highlightが後々デフォルトになったら削除
