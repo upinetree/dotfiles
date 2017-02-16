@@ -13,9 +13,13 @@ source ~/.zsh/.aliases.zsh
 
 # Histories
 #------------------
+export HISTFILE=${HOME}/.zsh_history
+export HISTSIZE=1000
+export SAVEHIST=100000
+
 setopt hist_ignore_dups
-# 複数端末感での共有
-setopt share_history
+setopt hist_reduce_blanks
+setopt share_history # 複数端末感での共有とタイムスタンプ
 
 # Miscs
 #------------------
