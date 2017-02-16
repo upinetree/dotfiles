@@ -20,7 +20,7 @@ alias pushkey alt
 
 # Push Bindings
 bind l:${pushkey}  push right bar-resize:screenSizeX/2
-bind h:${pushkey}  push left  bar-resize:screenSizeX/2
+bind h:${pushkey}  push left  bar-resize:screenSizeX/2+5 # overwrap to switch the focus with the behind right window.
 bind k:${pushkey}  push up    bar-resize:screenSizeY/2
 bind j:${pushkey}  push down  bar-resize:screenSizeY/2
 bind f:${pushkey}  push up    bar-resize:screenSizeX
