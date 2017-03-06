@@ -26,6 +26,13 @@ install_zsh() {
       return 1
       ;;
   esac
+}
+
+change_shell_to_zsh() {
+  if [[ $SHELL =~ zsh ]]; then
+    log info "Shell is already set as zsh."
+    return 0
+  fi
 
   zsh_path="$(which zsh)"
 
@@ -126,12 +133,13 @@ else
   install_zsh
   result zsh
 fi
+change_shell_to_zsh
 
 if [ -d ~/.zplug ]; then
   log info "Zplug is already exists"
 else
   install_zplug
-  result zplug
+  log success "zplug is deployed, Re-Login to apply it."
 fi
 
 if exists rbenv; then
