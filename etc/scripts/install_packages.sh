@@ -3,7 +3,7 @@ set -u
 . ./etc/scripts/lib.sh
 
 set_versions() {
-  export GO_VERSION="1.6.2"
+  export GO_VERSION="1.8"
 }
 
 install_zsh() {
