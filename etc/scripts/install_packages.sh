@@ -42,6 +42,10 @@ install_zsh() {
   fi
 }
 
+install_zplug() {
+  curl -sL zplug.sh/installer | zsh
+}
+
 install_rbenv() {
   git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
   git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
@@ -98,7 +102,6 @@ detect_platform
 set_versions
 
 # TODO: ファイルに分割するなりして整理する
-# TODO: zplug化
 if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
     log info "brew is already exists"
@@ -112,7 +115,8 @@ if [ "$PLATFORM" = "osx" ]; then
     brew tap caskroom/homebrew-versions
 
     brew install git go node openssl readline reattach-to-user-namespace tmux vim zsh
-    brew cask install dropbox firefox google-chrome iterm2 keepassx licecap skitch slate --language=ja
+    brew cask install dropbox iterm2 keepassx licecap skitch slate --language=ja
+    # firefox google-chrome slack は手動で入れることが多いため除外
   fi
 fi
 
@@ -121,6 +125,13 @@ if exists zsh; then
 else
   install_zsh
   result zsh
+fi
+
+if [ -d ~/.zplug ]; then
+  log info "Zplug is already exists"
+else
+  install_zplug
+  result zplug
 fi
 
 if exists rbenv; then
