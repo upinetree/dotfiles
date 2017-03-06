@@ -123,7 +123,6 @@ if [ "$PLATFORM" = "osx" ]; then
 
     brew install git go node openssl readline reattach-to-user-namespace tmux vim zsh
     brew cask install dropbox iterm2 keepassx licecap skitch slate --language=ja
-    # firefox google-chrome slack は手動で入れることが多いため除外
   fi
 fi
 
@@ -176,3 +175,6 @@ else
   install_dein
   log success "dein.vim is installed. Launch vim and execute ':call dein#install()' to install plugins"
 fi
+
+log success "Finished. Re-Login to zsh to complete."
+log success "Manual installation required: e.g.) firefox google-chrome slack dash, from the web or AppStore"
