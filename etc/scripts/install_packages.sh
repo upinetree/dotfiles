@@ -37,8 +37,8 @@ change_shell_to_zsh() {
   zsh_path="$(which zsh)"
 
   if ! grep -xq $zsh_path /etc/shells; then
-    log error "ERROR: \`$zsh_path\` should be appended in /etc/shells"
-    return 1
+    log warn "\`$zsh_path\` should be appended in /etc/shells. Append it now:"
+    echo $zsh_path | sudo tee -a /etc/shells
   fi
 
   log info "To change shell to $zsh_path, type your password:"
