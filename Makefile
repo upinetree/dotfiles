@@ -1,11 +1,15 @@
 help:
-	@echo "make install          # link dotfiles and install packages"
-	@echo "make install_packages # install packages"
+	@echo "make install          # copy and link files, then install packages"
+	@echo "make copy             # copy config files"
 	@echo "make link             # link dotfiles"
 	@echo "make clone_extra      # clone extra preferred repos"
 	@echo "make vimperator       # setup vimperator plugins"
+	@echo "make install_packages # install packages"
 
-install: link install_packages
+install: copy link install_packages
+
+copy:
+	@bash -c "[ -f /etc/paths ] && sudo cp -f ./etc/paths /etc/paths"
 
 link:
 	@bash ./scripts/link.sh
