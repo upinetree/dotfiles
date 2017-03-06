@@ -8,10 +8,10 @@ help:
 install: link install_packages
 
 link:
-	@bash ./etc/scripts/link.sh
+	@bash ./scripts/link.sh
 
 install_packages:
-	@bash ./etc/scripts/install_packages.sh
+	@bash ./scripts/install_packages.sh
 
 clone_extra:
 	ghq get vimpr/vimperator-plugins

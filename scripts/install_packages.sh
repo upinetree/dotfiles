@@ -1,6 +1,6 @@
 set -u
 
-. ./etc/scripts/lib.sh
+. ./scripts/lib.sh
 
 set_versions() {
   export GO_VERSION="1.8"

@@ -1,6 +1,6 @@
 set -u
 
-. ./etc/scripts/lib.sh
+. ./scripts/lib.sh
 
 init() {
   detect_platform
