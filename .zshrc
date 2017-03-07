@@ -35,5 +35,8 @@ which brew > /dev/null && fpath=($(brew --prefix)/share/zsh/site-functions $fpat
 autoload -U compinit
 compinit -u
 
+# completions
+zstyle ':completion:*' use-cache yes
+
 # 環境依存の追加設定はここに定義（上書きできるよう最後に読み込む）
 [ -f ~/.env.zsh ] && source ~/.env.zsh
