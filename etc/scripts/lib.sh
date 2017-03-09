@@ -39,5 +39,5 @@ log() {
 }
 
 exists() {
- which "$1" > /dev/null
+ type "$1" &> /dev/null
 }

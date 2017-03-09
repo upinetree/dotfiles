@@ -7,7 +7,7 @@ export PATH=/usr/local/share/git-core/contrib/diff-highlight:$PATH
 # postgresql
 export PGDATA=/usr/local/var/postgres
 
-# for ruby build
+# ruby build
 export CC=clang
 if [ $(uname) = "Darwin" ]; then
   export CONFIGURE_OPTS="--with-opt-dir=`brew --prefix openssl`"
@@ -17,6 +17,9 @@ fi
 # go
 export GOPATH=$HOME/.go
 export PATH=$PATH:$GOPATH/bin
+
+# yarn
+type yarn &> /dev/null && export PATH="$PATH:`yarn global bin`"
 
 # Shell Options
 #------------------
