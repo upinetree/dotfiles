@@ -15,7 +15,7 @@ install_packages:
 
 clone_extra:
 	ghq get vimpr/vimperator-plugins
-	ghq get lysyi3m/osx-terminal-themes
+	ghq get mbadolato/iTerm2-Color-Schemes
 
 vimperator:
 	[ -d ~/.vimperator/plugin ] || mkdir ~/.vimperator/plugin
