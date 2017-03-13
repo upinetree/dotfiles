@@ -23,7 +23,7 @@ clone_extra:
 	ghq get mbadolato/iTerm2-Color-Schemes
 
 vimperator:
-	[ -d ~/.vimperator/plugin ] || mkdir ~/.vimperator/plugin
+	[ -d ~/.vimperator/plugin ] || mkdir -p ~/.vimperator/plugin
 	$(eval src_root := $(shell ghq list -p vimpr/vimperator-plugins))
 	-ln -s "$(src_root)/_libly.js" ~/.vimperator/plugin/_libly.js
 	-ln -s "$(src_root)/_smooziee.js" ~/.vimperator/plugin/_smooziee.js
