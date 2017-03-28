@@ -1,1 +1,2 @@
 gem: --no-document
+gemsrc_use_ghq: true
