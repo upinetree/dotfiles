@@ -38,7 +38,7 @@
   # commit
   ci = commit -v
   cm = commit -m
-  cam = commit --amend # amends commit log
+  cam = commit --amend
 
   # push
   pushf = push --force-with-lease
@@ -53,6 +53,10 @@
   ls = log --stat
   lp = log -p --color
   sh = show --color
+
+  # hub
+  pr = pull-request
+  see = browse
 
 [ghq]
   root = ~/repo
