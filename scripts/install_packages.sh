@@ -125,7 +125,7 @@ if [ "$PLATFORM" = "osx" ]; then
     brew tap homebrew/versions
     brew tap caskroom/homebrew-versions
 
-    brew install git go node openssl readline reattach-to-user-namespace tmux vim zsh
+    brew install git go hub node openssl readline reattach-to-user-namespace tmux tree vim watch zsh
     brew cask install dropbox iterm2 keepassx licecap skitch slate --language=ja
   fi
 fi
