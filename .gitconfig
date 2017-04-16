@@ -38,7 +38,7 @@
   # commit
   ci = commit -v
   cm = commit -m
-  cam = commit --amend
+  cam = commit --amend -v
 
   # push
   pushf = push --force-with-lease
