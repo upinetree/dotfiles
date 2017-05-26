@@ -97,51 +97,46 @@ autocmd! FileType markdown hi! def link markdownItalic Normal
 " 自動的にquickfix-windowを開く（位置調整済み）
 autocmd! QuickFixCmdPost *grep* belowright cwindow
 
-
 "-------------------------------------------------
 " Dein.vim
 
 if &compatible
-  set nocompatible               " Be iMproved
+  set nocompatible
 endif
-
-" Required:
 set runtimepath^=~/.vim/bundle/repos/github.com/Shougo/dein.vim
 
-" Required:
-call dein#begin(expand('~/.vim/bundle'))
+if dein#load_state('~/.vim/bundle')
+  call dein#begin(expand('~/.vim/bundle'))
 
-" Let dein manage dein
-" Required:
-call dein#add('Shougo/dein.vim')
+  call dein#add('Shougo/dein.vim')
 
-call dein#add('vim-scripts/Align')
-call dein#add('AndrewRadev/vim-eco')
-call dein#add('Shougo/neomru.vim')
-call dein#add('Shougo/neosnippet-snippets')
-call dein#add('Shougo/neosnippet.vim')
-call dein#add('Shougo/unite.vim')
-call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
-call dein#add('Shougo/vimshell')
-call dein#add('Shougo/unite-outline')
-call dein#add('Shougo/unite-help')
-call dein#add('flazz/vim-colorschemes')
-call dein#add('kchmck/vim-coffee-script')
-call dein#add('nathanaelkane/vim-indent-guides')
-call dein#add('ntpeters/vim-better-whitespace')
-call dein#add('s3rvac/vim-syntax-redminewiki')
-call dein#add('slim-template/vim-slim')
-call dein#add('timcharper/textile.vim')
-call dein#add('tpope/vim-endwise')
-call dein#add('tpope/vim-fugitive')
-call dein#add('tpope/vim-haml')
-call dein#add('tyru/caw.vim')
-call dein#add('thinca/vim-qfreplace')
+  call dein#add('AndrewRadev/vim-eco')
+  call dein#add('Shougo/neomru.vim')
+  call dein#add('Shougo/neosnippet-snippets')
+  call dein#add('Shougo/neosnippet.vim')
+  call dein#add('Shougo/unite-help')
+  call dein#add('Shougo/unite-outline')
+  call dein#add('Shougo/unite.vim')
+  call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
+  call dein#add('Shougo/vimshell')
+  call dein#add('flazz/vim-colorschemes')
+  call dein#add('kchmck/vim-coffee-script')
+  call dein#add('nathanaelkane/vim-indent-guides')
+  call dein#add('ntpeters/vim-better-whitespace')
+  call dein#add('s3rvac/vim-syntax-redminewiki')
+  call dein#add('slim-template/vim-slim')
+  call dein#add('thinca/vim-qfreplace')
+  call dein#add('timcharper/textile.vim')
+  call dein#add('tpope/vim-endwise')
+  call dein#add('tpope/vim-fugitive')
+  call dein#add('tpope/vim-haml')
+  call dein#add('tyru/caw.vim')
+  call dein#add('vim-scripts/Align')
 
-" Required:
-call dein#end()
+  call dein#end()
+  call dein#save_state()
+endif
 
-" Required:
 filetype plugin indent on
 
 " If you want to install not installed plugins on startup.
