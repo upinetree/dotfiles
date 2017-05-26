@@ -81,7 +81,7 @@ set incsearch
 " set cursorline
 " hi CursorLine term=reverse cterm=none ctermbg=233
 set scrolloff=3
-set visualbell t_vb=
+set belloff=all
 
 " %キーでカッコとかdo-endとかに飛ぶ
 if !exists('loaded_matchit')
