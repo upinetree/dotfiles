@@ -1,4 +1,57 @@
 "-------------------------------------------------
+" Key Mappings
+
+" Prefix
+nnoremap [unite]  <Nop>
+nmap     <Space>u [unite]
+
+" Edit
+inoremap <C-L> <ESC>
+vnoremap <C-L> <ESC>
+
+" File, Window, Tab
+nnoremap <Space>w :<C-u>w<CR>
+nnoremap <Space>q :<C-u>q<CR>
+nnoremap <Space>Q :<C-u>bd<CR>
+nnoremap <Space>n :<C-u>noh<CR>
+nnoremap <Space>t :<C-u>tabnew<CR>
+nnoremap <Space>e :<C-u>Explore<CR>
+nnoremap <Space>s :<C-u>Sexplore<CR>
+nnoremap <Space>h <C-w>h
+nnoremap <Space>j <C-w>j
+nnoremap <Space>k <C-w>k
+nnoremap <Space>l <C-w>l
+nnoremap <C-n> gt
+nnoremap <C-p> gT
+
+" 括弧やクオートの自動補完
+inoremap {<Enter> {}<Left><CR><ESC><S-o>
+inoremap [<Enter> []<Left><CR><ESC><S-o>
+inoremap (<Enter> ()<Left><CR><ESC><S-o>
+inoremap { {}<LEFT>
+inoremap [ []<LEFT>
+inoremap ( ()<LEFT>
+inoremap " ""<LEFT>
+inoremap ' ''<LEFT>
+vnoremap { "zdi{<C-R>z}<ESC>
+vnoremap [ "zdi[<C-R>z]<ESC>
+vnoremap ( "zdi(<C-R>z)<ESC>
+vnoremap " "zdi"<C-R>z"<ESC>
+vnoremap ' "zdi'<C-R>z'<ESC>
+
+" Unite
+nnoremap <silent> [unite]u :<C-u>Unite buffer file_mru<CR>
+nnoremap <silent> [unite]g :<C-u>Unite file_rec/git:--cached:--others:--exclude-standard<CR>
+nnoremap <silent> [unite]a :<C-u>Unite file_rec/async<CR>
+nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=register register<CR>
+nnoremap <silent> [unite]o :<C-u>Unite outline<CR>
+nnoremap <silent> [unite]h :<C-u>Unite help<CR>
+
+" Caw
+nmap <Space>c <Plug>(caw:hatpos:toggle)
+vmap <Space>c <Plug>(caw:hatpos:toggle)
+
+"-------------------------------------------------
 " General
 
 syntax enable
@@ -29,38 +82,6 @@ set incsearch
 " hi CursorLine term=reverse cterm=none ctermbg=233
 set scrolloff=3
 set visualbell t_vb=
-
-inoremap <C-L> <ESC>
-vnoremap <C-L> <ESC>
-
-nnoremap <Space>w :<C-u>w<CR>
-nnoremap <Space>q :<C-u>q<CR>
-nnoremap <Space>Q :<C-u>bd<CR>
-nnoremap <Space>n :<C-u>noh<CR>
-nnoremap <Space>t :<C-u>tabnew<CR>
-nnoremap <Space>e :<C-u>Explore<CR>
-nnoremap <Space>s :<C-u>Sexplore<CR>
-nnoremap <Space>h <C-w>h
-nnoremap <Space>j <C-w>j
-nnoremap <Space>k <C-w>k
-nnoremap <Space>l <C-w>l
-nnoremap <C-n> gt
-nnoremap <C-p> gT
-
-" 括弧やクオートの自動補完
-inoremap {<Enter> {}<Left><CR><ESC><S-o>
-inoremap [<Enter> []<Left><CR><ESC><S-o>
-inoremap (<Enter> ()<Left><CR><ESC><S-o>
-inoremap { {}<LEFT>
-inoremap [ []<LEFT>
-inoremap ( ()<LEFT>
-inoremap " ""<LEFT>
-inoremap ' ''<LEFT>
-vnoremap { "zdi{<C-R>z}<ESC>
-vnoremap [ "zdi[<C-R>z]<ESC>
-vnoremap ( "zdi(<C-R>z)<ESC>
-vnoremap " "zdi"<C-R>z"<ESC>
-vnoremap ' "zdi'<C-R>z'<ESC>
 
 " %キーでカッコとかdo-endとかに飛ぶ
 if !exists('loaded_matchit')
@@ -132,9 +153,9 @@ filetype plugin indent on
 " Neosnipet
 
 " Plugin key-mappings.
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-xmap <C-k>     <Plug>(neosnippet_expand_target)
+imap <C-k> <Plug>(neosnippet_expand_or_jump)
+smap <C-k> <Plug>(neosnippet_expand_or_jump)
+xmap <C-k> <Plug>(neosnippet_expand_target)
 
 " SuperTab like snippets behavior.
 imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
@@ -158,22 +179,6 @@ let g:Align_xstrlen = 3
 " Unite
 
 let g:unite_enable_start_insert=1
-
-nnoremap [unite]  <Nop>
-nmap     <Space>u [unite]
-
-nnoremap <silent> [unite]u :<C-u>Unite buffer file_mru<CR>
-nnoremap <silent> [unite]g :<C-u>Unite file_rec/git<CR>
-nnoremap <silent> [unite]a :<C-u>Unite file_rec/async<CR>
-nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=register register<CR>
-nnoremap <silent> [unite]o :<C-u>Unite outline<CR>
-nnoremap <silent> [unite]h :<C-u>Unite help<CR>
-
-"-------------------------------------------------
-" Caw
-
-nmap <Space>c <Plug>(caw:hatpos:toggle)
-vmap <Space>c <Plug>(caw:hatpos:toggle)
 
 "-------------------------------------------------
 " IndentGuides
