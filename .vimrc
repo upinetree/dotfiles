@@ -115,6 +115,7 @@ call dein#add('tpope/vim-endwise')
 call dein#add('tpope/vim-fugitive')
 call dein#add('tpope/vim-haml')
 call dein#add('tyru/caw.vim')
+call dein#add('thinca/vim-qfreplace')
 
 " Required:
 call dein#end()
