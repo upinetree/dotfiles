@@ -63,6 +63,8 @@ colorscheme lucius
 
 set whichwrap=b,s,<,>,[,],~
 set number
+set laststatus=2
+set noshowmode
 
 set autoindent
 set breakindent
@@ -132,6 +134,7 @@ if dein#load_state('~/.vim/bundle')
   call dein#add('tpope/vim-haml')
   call dein#add('tyru/caw.vim')
   call dein#add('vim-scripts/Align')
+  call dein#add('itchyny/lightline.vim')
 
   call dein#end()
   call dein#save_state()
