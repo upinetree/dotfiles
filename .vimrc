@@ -1,4 +1,52 @@
 "-------------------------------------------------
+" Dein.vim
+
+if &compatible
+  set nocompatible
+endif
+set runtimepath^=~/.vim/bundle/repos/github.com/Shougo/dein.vim
+
+if dein#load_state('~/.vim/bundle')
+  call dein#begin(expand('~/.vim/bundle'))
+
+  call dein#add('Shougo/dein.vim')
+
+  call dein#add('AndrewRadev/vim-eco')
+  call dein#add('Shougo/neomru.vim')
+  call dein#add('Shougo/neosnippet-snippets')
+  call dein#add('Shougo/neosnippet.vim')
+  call dein#add('Shougo/unite-help')
+  call dein#add('Shougo/unite-outline')
+  call dein#add('Shougo/unite.vim')
+  call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
+  call dein#add('Shougo/vimshell')
+  call dein#add('flazz/vim-colorschemes')
+  call dein#add('kchmck/vim-coffee-script')
+  call dein#add('nathanaelkane/vim-indent-guides')
+  call dein#add('ntpeters/vim-better-whitespace')
+  call dein#add('s3rvac/vim-syntax-redminewiki')
+  call dein#add('slim-template/vim-slim')
+  call dein#add('thinca/vim-qfreplace')
+  call dein#add('timcharper/textile.vim')
+  call dein#add('tpope/vim-endwise')
+  call dein#add('tpope/vim-fugitive')
+  call dein#add('tpope/vim-haml')
+  call dein#add('tyru/caw.vim')
+  call dein#add('vim-scripts/Align')
+  call dein#add('itchyny/lightline.vim')
+
+  call dein#end()
+  call dein#save_state()
+endif
+
+filetype plugin indent on
+
+" If you want to install not installed plugins on startup.
+"if dein#check_install()
+"  call dein#install()
+"endif
+
+"-------------------------------------------------
 " Key Mappings
 
 " Prefix
@@ -74,6 +122,7 @@ set smarttab
 set expandtab
 set tabstop=2
 set shiftwidth=2
+set shiftround
 set backspace=2
 
 set clipboard=unnamed,autoselect
@@ -84,6 +133,7 @@ set incsearch
 " hi CursorLine term=reverse cterm=none ctermbg=233
 set scrolloff=3
 set belloff=all
+set keywordprg=:Ggrep " Open Vim internal help by K command
 
 " %キーでカッコとかdo-endとかに飛ぶ
 if !exists('loaded_matchit')
@@ -100,52 +150,25 @@ autocmd! FileType markdown hi! def link markdownItalic Normal
 autocmd! QuickFixCmdPost *grep* belowright cwindow
 
 "-------------------------------------------------
-" Dein.vim
+" FileType settings
 
-if &compatible
-  set nocompatible
-endif
-set runtimepath^=~/.vim/bundle/repos/github.com/Shougo/dein.vim
+autocmd FileType vim call s:vim_filetype_settings()
+function! s:vim_filetype_settings()
+  setlocal completeopt-=preview
+  setlocal keywordprg=:help
+endfunction
 
-if dein#load_state('~/.vim/bundle')
-  call dein#begin(expand('~/.vim/bundle'))
+autocmd FileType help call s:help_filetype_settings()
+function! s:help_filetype_settings()
+  setlocal keywordprg=:help
+endfunction
 
-  call dein#add('Shougo/dein.vim')
-
-  call dein#add('AndrewRadev/vim-eco')
-  call dein#add('Shougo/neomru.vim')
-  call dein#add('Shougo/neosnippet-snippets')
-  call dein#add('Shougo/neosnippet.vim')
-  call dein#add('Shougo/unite-help')
-  call dein#add('Shougo/unite-outline')
-  call dein#add('Shougo/unite.vim')
-  call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
-  call dein#add('Shougo/vimshell')
-  call dein#add('flazz/vim-colorschemes')
-  call dein#add('kchmck/vim-coffee-script')
-  call dein#add('nathanaelkane/vim-indent-guides')
-  call dein#add('ntpeters/vim-better-whitespace')
-  call dein#add('s3rvac/vim-syntax-redminewiki')
-  call dein#add('slim-template/vim-slim')
-  call dein#add('thinca/vim-qfreplace')
-  call dein#add('timcharper/textile.vim')
-  call dein#add('tpope/vim-endwise')
-  call dein#add('tpope/vim-fugitive')
-  call dein#add('tpope/vim-haml')
-  call dein#add('tyru/caw.vim')
-  call dein#add('vim-scripts/Align')
-  call dein#add('itchyny/lightline.vim')
-
-  call dein#end()
-  call dein#save_state()
-endif
-
-filetype plugin indent on
-
-" If you want to install not installed plugins on startup.
-"if dein#check_install()
-"  call dein#install()
-"endif
+autocmd FileType ruby call s:ruby_filetype_settings()
+function! s:ruby_filetype_settings()
+  setlocal tabstop=2 shiftround shiftwidth=2
+  setlocal completeopt-=preview
+  setlocal keywordprg=:Ggrep
+endfunction
 
 "-------------------------------------------------
 " Neosnipet
