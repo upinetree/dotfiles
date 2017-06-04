@@ -71,6 +71,19 @@ nnoremap <Space>k <C-w>k
 nnoremap <Space>l <C-w>l
 nnoremap <C-n> gt
 nnoremap <C-p> gT
+nnoremap <silent> <Space>m :<C-u>call <SID>MoveToNewTab()<CR>
+function! s:MoveToNewTab()
+  tab split
+  tabprevious
+
+  if winnr('$') > 1
+      close
+  elseif bufnr('$') > 1
+      buffer #
+  endif
+
+  tabnext
+endfunction
 
 " 括弧やクオートの自動補完
 inoremap {<Enter> {}<Left><CR><ESC><S-o>
