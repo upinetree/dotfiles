@@ -1,3 +1,5 @@
+autocmd!
+
 "-------------------------------------------------
 " Dein.vim
 
@@ -20,7 +22,9 @@ if dein#load_state('~/.vim/bundle')
   call dein#add('Shougo/unite.vim')
   call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
   call dein#add('Shougo/vimshell')
+  call dein#add('cohama/lexima.vim')
   call dein#add('flazz/vim-colorschemes')
+  call dein#add('itchyny/lightline.vim')
   call dein#add('kchmck/vim-coffee-script')
   call dein#add('nathanaelkane/vim-indent-guides')
   call dein#add('ntpeters/vim-better-whitespace')
@@ -28,12 +32,11 @@ if dein#load_state('~/.vim/bundle')
   call dein#add('slim-template/vim-slim')
   call dein#add('thinca/vim-qfreplace')
   call dein#add('timcharper/textile.vim')
-  call dein#add('tpope/vim-endwise')
   call dein#add('tpope/vim-fugitive')
   call dein#add('tpope/vim-haml')
+  call dein#add('tpope/vim-surround')
   call dein#add('tyru/caw.vim')
   call dein#add('vim-scripts/Align')
-  call dein#add('itchyny/lightline.vim')
 
   call dein#end()
   call dein#save_state()
@@ -85,20 +88,13 @@ function! s:MoveToNewTab()
   tabnext
 endfunction
 
-" 括弧やクオートの自動補完
-inoremap {<Enter> {}<Left><CR><ESC><S-o>
-inoremap [<Enter> []<Left><CR><ESC><S-o>
-inoremap (<Enter> ()<Left><CR><ESC><S-o>
-inoremap { {}<LEFT>
-inoremap [ []<LEFT>
-inoremap ( ()<LEFT>
-inoremap " ""<LEFT>
-inoremap ' ''<LEFT>
-vnoremap { "zdi{<C-R>z}<ESC>
-vnoremap [ "zdi[<C-R>z]<ESC>
-vnoremap ( "zdi(<C-R>z)<ESC>
-vnoremap " "zdi"<C-R>z"<ESC>
-vnoremap ' "zdi'<C-R>z'<ESC>
+" surround.vim shortcuts
+vmap { S{
+vmap [ S[
+vmap ( S(
+vmap " S"
+vmap ' S'
+vmap ` S`
 
 " Unite
 nnoremap <silent> [unite]u :<C-u>Unite buffer file_mru<CR>
@@ -140,13 +136,15 @@ set backspace=2
 
 set clipboard=unnamed,autoselect
 
-set hlsearch
-set incsearch
 " set cursorline
 " hi CursorLine term=reverse cterm=none ctermbg=233
+set hlsearch
+set incsearch
 set scrolloff=3
 set belloff=all
-set keywordprg=:Ggrep " Open Vim internal help by K command
+
+" Open Vim internal help by K command
+set keywordprg=:Ggrep
 
 " %キーでカッコとかdo-endとかに飛ぶ
 if !exists('loaded_matchit')
@@ -156,11 +154,8 @@ endif
 " 全角記号文字の幅を設定
 set ambiwidth=double
 
-" disable emphasis on markdown
-autocmd! FileType markdown hi! def link markdownItalic Normal
-
-" 自動的にquickfix-windowを開く（位置調整済み）
-autocmd! QuickFixCmdPost *grep* belowright cwindow
+" Open grep results in the quickfix-window
+autocmd QuickFixCmdPost *grep* belowright cwindow
 
 "-------------------------------------------------
 " FileType settings
@@ -182,6 +177,9 @@ function! s:ruby_filetype_settings()
   setlocal completeopt-=preview
   setlocal keywordprg=:Ggrep
 endfunction
+
+" disable emphasis on markdown
+autocmd FileType markdown hi! def link markdownItalic Normal
 
 "-------------------------------------------------
 " Neosnipet
