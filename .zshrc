@@ -17,9 +17,15 @@ export HISTFILE=${HOME}/.zsh_history
 export HISTSIZE=1000
 export SAVEHIST=100000
 
+setopt extended_history
 setopt hist_ignore_dups
+setopt hist_ignore_all_dups
+setopt hist_ignore_space
 setopt hist_reduce_blanks
-setopt share_history # 複数端末感での共有とタイムスタンプ
+setopt hist_expire_dups_first
+setopt hist_save_no_dups
+# 複数端末感での共有とタイムスタンプ
+setopt share_history
 
 # Miscs
 #------------------
