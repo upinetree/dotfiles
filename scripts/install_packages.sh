@@ -122,11 +122,10 @@ if [ "$PLATFORM" = "osx" ]; then
   fi
 
   if exists brew; then
-    brew tap homebrew/versions
     brew tap caskroom/homebrew-versions
 
     brew install git go hub node openssl readline reattach-to-user-namespace tmux tree vim watch zsh
-    brew cask install dropbox iterm2 keepassx licecap skitch slate --language=ja
+    brew cask install dropbox iterm2 keepassx licecap skitch slate
   fi
 fi
 
