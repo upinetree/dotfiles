@@ -24,6 +24,9 @@ export PATH=$PATH:$GOPATH/bin
 # yarn
 type yarn &> /dev/null && export PATH="$PATH:`yarn global bin`"
 
+# enhancd
+export ENHANCD_HOOK_AFTER_CD=pwd
+
 # Shell Options
 #------------------
 

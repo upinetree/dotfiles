@@ -3,7 +3,7 @@ alias zshrc='vim ~/.zshrc'
 alias reload='source ~/.zshrc'
 
 # File systems
-alias cdg='cd $(ghq list -p | fzf)'
+alias cdg='cd -G' # use enhancd
 alias df='df -h'
 alias du='du -h'
 alias du1='du -h -d1'

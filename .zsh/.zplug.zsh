@@ -3,6 +3,7 @@ source ~/.zplug/init.zsh
 zplug "zsh-users/zsh-completions"
 zplug "zsh-users/zsh-syntax-highlighting"
 zplug "zsh-users/zsh-history-substring-search"
+zplug "b4b4r07/enhancd", use:init.sh
 
 zplug 'dracula/zsh', as:theme
 
