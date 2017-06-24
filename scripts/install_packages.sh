@@ -50,7 +50,7 @@ change_shell_to_zsh() {
 }
 
 install_zplug() {
-  curl -sL zplug.sh/installer | zsh
+  curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 }
 
 install_rbenv() {
