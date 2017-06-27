@@ -46,3 +46,15 @@ zstyle ':completion:*' use-cache yes
 
 # 環境依存の追加設定はここに定義（上書きできるよう最後に読み込む）
 [ -f ~/.env.zsh ] && source ~/.env.zsh
+
+# OSX 固有
+#------------------
+if [ $(uname) = "Darwin" ]; then
+  # 任意のコマンドが終わったら通知
+  display_notification() {
+    $*
+    tput bel
+    osascript -e 'display notification "Processes are done." with title "Back To Working!"'
+  }
+fi
+alias dn=display_notification
