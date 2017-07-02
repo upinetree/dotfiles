@@ -58,6 +58,7 @@ install_rbenv() {
   git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
   git clone https://github.com/rbenv/rbenv-default-gems.git ~/.rbenv/plugins/rbenv-default-gems
   git clone https://github.com/amatsuda/gem-src.git ~/.rbenv/plugins/gem-src
+  git clone https://github.com/rkh/rbenv-update.git ~/.rbenv/plugins/rbenv-update
 
   ln -s  ~/.dotfiles/.rbenv/default-gems ~/.rbenv/default-gems
 }
