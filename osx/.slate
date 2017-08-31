@@ -7,7 +7,7 @@ config resizePercentOf screenSize
 
 # aliases
 alias pushkey alt
-alias appkey ctrl
+alias winkey alt;shift
 
 # Resize Bindings
 # bind right:alt       resize +10% +0
@@ -33,8 +33,8 @@ bind f:${pushkey}  push up    bar-resize:screenSizeX
 # bind down:shift;alt  nudge +0   +10%
 
 # Throw Bindings
-bind 1:${pushkey}         throw 0 resize
-bind 2:${pushkey}         throw 1 resize
+bind 1:${winkey} throw 0 resize
+bind 2:${winkey} throw 1 resize
 
 # Focus Bindings
 # bind right:${pushkey} focus right
@@ -44,11 +44,11 @@ bind 2:${pushkey}         throw 1 resize
 bind tab:${pushkey} focus behind
 
 # Applications
-bind 1:${appkey} focus 'Firefox'
-bind 2:${appkey} focus 'Google Chrome'
-bind 3:${appkey} focus 'Quiver'
-bind 9:${appkey} focus 'Slack'
-bind 0:${appkey} focus 'iTerm'
+bind 1:${pushkey} focus 'Firefox'
+bind 2:${pushkey} focus 'Google Chrome'
+bind 3:${pushkey} focus 'Quiver'
+bind 9:${pushkey} focus 'Slack'
+bind 0:${pushkey} focus 'iTerm'
 
 # Window Hints
-bind esc:${appkey} hint
+bind esc:${pushkey} hint
