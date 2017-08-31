@@ -21,6 +21,7 @@ alias gadp='git adp'
 alias gci='git ci'
 alias gco='git co'
 alias gd='git df'
+alias gdc='git dfc'
 alias gl='git lg'
 alias gs='git st'
 
