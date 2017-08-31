@@ -236,6 +236,14 @@ autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=darkgrey ctermbg=237
 " let g:ale_statusline_format = ['⨉ %d', '⚠ %d', '⬥ ok']
 let g:ale_sign_warning = '⚠'
 let g:ale_sign_error = '✗'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+let g:ale_lint_delay = 3000
+
+let g:ale_fixers = {
+\   'javascript': ['eslint'],
+\}
+" let g:ale_fix_on_save = 1
+
 highlight link ALEWarningSign String
 highlight link ALEErrorSign Title
 
