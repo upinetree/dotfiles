@@ -125,7 +125,7 @@ if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
     brew tap caskroom/homebrew-versions
 
-    brew install git go hub openssl readline reattach-to-user-namespace tmux tree vim watch yarn zsh
+    brew install chromedriver git go hub openssl readline reattach-to-user-namespace tmux tree vim watch yarn zsh
     brew cask install dropbox iterm2 keepassx licecap skitch slate
   fi
 fi
