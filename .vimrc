@@ -135,6 +135,10 @@ set noshowmode
 set number
 set scrolloff=3
 
+" Performance improvements
+set lazyredraw
+set synmaxcol=300
+
 "-------------------------------------------------
 " General Options
 
