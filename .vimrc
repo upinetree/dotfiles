@@ -1,3 +1,4 @@
+" Remove existing autocommands for when the file is sourced twice
 autocmd!
 
 "-------------------------------------------------
