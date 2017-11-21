@@ -220,6 +220,7 @@ let g:unite_enable_start_insert=1
 call unite#custom#source('buffer,file_rec/git', 'matchers', 'matcher_fuzzy')
 call unite#custom#source('buffer,file_rec/git', 'converters', 'converter_relative_abbr')
 call unite#custom#source('buffer,file_rec/git', 'sorters', 'sorter_selecta') " may slower
+call unite#custom#source('buffer,file_rec/git', 'ignore_pattern', '\(png\|gif\|jpeg\|jpg\)$')
 
 "-------------------------------------------------
 " IndentGuides
