@@ -46,9 +46,10 @@ bind tab:${pushkey} focus behind
 # Applications
 bind 1:${pushkey} focus 'Firefox'
 bind 2:${pushkey} focus 'Google Chrome'
-bind 3:${pushkey} focus 'Quiver'
+bind 3:${pushkey} focus 'Code'
+bind 8:${pushkey} focus 'Airmail'
 bind 9:${pushkey} focus 'Slack'
-bind 0:${pushkey} focus 'iTerm'
+bind 0:${pushkey} focus 'Quiver'
 
 # Window Hints
 bind esc:${pushkey} hint
