@@ -114,7 +114,7 @@ nmap <Space>c <Plug>(caw:hatpos:toggle)
 vmap <Space>c <Plug>(caw:hatpos:toggle)
 
 "-------------------------------------------------
-" General
+" Rendering Options
 
 syntax enable
 set t_Co=256
@@ -123,30 +123,33 @@ set background=dark
 " colorscheme hybrid
 colorscheme lucius
 
-set whichwrap=b,s,<,>,[,],~
-set number
-set laststatus=2
-set noshowmode
-
-set autoindent
+set ambiwidth=double " 全角記号文字の幅を設定
 set breakindent
 set breakindentopt=sbr
 set showbreak=>\ 
+set hlsearch
+set incsearch
+set laststatus=2
+set noshowmode
+set number
+set scrolloff=3
+
+"-------------------------------------------------
+" General Options
+
+" System
+set belloff=all
+set clipboard=unnamed,autoselect
+
+" Editor
+set autoindent
 set smarttab
 set expandtab
 set tabstop=2
 set shiftwidth=2
 set shiftround
 set backspace=2
-
-set clipboard=unnamed,autoselect
-
-" set cursorline
-" hi CursorLine term=reverse cterm=none ctermbg=233
-set hlsearch
-set incsearch
-set scrolloff=3
-set belloff=all
+set whichwrap=b,s,<,>,[,],~
 
 " Open Vim internal help by K command
 set keywordprg=:Ggrep
@@ -155,9 +158,6 @@ set keywordprg=:Ggrep
 if !exists('loaded_matchit')
   runtime macros/matchit.vim
 endif
-
-" 全角記号文字の幅を設定
-set ambiwidth=double
 
 " Open grep results in the quickfix-window
 autocmd QuickFixCmdPost *grep* belowright cwindow
