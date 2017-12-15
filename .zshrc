@@ -56,5 +56,7 @@ if [ $(uname) = "Darwin" ]; then
     tput bel
     osascript -e 'display notification "Processes are done." with title "Back To Working!"'
   }
+
+  alias ssaver='open -a ScreenSaverEngine'
 fi
 alias dn=display_notification
