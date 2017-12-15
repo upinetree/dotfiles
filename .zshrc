@@ -58,5 +58,11 @@ if [ $(uname) = "Darwin" ]; then
   }
   alias dn=display_notification
 
+  mute_volume() {
+    osascript -e "set volume output muted true"
+    osascript -e "get volume settings"
+  }
+  alias vmute=mute_volume
+
   alias ssaver='open -a ScreenSaverEngine'
 fi
