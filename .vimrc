@@ -243,7 +243,7 @@ autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=darkgrey ctermbg=237
 " let g:ale_statusline_format = ['⨉ %d', '⚠ %d', '⬥ ok']
 let g:ale_sign_warning = '⚠'
 let g:ale_sign_error = '✗'
-let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%/%code%]'
 let g:ale_lint_delay = 3000
 
 let g:ale_fixers = {
