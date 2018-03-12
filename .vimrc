@@ -265,6 +265,11 @@ let g:lightline = {
 \     ['linter_warnings', 'linter_errors', 'linter_ok'],
 \   ]
 \ },
+\ 'inactive': {
+\   'left': [
+\     ['relativepath', 'modified']
+\   ]
+\ },
 \ 'component_expand': {
 \   'linter_warnings': 'LightlineLinterWarnings',
 \   'linter_errors': 'LightlineLinterErrors',
