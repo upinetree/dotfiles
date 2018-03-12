@@ -41,6 +41,11 @@ if [ -d ~/.nodenv ]; then
   eval "$(nodenv init -)"
 fi
 
+# pyenv
+if [ -d ~/.pyenv ]; then
+  eval "$(pyenv init -)"
+fi
+
 # compinit
 which brew > /dev/null && fpath=($(brew --prefix)/share/zsh/site-functions $fpath) # from Homebrew
 autoload -U compinit
