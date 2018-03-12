@@ -1,9 +1,17 @@
+# System
 .DS_Store
-*.swp
-*.swo
 u8
+
+# Bundler
 .bundle
 vendor/bundle
 vendor/bundler
+
+# Editor
 *.sublime-project
 *.sublime-workspace
+*.swo
+*.swp
+
+# Project
+localscript
