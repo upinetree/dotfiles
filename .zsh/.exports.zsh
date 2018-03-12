@@ -14,9 +14,6 @@ if [ $(uname) = "Darwin" ]; then
   export RUBY_CONFIGURE_OPTS="--with-opt-dir=`brew --prefix openssl`"
 fi
 
-# nodebrew
-export PATH=$HOME/.nodebrew/current/bin:$PATH
-
 # go
 export GOPATH=$HOME/.go
 export PATH=$PATH:$GOPATH/bin

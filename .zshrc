@@ -36,6 +36,11 @@ if [ -d ~/.rbenv ]; then
   source ~/.rbenv/completions/rbenv.zsh
 fi
 
+# nodenv
+if [ -d ~/.nodenv ]; then
+  eval "$(nodenv init -)"
+fi
+
 # compinit
 which brew > /dev/null && fpath=($(brew --prefix)/share/zsh/site-functions $fpath) # from Homebrew
 autoload -U compinit
