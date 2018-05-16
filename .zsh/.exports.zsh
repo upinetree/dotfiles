@@ -14,6 +14,9 @@ if [ $(uname) = "Darwin" ]; then
   export RUBY_CONFIGURE_OPTS="--with-opt-dir=`brew --prefix openssl`"
 fi
 
+# python
+export PATH=$HOME/.local/bin:$PATH
+
 # go
 export GOPATH=$HOME/.go
 export PATH=$PATH:$GOPATH/bin
