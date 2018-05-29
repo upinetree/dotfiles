@@ -1,6 +1,7 @@
 # System
 .DS_Store
 u8
+-
 
 # Bundler
 .bundle
@@ -12,6 +13,7 @@ vendor/bundler
 *.sublime-workspace
 *.swo
 *.swp
+.vscode
 
 # Project
 localscript
