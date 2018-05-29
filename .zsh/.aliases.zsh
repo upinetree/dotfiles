@@ -4,6 +4,7 @@ alias reload='source ~/.zshrc'
 
 # File systems
 alias cdg='cd -G' # use enhancd
+alias dirs='dirs -v'
 alias df='df -h'
 alias du='du -h'
 alias du1='du -h -d1'
