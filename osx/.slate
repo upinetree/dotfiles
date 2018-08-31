@@ -49,7 +49,7 @@ bind 2:${pushkey} focus 'Google Chrome'
 bind 3:${pushkey} focus 'Code'
 bind 8:${pushkey} focus 'Airmail'
 bind 9:${pushkey} focus 'Slack'
-bind 0:${pushkey} focus 'Quiver'
+bind 0:${pushkey} focus 'Notion'
 
 # Window Hints
 bind esc:${pushkey} hint
