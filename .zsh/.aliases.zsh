@@ -40,4 +40,3 @@ alias ni='nicorepo i'
 alias v='vim'
 alias vag='vagrant'
 alias vssh='vagrant ssh'
-alias kill-spring="ps ax | grep 'spring server' | grep -v grep | cut -f1 -d' ' | xargs kill"
