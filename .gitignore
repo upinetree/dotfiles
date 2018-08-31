@@ -15,5 +15,5 @@ vendor/bundler
 *.swp
 .vscode
 
-# Project
-localscript
+# Project local
+__bin
