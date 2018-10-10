@@ -17,3 +17,4 @@ vendor/bundler
 
 # Project local
 __bin
+__data
