@@ -51,7 +51,6 @@ listup_dotfiles() {
     "~/.dotfiles/.zsh/.zplug.zsh     ~/.zsh/.zplug.zsh"
     "~/.dotfiles/.zsh/.oh-my-zsh.zsh ~/.zsh/.oh-my-zsh.zsh"
     "~/.dotfiles/.zshrc              ~/.zshrc"
-    "~/.dotfiles/bin/login-shell     ~/bin/login-shell"
   )
 
   if [ "$PLATFORM" = "osx" ]; then
