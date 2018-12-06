@@ -57,8 +57,14 @@ zstyle ':completion:*' use-cache yes
 # 環境依存の追加設定はここに定義（上書きできるよう最後に読み込む）
 [ -f ~/.env.zsh ] && source ~/.env.zsh
 
-# OSX 固有
+# Functions
 #------------------
+movtogif() {
+  ffmpeg -i "$1" -vf scale=800:-1 -r 10 -f image2pipe -vcodec ppm - |\
+  convert -delay 10 -layers Optimize -loop 0 - "${1%.*}.gif"
+}
+
+# OSX 固有
 if [ $(uname) = "Darwin" ]; then
   # 任意のコマンドが終わったら通知
   display_notification() {
@@ -77,6 +83,8 @@ if [ $(uname) = "Darwin" ]; then
   alias ssaver='open -a ScreenSaverEngine'
 fi
 
+# Auto added...
+#------------------
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/tmatsumoto/google-cloud-sdk/path.zsh.inc' ]; then source '/Users/tmatsumoto/google-cloud-sdk/path.zsh.inc'; fi
 
