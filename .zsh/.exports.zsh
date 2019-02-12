@@ -42,8 +42,9 @@ export LESSCHARSET=utf-8
 export CLICOLOR=1
 export LSCOLORS=DxGxcxdxCxegedabagacad
 
-# source-highlight
-export LESS='-R'
+# less options
+export LESS='--no-init --quit-if-one-screen --RAW-CONTROL-CHARS --LONG-PROMPT'
+# Use source-highlight for less
 export LESSOPEN='| /usr/local/bin/src-hilite-lesspipe.sh %s'
 
 # Don't put duplicate lines in the history.
