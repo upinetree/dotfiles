@@ -29,6 +29,9 @@ setopt share_history
 
 # Miscs
 #------------------
+# for safe redirect
+set -o noclobber
+
 # rbenv
 if [ -d ~/.rbenv ]; then
   export PATH=$HOME/.rbenv/bin:$PATH
