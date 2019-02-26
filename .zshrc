@@ -2,15 +2,6 @@
 # fzf がキーバインドを設定する前に読み込むこと
 bindkey -e
 
-# Sources
-#------------------
-[ -d ~/.oh-my-zsh ] && source ~/.zsh/.oh-my-zsh.zsh
-[ -d ~/.zplug ]     && source ~/.zsh/.zplug.zsh
-[ -f ~/.fzf.zsh ]   && source ~/.fzf.zsh
-
-source ~/.zsh/.exports.zsh
-source ~/.zsh/.aliases.zsh
-
 # Histories
 #------------------
 export HISTFILE=${HOME}/.zsh_history
@@ -49,11 +40,6 @@ if [ -d ~/.pyenv ]; then
   eval "$(pyenv init -)"
 fi
 
-# compinit
-# TODO: only call compinit once
-autoload -U compinit
-compinit -u
-
 # completions
 zstyle ':completion:*' use-cache yes
 
@@ -85,6 +71,17 @@ if [ $(uname) = "Darwin" ]; then
 
   alias ssaver='open -a ScreenSaverEngine'
 fi
+
+# Sources
+#------------------
+source ~/.zsh/.exports.zsh
+source ~/.zsh/.aliases.zsh
+
+[ -f ~/.fzf.zsh ]   && source ~/.fzf.zsh
+# NOTE: プラグインマネージャは最後に呼ぶ
+# 内部で compinit が実行されるので、.zshrc の他の部分で重複して呼ばないようにするため
+[ -d ~/.oh-my-zsh ] && source ~/.zsh/.oh-my-zsh.zsh
+[ -d ~/.zplug ]     && source ~/.zsh/.zplug.zsh
 
 # Auto added...
 #------------------
