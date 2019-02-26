@@ -34,7 +34,6 @@ setopt share_history
 if [ -d ~/.rbenv ]; then
   export PATH=$HOME/.rbenv/bin:$PATH
   eval "$(rbenv init -)"
-  source ~/.rbenv/completions/rbenv.zsh
 fi
 
 # nodenv
