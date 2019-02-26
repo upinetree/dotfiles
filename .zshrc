@@ -29,21 +29,34 @@ setopt share_history
 
 # **envs
 #------------------
-# TODO: Lazy load? (loading them every time cause some performance issue)
 # rbenv
 if [ -d ~/.rbenv ]; then
-  export PATH=$HOME/.rbenv/bin:$PATH
-  eval "$(rbenv init -)"
+  export PATH="$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH"
+  function rbenv() {
+    unset -f rbenv
+    eval "$(command rbenv init -)"
+    rbenv "$@"
+  }
 fi
 
 # nodenv
 if [ -d ~/.nodenv ]; then
-  eval "$(nodenv init -)"
+  export PATH="$HOME/.nodenv/bin:$HOME/.nodenv/shims:$PATH"
+  function nodenv() {
+    unset -f nodenv
+    eval "$(command nodenv init -)"
+    nodenv "$@"
+  }
 fi
 
 # pyenv
 if [ -d ~/.pyenv ]; then
-  eval "$(pyenv init -)"
+  export PATH="$HOME/.pyenv/bin:$HOME/.pyenv/shims:$PATH"
+  function pyenv() {
+    unset -f pyenv
+    eval "$(command pyenv init -)"
+    pyenv "$@"
+  }
 fi
 
 # Functions
