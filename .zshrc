@@ -50,7 +50,7 @@ if [ -d ~/.pyenv ]; then
 fi
 
 # compinit
-which brew > /dev/null && fpath=($(brew --prefix)/share/zsh/site-functions $fpath) # from Homebrew
+# TODO: only call compinit once
 autoload -U compinit
 compinit -u
 
