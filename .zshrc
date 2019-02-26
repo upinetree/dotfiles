@@ -1,6 +1,14 @@
+# Operations
+#------------------
 # ZLE は emacs モード。vi モードはまだ慣れないので
 # fzf がキーバインドを設定する前に読み込むこと
 bindkey -e
+
+# for safe redirect
+set -o noclobber
+
+# completions
+zstyle ':completion:*' use-cache yes
 
 # Histories
 #------------------
@@ -18,11 +26,9 @@ setopt hist_save_no_dups
 # 複数端末感での共有とタイムスタンプ
 setopt share_history
 
-# Miscs
+# **envs
 #------------------
-# for safe redirect
-set -o noclobber
-
+# TODO: Lazy load? (loading them every time cause some performance issue)
 # rbenv
 if [ -d ~/.rbenv ]; then
   export PATH=$HOME/.rbenv/bin:$PATH
@@ -39,12 +45,6 @@ fi
 if [ -d ~/.pyenv ]; then
   eval "$(pyenv init -)"
 fi
-
-# completions
-zstyle ':completion:*' use-cache yes
-
-# 環境依存の追加設定はここに定義（上書きできるよう最後に読み込む）
-[ -f ~/.env.zsh ] && source ~/.env.zsh
 
 # Functions
 #------------------
@@ -77,7 +77,11 @@ fi
 source ~/.zsh/.exports.zsh
 source ~/.zsh/.aliases.zsh
 
-[ -f ~/.fzf.zsh ]   && source ~/.fzf.zsh
+# 環境依存の追加設定はここに定義（上書きできるよう最後に読み込む）
+[ -f ~/.env.zsh ] && source ~/.env.zsh
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # NOTE: プラグインマネージャは最後に呼ぶ
 # 内部で compinit が実行されるので、.zshrc の他の部分で重複して呼ばないようにするため
 [ -d ~/.oh-my-zsh ] && source ~/.zsh/.oh-my-zsh.zsh
