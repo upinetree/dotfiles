@@ -40,3 +40,4 @@ alias ni='nicorepo i'
 alias v='vim'
 alias vag='vagrant'
 alias vssh='vagrant ssh'
+alias dc='docker-compose' # NOTE: overrids dc command
