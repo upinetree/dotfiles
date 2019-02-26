@@ -9,6 +9,7 @@ set -o noclobber
 
 # completions
 zstyle ':completion:*' use-cache yes
+zstyle ':completion:*:default' menu select=2
 
 # Histories
 #------------------
