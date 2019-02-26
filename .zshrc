@@ -83,6 +83,14 @@ source ~/.zsh/.aliases.zsh
 [ -d ~/.oh-my-zsh ] && source ~/.zsh/.oh-my-zsh.zsh
 [ -d ~/.zplug ]     && source ~/.zsh/.zplug.zsh
 
+# Profiling
+#------------------
+# NOTE: zprof を以下のコマンドで有効化すると表示される
+# echo "zmodload zsh/zprof && zprof" > ~/.zshenv
+if (which zprof > /dev/null 2>&1) ;then
+  zprof
+fi
+
 # Auto added...
 #------------------
 # The next line updates PATH for the Google Cloud SDK.
