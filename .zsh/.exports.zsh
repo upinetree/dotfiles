@@ -10,8 +10,9 @@ export PGDATA=/usr/local/var/postgres
 # ruby build
 export CC=clang
 if [ $(uname) = "Darwin" ]; then
-  export CONFIGURE_OPTS="--with-opt-dir=`brew --prefix openssl`"
-  export RUBY_CONFIGURE_OPTS="--with-opt-dir=`brew --prefix openssl`"
+  # path from `brew --prefix openssl`
+  export CONFIGURE_OPTS="--with-opt-dir=/usr/local/opt/openssl"
+  export RUBY_CONFIGURE_OPTS="--with-opt-dir=/usr/local/opt/openssl"
 fi
 
 # python
@@ -22,7 +23,8 @@ export GOPATH=$HOME/.go
 export PATH=$PATH:$GOPATH/bin
 
 # yarn
-type yarn &> /dev/null && export PATH="$PATH:`yarn global bin`"
+# path from `yarn global bin`
+type yarn &> /dev/null && export PATH="$PATH:/usr/local/bin"
 
 # enhancd
 export ENHANCD_HOOK_AFTER_CD=pwd
