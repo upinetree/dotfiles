@@ -43,6 +43,7 @@ listup_dotfiles() {
     "~/.dotfiles/.gemrc              ~/.gemrc"
     "~/.dotfiles/.gitconfig          ~/.gitconfig"
     "~/.dotfiles/.gitignore          ~/.gitignore"
+    "~/.dotfiles/.tigrc              ~/.tigrc"
     "~/.dotfiles/.tmux.conf          ~/.tmux.conf"
     "~/.dotfiles/.vim/colors         ~/.vim/colors"
     "~/.dotfiles/.vimrc              ~/.vimrc"

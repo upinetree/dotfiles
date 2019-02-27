@@ -125,7 +125,7 @@ if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
     brew tap caskroom/homebrew-versions
 
-    brew install chromedriver git go hub nodenv openssl pyenv readline source-highlight the_silver_searcher tmux tree vim watch yarn zsh
+    brew install chromedriver git git-now go hub nodenv openssl pyenv readline source-highlight the_silver_searcher tig tmux tree vim watch yarn zsh
     brew cask install dropbox iterm2 keepassx licecap skitch slate
   fi
 fi
