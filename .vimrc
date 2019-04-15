@@ -66,7 +66,15 @@ nmap     <Space>u [unite]
 
 " Edit
 inoremap <C-L> <ESC>
+inoremap <silent> jj <ESC>
+inoremap <silent> っｊ <ESC>
 vnoremap <C-L> <ESC>
+
+" IME
+nnoremap あ a
+nnoremap い i
+nnoremap う u
+nnoremap お o
 
 " File, Window, Tab
 nnoremap <Space>w :<C-u>w<CR>
