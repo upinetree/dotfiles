@@ -154,7 +154,7 @@ set synmaxcol=300
 
 " System
 set belloff=all
-set clipboard=unnamed,autoselect
+set clipboard=unnamed
 
 " Editor
 set autoindent
