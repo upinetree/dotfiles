@@ -20,7 +20,7 @@ alias rm='rm -i'
 alias g='git'
 alias gadp='git adp'
 alias gci='git ci'
-alias gco='git co'
+alias gco='git branch -a | fzf | xargs git checkout'
 alias gd='git df'
 alias gdc='git dfc'
 alias gl='git lg'
@@ -41,3 +41,7 @@ alias v='vim'
 alias vag='vagrant'
 alias vssh='vagrant ssh'
 alias dc='docker-compose' # NOTE: overrids dc command
+
+sshf() {
+  grep -w Host ~/.ssh/config | awk '{print $2}' | fzf | xargs -o -n 1 ssh
+}
