@@ -13,6 +13,7 @@ vendor/bundler
 *.sublime-workspace
 *.swo
 *.swp
+Session.vim
 .vscode
 
 # Project local
