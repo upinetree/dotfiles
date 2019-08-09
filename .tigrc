@@ -4,3 +4,5 @@ bind blob    L !git log -p %(commit) -- %(file)
 bind main R !git rebase -i %(commit)
 bind diff R !git rebase -i %(commit)
 bind refs R !git rebase -i %(branch)
+
+bind generic H !@sh -c "printf %(commit) | pbcopy"
