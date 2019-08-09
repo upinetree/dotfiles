@@ -78,6 +78,7 @@ nnoremap う u
 nnoremap お o
 
 " File, Window, Tab
+nnoremap QQ :<C-u>q!<CR>
 nnoremap <Space>w :<C-u>w<CR>
 nnoremap <Space>q :<C-u>q<CR>
 nnoremap <Space>Q :<C-u>bd<CR>

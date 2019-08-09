@@ -21,10 +21,14 @@ alias g='git'
 alias gadp='git adp'
 alias gci='git ci'
 alias gco='git branch -a | fzf | xargs git checkout'
+alias gct='git tag | fzf | xargs git checkout'
 alias gd='git df'
 alias gdc='git dfc'
+alias gf='git ft'
 alias gl='git lg'
+alias gp='git pull'
 alias gs='git st'
+alias t='tig'
 
 # DBs
 alias my="mysql"
