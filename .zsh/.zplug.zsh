@@ -6,7 +6,10 @@ zplug "zsh-users/zsh-syntax-highlighting"
 zplug "zsh-users/zsh-history-substring-search"
 zplug "b4b4r07/enhancd", use:init.sh
 
-zplug 'dracula/zsh', as:theme
+# zplug 'dracula/zsh', as:theme
+# zplug "denysdovhan/spaceship-prompt", use:spaceship.zsh, from:github, as:theme
+zplug "mafredri/zsh-async"
+zplug "sindresorhus/pure", use:pure.zsh, as:theme
 
 # Install plugins if there are plugins that have not been installed
 if ! zplug check --verbose; then
