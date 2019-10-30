@@ -49,3 +49,10 @@ alias dc='docker-compose' # NOTE: overrids dc command
 sshf() {
   grep -w Host ~/.ssh/config | awk '{print $2}' | fzf | xargs -o -n 1 ssh
 }
+
+gwt() {
+  WT_DIR="tmp/worktree"
+  GIT_CDUP_DIR=`git rev-parse --show-toplevel`
+  git worktree add ${GIT_CDUP_DIR}/${WT_DIR}/$1 -b $1
+  cd ${GIT_CDUP_DIR}/${WT_DIR}/$1
+}
