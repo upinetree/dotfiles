@@ -11,6 +11,13 @@ set -o noclobber
 zstyle ':completion:*' use-cache yes
 zstyle ':completion:*:default' menu select=2
 
+# word split chars
+# ctrl-w などの動作に影響する
+autoload -Uz select-word-style
+select-word-style default
+zstyle ':zle:*' word-chars ' /=;:@{}[]()<>,.|'
+zstyle ':zle:*' word-style unspecified
+
 # Histories
 #------------------
 export HISTFILE=${HOME}/.zsh_history
