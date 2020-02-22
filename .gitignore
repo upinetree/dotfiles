@@ -3,10 +3,12 @@
 u8
 -
 
-# Bundler
+# Ruby
 .bundle
 vendor/bundle
 vendor/bundler
+.byebug_history
+.irb_history
 
 # Editor
 *.sublime-project
@@ -15,6 +17,7 @@ vendor/bundler
 *.swp
 Session.vim
 .vscode
+TAGS
 
 # Project local
 __bin
