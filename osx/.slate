@@ -10,28 +10,13 @@ alias pushkey alt
 alias meh alt;shift;ctrl
 alias winkey alt;shift
 
-# Resize Bindings
-# bind right:alt       resize +10% +0
-# bind left:alt        resize -10% +0
-# bind up:alt          resize +0   -10%
-# bind down:alt        resize +0   +10%
-# bind right:ctrl;alt  resize -10% +0 bottom-right
-# bind left:ctrl;alt   resize +10% +0 bottom-right⁄
-# bind up:ctrl;alt     resize +0   +10% bottom-right
-# bind down:ctrl;alt   resize +0   -10% bottom-right
-
 # Push Bindings
 bind l:${pushkey} push right bar-resize:screenSizeX/2
 bind h:${pushkey} push left  bar-resize:screenSizeX/2+5 # overwrap to switch the focus with the behind right window.
 bind k:${pushkey} push up    bar-resize:screenSizeY/2
 bind j:${pushkey} push down  bar-resize:screenSizeY/2
 bind f:${pushkey} push up    bar-resize:screenSizeX
-
-# Nudge Bindings
-# bind right:shift;alt nudge +10% +0
-# bind left:shift;alt  nudge -10% +0
-# bind up:shift;alt    nudge +0   -10%
-# bind down:shift;alt  nudge +0   +10%
+bind m:cmd        push up    bar-resize:screenSizeX # macOS の Dock にしまう操作の上書き
 
 # Throw Bindings
 bind 1:${winkey} throw 0 resize
@@ -55,6 +40,7 @@ bind 9:${pushkey} focus 'Notion'
 
 # Window Hints
 bind esc:${pushkey} hint
+
 
 ########################
 # for 4 rows keyboard
