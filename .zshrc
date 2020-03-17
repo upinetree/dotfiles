@@ -36,6 +36,9 @@ setopt share_history
 
 # **envs
 #------------------
+# direnv
+eval "$(direnv hook zsh)"
+
 # rbenv
 if [ -d ~/.rbenv ]; then
   export PATH="$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH"
