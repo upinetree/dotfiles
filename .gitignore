@@ -22,3 +22,4 @@ TAGS
 # Project local
 __bin
 __data
+.envrc
