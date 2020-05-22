@@ -29,6 +29,9 @@ type yarn &> /dev/null && export PATH="$PATH:/usr/local/bin"
 # enhancd
 export ENHANCD_HOOK_AFTER_CD=pwd
 
+# ripgrep
+export RIPGREP_CONFIG_PATH=~/.ripgreprc
+
 # Shell Options
 #------------------
 
