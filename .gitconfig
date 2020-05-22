@@ -25,30 +25,30 @@
 	helper = osxkeychain
 
 [alias]
-  st = status -sbu
+  # branch manipulation
+  br = branch
+  sw = switch
+  re = restore
   ft = fetch
   co = checkout
   cob = checkout -b
-  br = branch
+  br-clean = "!git branch --merged | grep -v 'master' | xargs git branch -d"
 
-  # add
+  # snapshotting
+  st = status -sbu
   ad = add
   adp = add -p
   ada = add -A
-
-  # commit
   ci = commit -v
   cm = commit -m
   cam = commit --amend -v
 
-  # push
+  # sharing
   pushf = push --force-with-lease
 
-  # diff
+  # inspection
   df = diff
   dfc = diff --cached
-
-  # log / show
   lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   lga = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
   ls = log --stat
@@ -56,7 +56,6 @@
   sh = show --color
 
   # hub
-  pr = pull-request
   see = browse
   openpr = "!f() { hub browse -- `git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1 | cut -f5 -d' ' | sed -e 's%#%pull/%'`; }; f"
 
