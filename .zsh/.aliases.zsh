@@ -46,6 +46,10 @@ alias vag='vagrant'
 alias vssh='vagrant ssh'
 alias dc='docker-compose' # NOTE: overrids dc command
 
+d() {
+  diff -u "$@" | delta
+}
+
 sshf() {
   grep -w Host ~/.ssh/config | awk '{print $2}' | fzf | xargs -o -n 1 ssh
 }
