@@ -15,6 +15,8 @@ if dein#load_state('~/.vim/bundle')
   call dein#add('Shougo/dein.vim')
 
   call dein#add('AndrewRadev/vim-eco')
+  call dein#add('ctrlpvim/ctrlp.vim')
+  call dein#add('ivalkeen/vim-ctrlp-tjump')
   call dein#add('Shougo/neomru.vim')
   call dein#add('Shougo/neosnippet-snippets')
   call dein#add('Shougo/neosnippet.vim')
@@ -29,6 +31,7 @@ if dein#load_state('~/.vim/bundle')
   call dein#add('hashivim/vim-terraform')
   call dein#add('itchyny/lightline.vim')
   call dein#add('leafgarland/typescript-vim')
+  call dein#add('mattn/ctrlp-matchfuzzy')
   call dein#add('maxmellon/vim-jsx-pretty')
   call dein#add('nathanaelkane/vim-indent-guides')
   call dein#add('ntpeters/vim-better-whitespace')
@@ -85,9 +88,11 @@ nnoremap <Space>h <C-w>h
 nnoremap <Space>j <C-w>j
 nnoremap <Space>k <C-w>k
 nnoremap <Space>l <C-w>l
-nnoremap <C-n> gt
-nnoremap <C-p> gT
+nnoremap <Tab> gt
+nnoremap <S-Tab> gT
 nnoremap <silent> <Space>m :<C-u>call <SID>MoveToNewTab()<CR>
+nnoremap <c-]> :CtrlPtjump<cr>
+vnoremap <c-]> :CtrlPtjumpVisual<cr>
 function! s:MoveToNewTab()
   tab split
   tabprevious
@@ -111,8 +116,6 @@ vmap ` S`
 
 " Unite
 nnoremap <silent> [unite]u :<C-u>Unite buffer file_mru<CR>
-nnoremap <silent> [unite]g :<C-u>Unite file_rec/git:--cached:--others:--exclude-standard<CR>
-nnoremap <silent> [unite]a :<C-u>Unite file_rec/async<CR>
 nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=register register<CR>
 nnoremap <silent> [unite]o :<C-u>Unite outline<CR>
 nnoremap <silent> [unite]h :<C-u>Unite help<CR>
@@ -310,3 +313,9 @@ function! LightlineLinterOK() abort
 endfunction
 
 autocmd User ALELint call lightline#update()
+
+
+"-------------------------------------------------
+" CtrlP
+let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
+let g:ctrlp_match_func = {'match': 'ctrlp_matchfuzzy#matcher'}
