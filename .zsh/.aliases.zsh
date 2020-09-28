@@ -21,6 +21,7 @@ alias g='git'
 alias gadp='git adp'
 alias gci='git ci'
 alias gco='git branch -a | fzf | xargs git checkout'
+alias gsw='git branch | fzf | xargs git switch'
 alias gct='git tag | fzf | xargs git checkout'
 alias gd='git df'
 alias gdc='git dfc'
@@ -28,6 +29,7 @@ alias gf='git ft'
 alias gl='git lg'
 alias gp='git pull'
 alias gs='git st'
+alias gm='git switch master'
 alias t='tig'
 
 # DBs
@@ -59,4 +61,8 @@ gwt() {
   GIT_CDUP_DIR=`git rev-parse --show-toplevel`
   git worktree add ${GIT_CDUP_DIR}/${WT_DIR}/$1 -b $1
   cd ${GIT_CDUP_DIR}/${WT_DIR}/$1
+}
+
+http-status-code() {
+  ruby -rrack -e 'puts Rack::Utils::HTTP_STATUS_CODES[ARGV[0].to_i]' -- $1
 }
