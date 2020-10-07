@@ -40,18 +40,17 @@ link_all() {
 listup_dotfiles() {
   export DOTFILE_MAPS
   DOTFILE_MAPS=(
-    "~/.dotfiles/.gemrc              ~/.gemrc"
-    "~/.dotfiles/.gitconfig          ~/.gitconfig"
-    "~/.dotfiles/.gitignore          ~/.gitignore"
-    "~/.dotfiles/.tigrc              ~/.tigrc"
-    "~/.dotfiles/.tmux.conf          ~/.tmux.conf"
-    "~/.dotfiles/.vim/colors         ~/.vim/colors"
-    "~/.dotfiles/.vimrc              ~/.vimrc"
-    "~/.dotfiles/.zsh/.aliases.zsh   ~/.zsh/.aliases.zsh"
-    "~/.dotfiles/.zsh/.exports.zsh   ~/.zsh/.exports.zsh"
-    "~/.dotfiles/.zsh/.zplug.zsh     ~/.zsh/.zplug.zsh"
-    "~/.dotfiles/.zsh/.oh-my-zsh.zsh ~/.zsh/.oh-my-zsh.zsh"
-    "~/.dotfiles/.zshrc              ~/.zshrc"
+    "~/.dotfiles/.gemrc            ~/.gemrc"
+    "~/.dotfiles/.gitconfig        ~/.gitconfig"
+    "~/.dotfiles/.gitignore        ~/.gitignore"
+    "~/.dotfiles/.tigrc            ~/.tigrc"
+    "~/.dotfiles/.tmux.conf        ~/.tmux.conf"
+    "~/.dotfiles/.vim/colors       ~/.vim/colors"
+    "~/.dotfiles/.vimrc            ~/.vimrc"
+    "~/.dotfiles/.zsh/.aliases.zsh ~/.zsh/.aliases.zsh"
+    "~/.dotfiles/.zsh/.exports.zsh ~/.zsh/.exports.zsh"
+    "~/.dotfiles/.zsh/.zplug.zsh   ~/.zsh/.zplug.zsh"
+    "~/.dotfiles/.zshrc            ~/.zshrc"
   )
 
   if [ "$PLATFORM" = "osx" ]; then
