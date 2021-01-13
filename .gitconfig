@@ -27,23 +27,24 @@
 
 [alias]
   # branch manipulation
-  br = branch
-  sw = switch
-  re = restore
-  ft = fetch
+  b = branch
   co = checkout
-  cob = checkout -b
+  sw = switch
   m = switch master
-  br-clean = "!git branch --merged | grep -v 'master' | xargs git branch -d"
+  f = fetch
+  fm = fetch origin master
+  p = pull
+  b-clean = "!git branch --merged | grep -v 'master' | xargs git branch -d"
+  rebase-latest = "!git fm && git rebase origin/master"
 
   # snapshotting
   st = status -sbu
   ad = add
-  adp = add -p
-  ada = add -A
+  a = add -p
   ci = commit -v
   cm = commit -m
-  cam = commit --amend -v
+  ca = commit --amend -v
+  res = restore
 
   # sharing
   pushf = push --force-with-lease
