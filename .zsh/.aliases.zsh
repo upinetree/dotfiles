@@ -47,6 +47,7 @@ alias v='vim'
 alias vag='vagrant'
 alias vssh='vagrant ssh'
 alias dc='docker-compose' # NOTE: overrids dc command
+alias laws='aws --profile=local --endpoint-url=http://localhost:4566'
 
 d() {
   diff -u "$@" | delta
