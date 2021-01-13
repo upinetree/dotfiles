@@ -1,4 +1,5 @@
 export PATH=$HOME/bin:$PATH
+type brew &> /dev/null && export PATH="/usr/local/sbin:$PATH"
 
 # git
 # NOTE: diff-highlightが後々デフォルトになったら削除
@@ -21,10 +22,6 @@ export PATH=$HOME/.local/bin:$PATH
 # go
 export GOPATH=$HOME/.go
 export PATH=$PATH:$GOPATH/bin
-
-# yarn
-# path from `yarn global bin`
-type yarn &> /dev/null && export PATH="$PATH:/usr/local/bin"
 
 # enhancd
 export ENHANCD_HOOK_AFTER_CD=pwd
