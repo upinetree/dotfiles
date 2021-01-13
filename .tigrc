@@ -5,4 +5,4 @@ bind main B !>git rebase -i %(commit)
 bind diff B !>git rebase -i %(commit)
 bind refs B !>git rebase -i %(branch)
 
-bind generic H @sh -c "printf %(commit) | pbcopy"
+bind generic Y @sh -c "printf %(commit) | pbcopy"
