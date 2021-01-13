@@ -20,8 +20,8 @@ bind j:${pushkey} push down  bar-resize:screenSizeY/2
 bind f:${pushkey} push up    bar-resize:screenSizeX
 
 # Throw Bindings
-bind left:${pushkey} throw 0 resize
-bind right:${pushkey} throw 1 resize
+bind 1:${pushkey} throw 0 resize
+bind 2:${pushkey} throw 1 resize
 
 # Focus Bindings
 # bind right:${pushkey} focus right
@@ -31,10 +31,9 @@ bind right:${pushkey} throw 1 resize
 bind tab:${pushkey} focus behind
 
 # Applications
-bind 1:${pushkey} focus 'Google Chrome'
-bind 2:${pushkey} focus 'Firefox'
-bind 3:${pushkey} focus 'Code'
-bind 7:${pushkey} focus 'Airmail'
+bind 3:${pushkey} focus 'Google Chrome'
+bind 4:${pushkey} focus 'Code'
+bind 7:${pushkey} focus 'HEY'
 bind 8:${pushkey} focus 'Slack'
 bind 9:${pushkey} focus 'Notion'
 
@@ -52,9 +51,8 @@ bind j:${meh} push down  bar-resize:screenSizeY/2
 bind f:${meh} push up    bar-resize:screenSizeX
 
 bind q:${meh} focus 'Google Chrome'
-bind w:${meh} focus 'Firefox'
-bind e:${meh} focus 'Code'
-bind u:${meh} focus 'Airmail'
+bind w:${meh} focus 'Code'
+bind u:${meh} focus 'HEY'
 bind i:${meh} focus 'Slack'
 bind o:${meh} focus 'Notion'
 bind space:${meh} focus 'iTerm2'
