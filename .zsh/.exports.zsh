@@ -12,8 +12,7 @@ export PGDATA=/usr/local/var/postgres
 export CC=clang
 if [ $(uname) = "Darwin" ]; then
   # path from `brew --prefix openssl`
-  export CONFIGURE_OPTS="--with-opt-dir=/usr/local/opt/openssl"
-  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl"
+  export CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl@1.1"
 fi
 
 # python
