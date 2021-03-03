@@ -38,22 +38,27 @@
   rebase-latest = "!git fm && git rebase origin/master"
 
   # snapshotting
-  st = status -sbu
-  ad = add
+  s = status -sbu
   a = add -p
+  aa = !git add -u . && git s
+  ao = "!git ls-files --others --exclude-standard | fzf -m --preview '{ bat --style=numbers --color=always --line-range :500 {} }' | xargs git add && git s"
   ci = commit -v
   cm = commit -m
   ca = commit --amend -v
+  can = commit --amend --no-edit
+  r = reset
   res = restore
 
   # sharing
   pushf = push --force-with-lease
 
   # inspection
-  df = diff
-  dfc = diff --cached
-  lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-  lga = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
+  df = diff --color
+  dfc = diff --color --cached
+  l = log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  lg = l --graph
+  lga = lg --all
+  lm = l --merges
   ls = log --stat
   lp = log -p --color
   sh = show --color
@@ -64,6 +69,7 @@
 
 [ghq]
   root = ~/repo
+  root = ~/.go/src
 
 [pager]
 	branch = false
@@ -73,3 +79,5 @@
 
 [diff]
 	compactionHeuristic = true
+[init]
+	defaultBranch = master

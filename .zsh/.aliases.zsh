@@ -28,7 +28,7 @@ alias gdc='git dfc'
 alias gf='git fetch'
 alias gl='git lg'
 alias gp='git pull'
-alias gs='git st'
+alias gs='git s'
 alias gm='git switch master'
 alias t='tig'
 
