@@ -69,7 +69,7 @@ install_fzf() {
 }
 
 install_brew() {
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
 install_go() {
@@ -130,6 +130,22 @@ if [ "$PLATFORM" = "osx" ]; then
   fi
 fi
 
+if [ "$PLATFORM" = "linux" ]; then
+  if exists brew; then
+    log info "brew is already exists"
+  else
+    install_brew
+    result brew
+  fi
+
+  if exists delta; then
+    log info "delta is already exists"
+  else
+    curl -L https://github.com/dandavison/delta/releases/download/0.8.0/delta-0.8.0-x86_64-unknown-linux-gnu.tar.gz | tar zx --strip-components=1 -C ~/bin delta-0.8.0-x86_64-unknown-linux-gnu/delta
+    result delta
+  fi
+fi
+
 if exists zsh; then
   log info "Zsh is already exists"
 else
@@ -169,7 +185,7 @@ fi
 if exists ghq; then
   log info "ghq is already exists"
 else
-  go get github.com/motemen/ghq
+  go get github.com/x-motemen/ghq
   result ghq
 fi
 
