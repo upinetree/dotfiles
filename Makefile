@@ -6,7 +6,7 @@ help:
 	@echo "make vimperator       # setup vimperator plugins"
 	@echo "make install_packages # install packages"
 
-install: copy link install_packages
+install: link install_packages
 
 copy:
 	@bash -c "cp -f ./.bashrc ~/.bashrc"
