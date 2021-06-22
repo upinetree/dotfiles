@@ -46,7 +46,8 @@ alias ni='nicorepo i'
 alias v='vim'
 alias vag='vagrant'
 alias vssh='vagrant ssh'
-alias dc='docker-compose' # NOTE: overrids dc command
+alias dc='docker-compose' # NOTE: overrides dc command
+alias dcps='docker-compose ps'
 alias laws='aws --profile=local --endpoint-url=http://localhost:4566'
 
 d() {
