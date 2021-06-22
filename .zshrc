@@ -69,6 +69,11 @@ if [ -d ~/.pyenv ]; then
   }
 fi
 
+# rust
+if [ -d ~/.cargo ]; then
+  source $HOME/.cargo/env
+fi
+
 # Functions
 #------------------
 movtogif() {
