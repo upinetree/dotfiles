@@ -257,7 +257,9 @@ let g:ale_echo_msg_format = '[%linter%] %s [%severity%/%code%]'
 let g:ale_lint_delay = 3000
 
 let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
 \   'javascript': ['prettier', 'eslint'],
+\   'go': ['gofmt', 'goimports'],
 \}
 " let g:ale_fix_on_save = 1
 
