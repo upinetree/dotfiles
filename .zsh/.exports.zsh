@@ -9,10 +9,10 @@ export PATH=/usr/local/share/git-core/contrib/diff-highlight:$PATH
 export PGDATA=/usr/local/var/postgres
 
 # ruby build
-export CC=clang
+# export CC='clang -fdeclspec'
 if [ $(uname) = "Darwin" ]; then
   # path from `brew --prefix openssl`
-  export CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl@1.1"
+  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl"
 fi
 
 # python
