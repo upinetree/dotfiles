@@ -198,6 +198,13 @@ function! s:ruby_filetype_settings()
   setlocal keywordprg=:Ggrep
 endfunction
 
+autocmd FileType go call s:go_filetype_settings()
+function! s:go_filetype_settings()
+  setlocal tabstop=4 shiftwidth=4 softtabstop=4 noet
+  setlocal completeopt-=preview
+  setlocal keywordprg=:Ggrep
+endfunction
+
 " disable emphasis on markdown
 autocmd FileType markdown hi! def link markdownItalic Normal
 
