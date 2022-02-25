@@ -138,11 +138,8 @@ if [ "$PLATFORM" = "linux" ]; then
     result brew
   fi
 
-  if exists delta; then
-    log info "delta is already exists"
-  else
-    curl -L https://github.com/dandavison/delta/releases/download/0.8.0/delta-0.8.0-x86_64-unknown-linux-gnu.tar.gz | tar zx --strip-components=1 -C ~/bin delta-0.8.0-x86_64-unknown-linux-gnu/delta
-    result delta
+  if exists brew; then
+    brew install bat git-delta ripgrep git gh
   fi
 fi
 
