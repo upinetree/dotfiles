@@ -72,3 +72,10 @@ gwt() {
 http-status-code() {
   ruby -rrack -e 'puts Rack::Utils::HTTP_STATUS_CODES[ARGV[0].to_i]' -- $1
 }
+
+# for WSL
+if [ -n "$WSLENV" ]; then
+  alias pbcopy='win32yank.exe -i'
+  alias pbpaste='win32yank.exe -o'
+  alias v=nvim
+fi
