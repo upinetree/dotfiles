@@ -18,6 +18,7 @@ vendor/bundler
 Session.vim
 .vscode
 TAGS
+tags
 
 # Project local
 __bin

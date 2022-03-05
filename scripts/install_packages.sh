@@ -59,6 +59,7 @@ install_rbenv() {
   git clone https://github.com/rbenv/rbenv-default-gems.git ~/.rbenv/plugins/rbenv-default-gems
   git clone https://github.com/amatsuda/gem-src.git ~/.rbenv/plugins/gem-src
   git clone https://github.com/rkh/rbenv-update.git ~/.rbenv/plugins/rbenv-update
+  git clone https://github.com/tpope/rbenv-ctags.git ~/.rbenv/plugins/rbenv-ctags
 
   ln -s  ~/.dotfiles/.rbenv/default-gems ~/.rbenv/default-gems
 }
@@ -125,7 +126,7 @@ if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
     brew tap caskroom/homebrew-versions
 
-    brew install bat coreutils git-delta direnv git gh go nodenv openssl pyenv readline ripgrep source-highlight tig tmux tree vim watch yarn zsh
+    brew install bat coreutils ctags git-delta direnv git gh go nodenv openssl pyenv readline ripgrep source-highlight tig tmux tree vim watch yarn zsh
     brew install alt-tab chromedriver dropbox iterm2 keepassx kap meetingbar slate
   fi
 fi
@@ -139,7 +140,7 @@ if [ "$PLATFORM" = "linux" ]; then
   fi
 
   if exists brew; then
-    brew install bat git-delta ripgrep git gh nvim
+    brew install bat ctags git-delta ripgrep git gh nvim
   fi
 
   if [ -n "$WSLENV" ]; then
