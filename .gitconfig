@@ -10,7 +10,7 @@
   precomposeunicode = true
   quotepath = false
   editor = vim
-  pager = delta --plus-style="syntax #012800" --minus-style="syntax #340001" --syntax-theme='Dracula'
+  pager = delta
 
 [fetch]
   prune = true
@@ -79,5 +79,11 @@
 
 [diff]
 	compactionHeuristic = true
+
 [init]
 	defaultBranch = master
+
+[delta]
+  plus-style = syntax auto
+  minus-style = syntax auto
+  syntax-theme = Dracula

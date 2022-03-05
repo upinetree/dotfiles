@@ -39,7 +39,8 @@ export PAGER='less -Ou8'
 export EDITOR='vim'
 export LESSCHARSET=utf-8
 
-# ls colors
+# colors
+export COLORTERM=truecolor
 export CLICOLOR=1
 export LSCOLORS=DxGxcxdxCxegedabagacad
 
