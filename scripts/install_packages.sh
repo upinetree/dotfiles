@@ -198,7 +198,7 @@ else
   result ghq
 fi
 
-if [ -d ~/.vim/bundle ]; then
+if [ -d ~/.cache/dein ]; then
   log info "dein.vim is already exists"
 else
   install_dein
