@@ -31,14 +31,15 @@ bind 2:${pushkey} throw 1 resize
 bind tab:${pushkey} focus behind
 
 # Applications
-bind 3:${pushkey} focus 'Google Chrome'
-bind 4:${pushkey} focus 'Code'
-bind 7:${pushkey} focus 'HEY'
-bind 8:${pushkey} focus 'Slack'
-bind 9:${pushkey} focus 'Notion'
+bind 1:alt focus 'Google Chrome'
+bind 2:alt focus 'Code'
+bind 3:alt focus 'Jasper'
+bind 7:alt focus 'HEY'
+bind 8:alt focus 'Slack'
+bind 9:alt focus 'Notion'
 
 # Window Hints
-bind esc:${pushkey} hint
+bind esc:alt hint
 
 
 ########################
@@ -52,6 +53,7 @@ bind f:${meh} push up    bar-resize:screenSizeX
 
 bind q:${meh} focus 'Google Chrome'
 bind w:${meh} focus 'Code'
+bind e:${meh} focus 'Jasper'
 bind u:${meh} focus 'HEY'
 bind i:${meh} focus 'Slack'
 bind o:${meh} focus 'Notion'
