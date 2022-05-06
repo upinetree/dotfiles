@@ -69,7 +69,7 @@
 
 [ghq]
   root = ~/repo
-  root = ~/.go/src
+  root = ~/go/src
 
 [pager]
 	branch = false

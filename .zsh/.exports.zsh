@@ -19,8 +19,7 @@ fi
 export PATH=$HOME/.local/bin:$PATH
 
 # go
-export GOPATH=$HOME/.go
-export PATH=$PATH:$GOPATH/bin
+export PATH=$(go env GOPATH)/bin:$PATH
 
 # enhancd
 export ENHANCD_HOOK_AFTER_CD=pwd

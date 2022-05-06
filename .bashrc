@@ -5,5 +5,4 @@ export PATH=/usr/local/bin:$PATH
 export PATH=$HOME/bin:$PATH
 
 # golang
-export GOPATH=$HOME/.go
-export PATH=$PATH:$GOPATH/bin
+export PATH=$(go env GOPATH)/bin:$PATH
