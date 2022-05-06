@@ -79,11 +79,10 @@
 
 [diff]
 	compactionHeuristic = true
-
-[init]
-	defaultBranch = master
+  colorMoved = default
 
 [delta]
   plus-style = syntax auto
   minus-style = syntax auto
   syntax-theme = Dracula
+  navigate = true
