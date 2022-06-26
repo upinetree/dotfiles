@@ -69,8 +69,9 @@
   openpr = "!gh pr view -w"
 
 [ghq]
-  root = ~/repo
+  # ghq.root: the last one becomes primary one.
   root = ~/go/src
+  root = ~/repo
 
 [pager]
 	branch = false
