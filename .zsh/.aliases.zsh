@@ -49,6 +49,7 @@ alias vssh='vagrant ssh'
 alias dc='docker-compose' # NOTE: overrides dc command
 alias dcps='docker-compose ps'
 alias laws='aws --profile=local --endpoint-url=http://localhost:4566'
+type gsed &> /dev/null && alias sed='gsed'
 
 dhist() {
   LC_ALL=C sed -i '.bak' "/$1/d" $HISTFILE
