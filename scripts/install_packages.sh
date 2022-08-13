@@ -127,7 +127,7 @@ if [ "$PLATFORM" = "osx" ]; then
     brew tap homebrew/cask-versions
 
     brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh openssl readline ripgrep source-highlight tig tmux tree vim watch zsh
-    brew install alt-tab chromedriver dropbox iterm2 keepassx kap meetingbar slate
+    brew install alt-tab chromedriver dropbox iterm2 kap keepassx karabiner-elements meetingbar slate
   fi
 fi
 
