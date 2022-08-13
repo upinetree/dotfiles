@@ -139,6 +139,9 @@ if [ "$PLATFORM" = "osx" ]; then
 
     brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh openssl readline ripgrep source-highlight tig tree vim watch zsh
     brew install alt-tab chromedriver dropbox iterm2 kap keepassx karabiner-elements meetingbar slate 1password/tap/1password-cli
+  else
+    log error "brew command not found"
+    exit 1
   fi
 fi
 
@@ -152,6 +155,9 @@ if [ "$PLATFORM" = "linux" ]; then
 
   if exists brew; then
     brew install bat ctags git-delta ripgrep git gh nvim
+  else
+    log error "brew command not found"
+    exit 1
   fi
 
   if [ -n "$WSLENV" ]; then
