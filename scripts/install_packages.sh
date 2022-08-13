@@ -101,6 +101,17 @@ install_dein() {
   rm -fv ./installer.sh
 }
 
+install_tmux() {
+  if exists brew; then
+    brew install tmux
+  else
+    log error "Install tmux manually : https://github.com/tmux/tmux"
+  fi
+
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+  ~/.tmux/plugins/tpm/bin/install_plugins
+}
+
 result() {
   local name="$1"
   if exists $name; then
@@ -126,7 +137,7 @@ if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
     brew tap homebrew/cask-versions
 
-    brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh openssl readline ripgrep source-highlight tig tmux tree vim watch zsh
+    brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh openssl readline ripgrep source-highlight tig tree vim watch zsh
     brew install alt-tab chromedriver dropbox iterm2 kap keepassx karabiner-elements meetingbar slate 1password/tap/1password-cli
   fi
 fi
@@ -168,6 +179,13 @@ if [ -d ~/.zplug ]; then
 else
   install_zplug
   log success "zplug is deployed, Re-Login to apply it."
+fi
+
+if exists tmux; then
+  log info "tmux is already exists"
+else
+  install_tmux
+  result tmux
 fi
 
 if exists rbenv; then
