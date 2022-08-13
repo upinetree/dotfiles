@@ -36,6 +36,11 @@ setopt share_history
 
 # **envs
 #------------------
+# homebrew
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 # direnv
 eval "$(direnv hook zsh)"
 
