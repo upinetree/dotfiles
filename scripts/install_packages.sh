@@ -124,7 +124,7 @@ if [ "$PLATFORM" = "osx" ]; then
   fi
 
   if exists brew; then
-    brew tap caskroom/homebrew-versions
+    brew tap homebrew/cask-versions
 
     brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh openssl readline ripgrep source-highlight tig tmux tree vim watch zsh
     brew install alt-tab chromedriver dropbox iterm2 keepassx kap meetingbar slate
