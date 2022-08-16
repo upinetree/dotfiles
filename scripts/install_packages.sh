@@ -218,7 +218,7 @@ fi
 if exists ghq; then
   log info "ghq is already exists"
 else
-  go get github.com/x-motemen/ghq
+  go install github.com/x-motemen/ghq@latest
   result ghq
 fi
 
