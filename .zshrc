@@ -47,6 +47,7 @@ eval "$(direnv hook zsh)"
 # anyenv
 type anyenv &> /dev/null && eval "$(anyenv init -)"
 
+# NOTE: anyenv を使う環境は ~/.anyenv/envs に、そうでない環境は $HOME に配置される想定
 # rbenv
 if [ -d ~/.rbenv ]; then
   export PATH="$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH"
