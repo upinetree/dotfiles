@@ -137,7 +137,7 @@ if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
     brew tap homebrew/cask-versions
 
-    brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh openssl readline ripgrep source-highlight tig tree vim watch zsh
+    brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh jq openssl readline ripgrep source-highlight tig tree vim watch zsh
     brew install alt-tab chromedriver dropbox iterm2 kap keepassx karabiner-elements meetingbar slate 1password/tap/1password-cli
   else
     log error "brew command not found"
