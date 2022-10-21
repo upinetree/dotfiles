@@ -1,0 +1,9 @@
+#!/bin/bash
+
+command=$1
+appname=$2
+
+if [ "$command" = "focusapp" ]; then
+  yabai -m window --focus $(yabai -m query --windows | jq -r "sort_by (.display) | map(select(.app == \"$appname\")) | first.id")
+fi
+

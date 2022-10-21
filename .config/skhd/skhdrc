@@ -1,0 +1,27 @@
+# meh is (shift + alt + ctrl)
+# ref. https://github.com/koekeishiya/skhd/issues/1
+
+# move window in display
+# The grid format is <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
+meh - h : yabai -m window --grid 1:3:0:0:2:1
+meh - j : yabai -m window --grid 2:1:0:1:1:1
+meh - k : yabai -m window --grid 2:1:0:0:1:1
+meh - l : yabai -m window --grid 1:3:2:0:1:1
+meh - f : yabai -m window --grid 1:1:0:0:1:1
+
+# move window to display
+meh - left : yabai -m window --display 1 && yabai -m display --focus 1 && yabai -m window --grid 1:1:0:0:1:1
+meh - right : yabai -m window --display 2 && yabai -m display --focus 2 && yabai -m window --grid 1:1:0:0:1:1
+
+# focus behind
+# ref. https://github.com/koekeishiya/yabai/issues/113
+meh - tab : yabai -m window --focus "$(yabai -m query --windows | jq -re "sort_by(.display) | map(select(.\"is-visible\" == true and .role != \"AXUnknown\")) | reverse | nth(index(map(select(.\"has-focus\" == true))) - 1).id")"
+
+# focus apps
+meh - space : ~/.config/yabai/yabaicmd focusapp iTerm2
+meh - q     : ~/.config/yabai/yabaicmd focusapp "Google Chrome"
+meh - w     : ~/.config/yabai/yabaicmd focusapp Code
+meh - e     : ~/.config/yabai/yabaicmd focusapp Jasper
+meh - i     : ~/.config/yabai/yabaicmd focusapp Slack
+meh - o     : ~/.config/yabai/yabaicmd focusapp Notion
+

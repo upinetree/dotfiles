@@ -18,6 +18,8 @@ make_base_dirs() {
   mkdir ~/.zsh
   mkdir ~/bin
   mkdir -p ~/.config/nvim
+  mkdir -p ~/.config/yabai
+  mkdir -p ~/.config/skhd
 }
 
 unlink_all() {
@@ -61,6 +63,8 @@ listup_dotfiles() {
       "~/.dotfiles/osx/.slate                  ~/.slate"
       "~/.dotfiles/osx/.vimperatorrc           ~/.vimperatorrc"
       "~/.dotfiles/osx/bin/git-completion.bash ~/bin/git-completion.bash"
+      "~/.dotfiles/.config/skhd/skhdrc         ~/.config/skhd/skhdrc"
+      "~/.dotfiles/.config/yabai/yabaicmd      ~/.config/yabai/yabaicmd"
     )
   fi
 }

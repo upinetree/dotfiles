@@ -141,6 +141,12 @@ if [ "$PLATFORM" = "osx" ]; then
     brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh jq openssl readline ripgrep source-highlight tig tree vim watch zsh
     brew install alt-tab chromedriver dropbox iterm2 kap keepassx karabiner-elements meetingbar slate 1password/tap/1password-cli
     brew install font-myrica
+
+    brew install koekeishiya/formulae/yabai
+    brew install --head koekeishiya/formulae/skhd # https://github.com/koekeishiya/skhd/issues/206
+
+    brew services start yabai
+    brew services start skhd
   else
     log error "brew command not found"
     exit 1
