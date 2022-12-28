@@ -1,8 +1,13 @@
 bind generic L !git log -p %(commit)
 bind blob    L !git log -p %(commit) -- %(file)
 
+# rebase
 bind main B !>git rebase -i %(commit)
 bind diff B !>git rebase -i %(commit)
 bind refs B !>git rebase -i %(branch)
 
+# checkout
+bind diff C ?>git checkout %(commit)
+
+# yank commit hash
 bind generic Y @sh -c "printf %(commit) | pbcopy"
