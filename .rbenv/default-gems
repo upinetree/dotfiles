@@ -2,3 +2,4 @@ pry
 ec2ssh
 solargraph
 gem-ctags
+ripper-tags
