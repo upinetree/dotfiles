@@ -10,6 +10,10 @@ vendor/bundler
 .byebug_history
 .irb_history
 
+# Go
+go.work
+go.work.sum
+
 # Editor
 *.sublime-project
 *.sublime-workspace
