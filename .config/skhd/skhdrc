@@ -18,7 +18,8 @@ meh - right : yabai -m window --display 2 && yabai -m display --focus 2 && yabai
 meh - tab : yabai -m window --focus "$(yabai -m query --windows | jq -re "sort_by(.display) | map(select(.\"is-visible\" == true and .role != \"AXUnknown\")) | reverse | nth(index(map(select(.\"has-focus\" == true))) - 1).id")"
 
 # focus apps
-meh - space : ~/.config/yabai/yabaicmd focusapp iTerm2
+meh - space : ~/.config/yabai/yabaicmd focusapp Alacritty
+# meh - space : ~/.config/yabai/yabaicmd focusapp iTerm2
 meh - q     : ~/.config/yabai/yabaicmd focusapp "Google Chrome"
 meh - w     : ~/.config/yabai/yabaicmd focusapp Code
 meh - e     : ~/.config/yabai/yabaicmd focusapp Jasper
