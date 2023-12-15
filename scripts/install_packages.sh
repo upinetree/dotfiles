@@ -2,10 +2,6 @@ set -u
 
 . ./scripts/lib.sh
 
-set_versions() {
-  export GO_VERSION="1.16.5"
-}
-
 install_zsh() {
   case "$PLATFORM" in
     osx)
@@ -53,6 +49,7 @@ install_zplug() {
   curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 }
 
+# TODO: install via anyenv
 install_rbenv() {
   git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
   git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
@@ -74,25 +71,13 @@ install_brew() {
 }
 
 install_go() {
-  case "$PLATFORM" in
-    osx)
-      log info "go is installed in the homebrew installation phase"
-      ;;
-    linux)
-      local tar="go$GO_VERSION.linux-amd64.tar.gz"
+  if ! exists anyenv; then
+    return 1
+  fi
 
-      wget "https://storage.googleapis.com/golang/$tar"
-
-      sudo tar -C /usr/local -xf $tar
-      sudo ln -s /usr/local/go/bin/go* /usr/local/bin
-
-      rm -fv "$tar"
-      ;;
-    *)
-      log error "ERROR: Your platform is not supported"
-      return 1
-      ;;
-  esac
+  anyenv install goenv
+  goenv install latest
+  goenv rehash
 }
 
 install_dein() {
@@ -123,7 +108,6 @@ result() {
 
 # ================== Entry Point
 detect_platform
-set_versions
 
 # TODO: ファイルに分割するなりして整理する
 if [ "$PLATFORM" = "osx" ]; then
