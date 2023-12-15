@@ -1,6 +1,6 @@
 # zsh
 alias zshrc='vim ~/.zshrc'
-alias reload='source ~/.zshrc'
+alias reload='exec $SHELL -l'
 
 # File systems
 alias cdg='ghq list -p | fzf | cd'
