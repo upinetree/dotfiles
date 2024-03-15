@@ -36,7 +36,7 @@
   f = fetch
   fm = "!git fetch origin $(git main)"
   p = pull
-  b-clean = "!git branch --merged | grep -v 'master' | xargs git branch -d"
+  b-tidy = "!git branch --merged | grep -v 'master' | xargs git branch -d"
   rebase-latest = "!git fm && git rebase origin/master"
 
   # snapshotting
