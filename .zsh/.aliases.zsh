@@ -41,11 +41,9 @@ alias pg-stop='pg_ctl -D /usr/local/var/postgres stop -s -m fast'
 
 # Misc :)
 alias be='bundle exec'
+alias dev='devcontainer open'
 alias f='fg'
-alias ni='nicorepo i'
 alias v='vim'
-alias vag='vagrant'
-alias vssh='vagrant ssh'
 alias dc='docker compose' # NOTE: overrides dc command
 alias dcps='docker compose ps'
 alias laws='aws --profile=local --endpoint-url=http://localhost:4566'
