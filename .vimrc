@@ -268,8 +268,8 @@ let g:ale_fixers = {
 \}
 " let g:ale_fix_on_save = 1
 
-highlight link ALEWarningSign String
-highlight link ALEErrorSign Title
+" 背景色が見づらいので desabled
+let g:ale_set_highlights = 0
 
 "-------------------------------------------------
 " Lightline
