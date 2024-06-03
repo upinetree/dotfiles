@@ -22,7 +22,7 @@ meh - space : ~/.config/yabai/yabaicmd focusapp Alacritty
 # meh - space : ~/.config/yabai/yabaicmd focusapp iTerm2
 meh - q     : ~/.config/yabai/yabaicmd focusapp "Google Chrome"
 meh - w     : ~/.config/yabai/yabaicmd focusapp Code
-meh - e     : ~/.config/yabai/yabaicmd focusapp Jasper
+meh - e     : ~/.config/yabai/yabaicmd focusapp Arc
 meh - i     : ~/.config/yabai/yabaicmd focusapp Slack
 meh - o     : ~/.config/yabai/yabaicmd focusapp Obsidian
 
