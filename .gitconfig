@@ -35,14 +35,15 @@
   sm = "!git switch $(git main)"
   f = fetch
   fm = "!git fetch origin $(git main)"
+  fmr = "!git fm && git rebase origin/$(git main)"
   p = pull
-  b-tidy = "!git branch --merged | grep -v 'master' | xargs git branch -d"
+  b-tidy = "!git branch --merged | grep -Ev '(master|main)' | xargs git branch -d"
   rebase-latest = "!git fm && git rebase origin/master"
 
   # snapshotting
   s = status -sbu
   a = add -p
-  aa = !git add -u . && git s
+  aa = "!git ls-files --modified --others --exclude-standard | fzf -m --preview '{ git diff {} | delta --color-only }' | xargs git add && git s"
   ao = "!git ls-files --others --exclude-standard | fzf -m --preview '{ bat --style=numbers --color=always --line-range :500 {} }' | xargs git add && git s"
   ci = commit -v
   cm = commit -m
