@@ -23,6 +23,9 @@
   default = current
 	autoSetupRemote = true
 
+[merge]
+	conflictstyle = zdiff3
+
 [credential]
 	helper = osxkeychain
 
