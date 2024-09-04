@@ -12,6 +12,9 @@
   editor = vim
   pager = delta
 
+[commit]
+	verbose = true
+
 [fetch]
   prune = true
 
@@ -51,9 +54,9 @@
   a = add -p
   aa = "!git ls-files --modified --others --exclude-standard | fzf -m --preview '{ git diff {} | delta --color-only }' | xargs git add && git s"
   ao = "!git ls-files --others --exclude-standard | fzf -m --preview '{ bat --style=numbers --color=always --line-range :500 {} }' | xargs git add && git s"
-  ci = commit -v
+  ci = commit
   cm = commit -m
-  ca = commit --amend -v
+  ca = commit --amend
   can = commit --amend --no-edit
   r = reset
   res = restore
