@@ -93,6 +93,7 @@
 [diff]
 	compactionHeuristic = true
   colorMoved = default
+	algorithm = histogram
 
 [delta]
   plus-style = syntax auto
