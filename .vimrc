@@ -175,6 +175,9 @@ endif
 " Open grep results in the quickfix-window
 autocmd QuickFixCmdPost *grep* belowright cwindow
 
+" Quickfix list launch file in a new tab
+set switchbuf+=usetab,newtab
+
 "-------------------------------------------------
 " FileType settings
 
