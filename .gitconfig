@@ -45,7 +45,6 @@
   fmr = "!git fm && git rebase origin/$(git main)"
   p = pull
   b-tidy = "!git branch --merged | grep -Ev '(master|main)' | xargs git branch -d"
-  rebase-latest = "!git fm && git rebase origin/master"
 
   # snapshotting
   s = status -sbu
