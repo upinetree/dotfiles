@@ -23,6 +23,9 @@
   default = current
 	autoSetupRemote = true
 
+[rebase]
+	autostash = true # conflict がつらかったら外す
+
 [merge]
 	conflictstyle = zdiff3
 
