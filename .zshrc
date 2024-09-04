@@ -8,8 +8,11 @@ bindkey -e
 set -o noclobber
 
 # completions
+autoload -Uz compinit && compinit
 zstyle ':completion:*' use-cache yes
 zstyle ':completion:*:default' menu select=2
+zstyle ':completion::complete:make:*:targets' call-command true
+source <(docker completion zsh)
 
 # word split chars
 # ctrl-w などの動作に影響する
@@ -45,7 +48,7 @@ fi
 eval "$(direnv hook zsh)"
 
 # anyenv
-type anyenv &> /dev/null && eval "$(anyenv init -)"
+type anyenv &>/dev/null && eval "$(anyenv init -)"
 
 # NOTE: anyenv を使う環境は ~/.anyenv/envs に、そうでない環境は $HOME に配置される想定
 # rbenv
@@ -86,8 +89,8 @@ fi
 # Functions
 #------------------
 movtogif() {
-  ffmpeg -i "$1" -vf scale=800:-1 -r 10 -f image2pipe -vcodec ppm - |\
-  convert -delay 10 -layers Optimize -loop 0 - "${1%.*}.gif"
+  ffmpeg -i "$1" -vf scale=800:-1 -r 10 -f image2pipe -vcodec ppm - |
+    convert -delay 10 -layers Optimize -loop 0 - "${1%.*}.gif"
 }
 
 # OSX 固有
@@ -119,16 +122,15 @@ source ~/.zsh/.aliases.zsh
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# NOTE: プラグインマネージャは最後に呼ぶ
-# 内部で compinit が実行されるので、.zshrc の他の部分で重複して呼ばないようにするため
+# プラグインマネージャ
 [ -d ~/.oh-my-zsh ] && source ~/.zsh/.oh-my-zsh.zsh
-[ -d ~/.zplug ]     && source ~/.zsh/.zplug.zsh
+[ -d ~/.zplug ] && source ~/.zsh/.zplug.zsh
 
 # Profiling
 #------------------
 # NOTE: zprof を以下のコマンドで有効化すると表示される
 # echo "zmodload zsh/zprof && zprof" > ~/.zshenv
-if (which zprof > /dev/null 2>&1) ;then
+if (which zprof >/dev/null 2>&1); then
   zprof
 fi
 
