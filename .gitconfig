@@ -1,29 +1,29 @@
 [user]
-  name = upinetree
-  email = upinetree@gmail.com
+	name = upinetree
+	email = upinetree@gmail.com
 
 [color]
-  ui = auto
+	ui = auto
 
 [core]
-  excludesfile = ~/.gitignore
-  precomposeunicode = true
-  quotepath = false
-  editor = vim
-  pager = delta
+	excludesfile = ~/.gitignore
+	precomposeunicode = true
+	quotepath = false
+	editor = vim
+	pager = delta
 
 [commit]
 	verbose = true
 
 [fetch]
-  prune = true
+	prune = true
 
 [pull]
-  rebase = true
-  prune = true
+	rebase = true
+	prune = true
 
 [push]
-  default = current
+	default = current
 	autoSetupRemote = true
 
 [rebase]
@@ -39,67 +39,70 @@
 	helper = osxkeychain
 
 [alias]
-  # branch manipulation
-  b = branch
-  co = checkout
-  sw = switch
-  main = "!git symbolic-ref refs/remotes/origin/HEAD | cut -d'/' -f4"
-  sync-main = "!git remote set-head origin --auto"
-  sm = "!git switch $(git main)"
-  f = fetch
-  fm = "!git fetch origin $(git main)"
-  fmr = "!git fm && git rebase origin/$(git main)"
-  p = pull
-  b-tidy = "!git branch --merged | grep -Ev '(master|main)' | xargs git branch -d"
+	# branch manipulation
+	b = branch
+	co = checkout
+	sw = switch
+	main = "!git symbolic-ref refs/remotes/origin/HEAD | cut -d'/' -f4"
+	sync-main = "!git remote set-head origin --auto"
+	sm = "!git switch $(git main)"
+	f = fetch
+	fm = "!git fetch origin $(git main)"
+	fmr = "!git fm && git rebase origin/$(git main)"
+	p = pull
+	b-tidy = "!git branch --merged | grep -Ev '(master|main)' | xargs git branch -d"
 
-  # snapshotting
-  s = status -sbu
-  a = add -p
-  aa = "!git ls-files --modified --others --exclude-standard | fzf -m --preview '{ git diff {} | delta --color-only }' | xargs git add && git s"
-  ao = "!git ls-files --others --exclude-standard | fzf -m --preview '{ bat --style=numbers --color=always --line-range :500 {} }' | xargs git add && git s"
-  ci = commit
-  cm = commit -m
-  ca = commit --amend
-  can = commit --amend --no-edit
-  r = reset
-  res = restore
+	# snapshotting
+	s = status -sbu
+	a = add -p
+	aa = "!git ls-files --modified --others --exclude-standard | fzf -m --preview '{ git diff {} | delta --color-only }' | xargs git add && git s"
+	ao = "!git ls-files --others --exclude-standard | fzf -m --preview '{ bat --style=numbers --color=always --line-range :500 {} }' | xargs git add && git s"
+	ci = commit
+	cm = commit -m
+	ca = commit --amend
+	can = commit --amend --no-edit
+	r = reset
+	res = restore
 
-  # sharing
-  pushf = push --force-with-lease
+	# sharing
+	pushf = push --force-with-lease
 
-  # inspection
-  df = diff --color
-  dfc = diff --color --cached
-  l = log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-  lg = l --graph
-  lga = lg --all
-  lm = l --merges
-  ls = log --stat
-  lp = log -p --color
-  sh = show --color
+	# inspection
+	df = diff --color
+	dfc = diff --color --cached
+	l = log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	lg = l --graph
+	lga = lg --all
+	lm = l --merges
+	ls = log --stat
+	lp = log -p --color
+	sh = show --color
 
-  # github
-  open = "!gh repo view -w"
-  openpr = "!gh pr view -w"
+	# github
+	open = "!gh repo view -w"
+	openpr = "!gh pr view -w"
 
 [ghq]
-  # ghq.root: the last one becomes primary one.
-  root = ~/go/src
-  root = ~/repo
+	# ghq.root: the last one becomes primary one.
+	root = ~/go/src
+	root = ~/repo
 
 [pager]
 	branch = false
 
 [interactive]
-  diffFilter = delta --color-only
+	diffFilter = delta --color-only
 
 [diff]
 	compactionHeuristic = true
-  colorMoved = default
+	colorMoved = default
 	algorithm = histogram
 
 [delta]
-  plus-style = syntax auto
-  minus-style = syntax auto
-  syntax-theme = Dracula
-  navigate = true
+	plus-style = syntax auto
+	minus-style = syntax auto
+	syntax-theme = Dracula
+	navigate = true
+
+[url "ssh://git@github.com/heyinc/"]
+	insteadOf = https://github.com/heyinc/
