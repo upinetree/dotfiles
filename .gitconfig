@@ -32,6 +32,9 @@
 [merge]
 	conflictstyle = zdiff3
 
+[branch]
+	sort = -committerdate
+
 [credential]
 	helper = osxkeychain
 
