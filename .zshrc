@@ -114,17 +114,21 @@ fi
 
 # Sources
 #------------------
+# export する環境変数を読み込む
 source ~/.zsh/.exports.zsh
-source ~/.zsh/.aliases.zsh
-
-# 環境依存の追加設定はここに定義（上書きできるよう最後に読み込む）
-[ -f ~/.env.zsh ] && source ~/.env.zsh
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # プラグインマネージャ
 [ -d ~/.oh-my-zsh ] && source ~/.zsh/.oh-my-zsh.zsh
 [ -d ~/.zplug ] && source ~/.zsh/.zplug.zsh
+
+# alias/function を読み込む
+# compdef は zplug の後に読み込まないとうまく動かない
+source ~/.zsh/.aliases.zsh
+
+# 環境依存の追加設定はここに定義（上書きできるよう最後に読み込む）
+[ -f ~/.env.zsh ] && source ~/.env.zsh
 
 # Profiling
 #------------------

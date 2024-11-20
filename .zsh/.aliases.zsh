@@ -49,6 +49,18 @@ alias dcps='docker compose ps'
 alias laws='aws --profile=local --endpoint-url=http://localhost:4566'
 type gsed &> /dev/null && alias sed='gsed'
 
+# usage: rgl <rg-args>
+# `rg` with sipmle output (path:line_number<TAB>line_text)
+# e.g.)
+#   $ rgl "func\(" .zsh/
+#   .zsh/.aliases.zsh:114   ls-func() {\n
+#   .zsh/.aliases.zsh:118   show-func() {\n
+rgl() {
+  rg --json $@ | jq -r 'select(.type == "match") | .data | [(.path.text + ":" + (.line_number|tostring)), .lines.text] | @tsv'
+}
+
+# usage: dhist <keyword>
+# Delete history lines that contain the keyword
 dhist() {
   LC_ALL=C sed -i '.bak' "/$1/d" $HISTFILE
 }
@@ -68,8 +80,53 @@ gwt() {
   cd ${GIT_CDUP_DIR}/${WT_DIR}/$1
 }
 
+# usege: git-branch-vault <branch1> <branch2> ...
+# It renames the branch to vault/<branch>.
+# If the environment variable `VAULT` is provided, it uses it as the vault name.
+git-branch-vault() {
+  local branches=($@)
+  local vault=${VAULT:-vault}
+  for branch in ${branches[@]}; do
+    git branch -m $branch $vault/$branch
+    echo "Renamed $branch to $vault/$branch"
+  done
+}
+compdef _git git-branch-vault=git-branch
+
 http-status-code() {
   ruby -rrack -e 'puts Rack::Utils::HTTP_STATUS_CODES[ARGV[0].to_i]' -- $1
+}
+
+cop() {
+  local files=($(git diff --name-only --diff-filter=AM "*.rb"))
+  if [[ ${#files[@]} -eq 0 ]]; then
+    # 差分がなければ main ブランチからの差分を取得
+    local main=$(git main)
+    files=($(git diff --name-only --diff-filter=AM "*.rb" "$main"))
+  fi
+
+  if [[ ${#files[@]} -ne 0 ]]; then
+    echo "Executing: bundle exec rubocop -A ${files[@]}"
+    bundle exec rubocop -A "${files[@]}"
+  else
+    echo "No files to lint."
+  fi
+}
+
+ls-func() {
+  print -l ${(ok)functions[(I)[^_]*]} # _ で始まる関数は除外
+}
+
+show-func() {
+  if [[ -n $1 && -n ${functions[$1]} ]]; then
+    print -r -- "${functions[$1]}"
+  else
+    print "Function '$1' not found."
+  fi
+}
+
+edit-func() {
+  vim ~/.zsh/.aliases.zsh
 }
 
 # for WSL
