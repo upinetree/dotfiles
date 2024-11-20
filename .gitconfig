@@ -63,6 +63,7 @@
 	can = commit --amend --no-edit
 	r = reset
 	res = restore
+	pop = stash pop
 
 	# sharing
 	pushf = push --force-with-lease
