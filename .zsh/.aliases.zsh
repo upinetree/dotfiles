@@ -102,7 +102,7 @@ cop() {
   if [[ ${#files[@]} -eq 0 ]]; then
     # 差分がなければ main ブランチからの差分を取得
     local main=$(git main)
-    files=($(git diff --name-only --diff-filter=AM "*.rb" "$main"))
+    files=($(git diff --name-only --diff-filter=AM "$main" "*.rb"))
   fi
 
   if [[ ${#files[@]} -ne 0 ]]; then
