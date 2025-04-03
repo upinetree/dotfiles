@@ -49,15 +49,18 @@ alias dcps='docker compose ps'
 alias laws='aws --profile=local --endpoint-url=http://localhost:4566'
 type gsed &> /dev/null && alias sed='gsed'
 
-# usage: rgl <rg-args>
-# `rg` with sipmle output (path:line_number<TAB>line_text)
+# usage: rgt <rg-args>
+# `rg` tsv format (path:line_number<TAB>line_text)
+# handy for pasting to spreadsheet
 # e.g.)
 #   $ rgl "func\(" .zsh/
 #   .zsh/.aliases.zsh:114   ls-func() {\n
 #   .zsh/.aliases.zsh:118   show-func() {\n
-rgl() {
+rgt() {
   rg --json $@ | jq -r 'select(.type == "match") | .data | [(.path.text + ":" + (.line_number|tostring)), .lines.text] | @tsv'
 }
+
+alias rgl="rg --no-heading"
 
 # usage: dhist <keyword>
 # Delete history lines that contain the keyword
