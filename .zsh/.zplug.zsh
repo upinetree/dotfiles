@@ -11,6 +11,10 @@ zplug "b4b4r07/enhancd", use:init.sh
 zplug "mafredri/zsh-async"
 zplug "sindresorhus/pure", use:pure.zsh, as:theme
 
+# docker completion を実験中
+# zplug "docker/cli", use:contrib/completion/zsh
+# zplug "docker/compose", use:contrib/completion/zsh
+
 # Install plugins if there are plugins that have not been installed
 if ! zplug check --verbose; then
   printf "Install? [y/N]: "
