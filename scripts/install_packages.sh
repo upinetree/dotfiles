@@ -119,9 +119,6 @@ if [ "$PLATFORM" = "osx" ]; then
   fi
 
   if exists brew; then
-    brew tap homebrew/cask-versions
-    brew tap homebrew/cask-fonts
-
     brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh jq openssl readline ripgrep source-highlight tig tree vim watch zsh
     brew install alt-tab chromedriver dropbox iterm2 kap keepassx karabiner-elements maccy meetingbar slate 1password/tap/1password-cli
     brew install font-myrica
