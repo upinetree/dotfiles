@@ -1,3 +1,5 @@
+.PHONY: help install copy link install_packages
+
 help:
 	@echo "make install          # copy and link files, then install packages"
 	@echo "make copy             # copy config files"
