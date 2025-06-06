@@ -130,6 +130,11 @@ if [ "$PLATFORM" = "osx" ]; then
     log error "brew command not found"
     exit 1
   fi
+
+  # anyenv
+  anyenv init
+  mkdir -p $(anyenv root)/plugins
+  git clone https://github.com/znz/anyenv-update.git $(anyenv root)/plugins/anyenv-update
 fi
 
 if [ "$PLATFORM" = "linux" ]; then
