@@ -50,6 +50,9 @@ eval "$(direnv hook zsh)"
 # anyenv
 type anyenv &>/dev/null && eval "$(anyenv init -)"
 
+# mise
+type mise &>/dev/null && eval "$(mise activate zsh)"
+
 # NOTE: anyenv を使う環境は ~/.anyenv/envs に、そうでない環境は $HOME に配置される想定
 # rbenv
 if [ -d ~/.rbenv ]; then
