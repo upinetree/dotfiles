@@ -4,23 +4,23 @@ set -u
 
 install_zsh() {
   case "$PLATFORM" in
-    osx)
-      log info "zsh is installed in the homebrew installation phase"
-      ;;
-    linux)
-      if exists apt-get; then
-        sudo apt-get -y install zsh
-      elif exists yum; then
-        sudo yum -y install zsh
-      else
-        log error "ERROR: apt-get or yum is not exists"
-        return 1
-      fi
-      ;;
-    *)
-      log error "ERROR: Your platform is not supported"
+  osx)
+    log info "zsh is installed in the homebrew installation phase"
+    ;;
+  linux)
+    if exists apt-get; then
+      sudo apt-get -y install zsh
+    elif exists yum; then
+      sudo yum -y install zsh
+    else
+      log error "ERROR: apt-get or yum is not exists"
       return 1
-      ;;
+    fi
+    ;;
+  *)
+    log error "ERROR: Your platform is not supported"
+    return 1
+    ;;
   esac
 }
 
@@ -58,7 +58,7 @@ install_rbenv() {
   git clone https://github.com/rkh/rbenv-update.git ~/.rbenv/plugins/rbenv-update
   git clone https://github.com/tpope/rbenv-ctags.git ~/.rbenv/plugins/rbenv-ctags
 
-  ln -s  ~/.dotfiles/.rbenv/default-gems ~/.rbenv/default-gems
+  ln -s ~/.dotfiles/.rbenv/default-gems ~/.rbenv/default-gems
 }
 
 install_fzf() {
@@ -157,7 +157,7 @@ if [ "$PLATFORM" = "linux" ]; then
       log info "win32yank is already exists"
     else
       curl -sLo/tmp/win32yank.zip https://github.com/equalsraf/win32yank/releases/download/v0.0.4/win32yank-x64.zip
-      unzip -p /tmp/win32yank.zip win32yank.exe > /tmp/win32yank.exe
+      unzip -p /tmp/win32yank.zip win32yank.exe >/tmp/win32yank.exe
       chmod +x /tmp/win32yank.exe
       sudo mv /tmp/win32yank.exe /usr/local/bin/
     fi
