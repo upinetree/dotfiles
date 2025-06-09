@@ -211,15 +211,17 @@ if exists ghq; then
   log info "ghq is already exists"
 else
   go install github.com/x-motemen/ghq@latest
+  goenv rehash
   result ghq
 fi
 
-if [ -d ~/.cache/dein ]; then
-  log info "dein.vim is already exists"
-else
-  install_dein
-  log success "dein.vim is installed. Launch vim and execute ':call dein#install()' to install plugins"
-fi
+# TODO: fix dein installation and settings
+# if [ -d ~/.cache/dein ]; then
+#   log info "dein.vim is already exists"
+# else
+#   install_dein
+#   log success "dein.vim is installed. Launch vim and execute ':call dein#install()' to install plugins"
+# fi
 
 log success "Finished. Re-Login to zsh to complete."
 log success "Manual installation required: e.g.) firefox google-chrome slack dash, from the web or AppStore"
