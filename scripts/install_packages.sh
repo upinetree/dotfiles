@@ -119,7 +119,7 @@ if [ "$PLATFORM" = "osx" ]; then
 
   if exists brew; then
     brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh jq openssl readline ripgrep source-highlight tig tree vim watch zsh
-    brew install --cask alacritty alt-tab bartender kap keepassx karabiner-elements maccy meetingbar 1password-cli docker font-myrica
+    brew install --cask alacritty alt-tab bartender kap keepassx karabiner-elements maccy meetingbar 1password-cli docker font-myrica deepl
 
     # TODO: replace yabai/skhd with an other tool
     # brew install koekeishiya/formulae/yabai
