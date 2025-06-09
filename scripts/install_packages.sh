@@ -118,7 +118,7 @@ if [ "$PLATFORM" = "osx" ]; then
 
   if exists brew; then
     brew install anyenv bat coreutils ctags direnv git-delta gnu-sed git gh jq openssl readline ripgrep source-highlight tig tree vim watch zsh
-    brew install alacritty alt-tab kap keepassx karabiner-elements maccy meetingbar 1password-cli
+    brew install alacritty alt-tab bartender kap keepassx karabiner-elements maccy meetingbar 1password-cli
     brew install font-myrica
 
     brew install koekeishiya/formulae/yabai
