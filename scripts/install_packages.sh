@@ -76,8 +76,9 @@ install_go() {
   fi
 
   anyenv install goenv
+  eval "$(anyenv init -)"
   goenv install latest
-  goenv rehash
+  goenv global latest
 }
 
 install_dein() {
