@@ -147,6 +147,7 @@ if [ "$PLATFORM" = "osx" ]; then
       deepl \
       docker \
       font-myrica \
+      google-cloud-sdk \
       kap \
       karabiner-elements \
       keepassx \
