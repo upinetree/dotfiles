@@ -3,51 +3,51 @@ autocmd!
 
 "-------------------------------------------------
 " Dein.vim
-
-if &compatible
-  set nocompatible
-endif
-set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
-
-call dein#begin('~/.cache/dein')
-
-" Let dein manage dein
-call dein#add('~/.cache/dein/repos/github.com/Shougo/dein.vim')
-
-call dein#add('AndrewRadev/vim-eco')
-call dein#add('ctrlpvim/ctrlp.vim')
-call dein#add('ivalkeen/vim-ctrlp-tjump')
-call dein#add('Shougo/neomru.vim')
-call dein#add('Shougo/neosnippet-snippets')
-call dein#add('Shougo/neosnippet.vim')
-call dein#add('Shougo/unite-help')
-call dein#add('Shougo/unite-outline')
-call dein#add('Shougo/unite.vim')
-call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
-call dein#add('Shougo/vimshell')
-call dein#add('cohama/lexima.vim')
-call dein#add('fatih/vim-go')
-call dein#add('flazz/vim-colorschemes')
-call dein#add('hashivim/vim-terraform')
-call dein#add('itchyny/lightline.vim')
-call dein#add('leafgarland/typescript-vim')
-call dein#add('mattn/ctrlp-matchfuzzy')
-call dein#add('maxmellon/vim-jsx-pretty')
-call dein#add('nathanaelkane/vim-indent-guides')
-call dein#add('ntpeters/vim-better-whitespace')
-call dein#add('pangloss/vim-javascript')
-call dein#add('thinca/vim-qfreplace')
-call dein#add('tpope/vim-fugitive')
-call dein#add('tpope/vim-obsession')
-call dein#add('tpope/vim-rhubarb')
-call dein#add('tpope/vim-surround')
-call dein#add('tyru/caw.vim')
-call dein#add('vim-scripts/Align')
-call dein#add('w0rp/ale')
-
-call dein#end()
-
-filetype plugin indent on
+"
+" if &compatible
+"   set nocompatible
+" endif
+" set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
+"
+" call dein#begin('~/.cache/dein')
+"
+" " Let dein manage dein
+" call dein#add('~/.cache/dein/repos/github.com/Shougo/dein.vim')
+"
+" call dein#add('AndrewRadev/vim-eco')
+" call dein#add('ctrlpvim/ctrlp.vim')
+" call dein#add('ivalkeen/vim-ctrlp-tjump')
+" call dein#add('Shougo/neomru.vim')
+" call dein#add('Shougo/neosnippet-snippets')
+" call dein#add('Shougo/neosnippet.vim')
+" call dein#add('Shougo/unite-help')
+" call dein#add('Shougo/unite-outline')
+" call dein#add('Shougo/unite.vim')
+" call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
+" call dein#add('Shougo/vimshell')
+" call dein#add('cohama/lexima.vim')
+" call dein#add('fatih/vim-go')
+" call dein#add('flazz/vim-colorschemes')
+" call dein#add('hashivim/vim-terraform')
+" call dein#add('itchyny/lightline.vim')
+" call dein#add('leafgarland/typescript-vim')
+" call dein#add('mattn/ctrlp-matchfuzzy')
+" call dein#add('maxmellon/vim-jsx-pretty')
+" call dein#add('nathanaelkane/vim-indent-guides')
+" call dein#add('ntpeters/vim-better-whitespace')
+" call dein#add('pangloss/vim-javascript')
+" call dein#add('thinca/vim-qfreplace')
+" call dein#add('tpope/vim-fugitive')
+" call dein#add('tpope/vim-obsession')
+" call dein#add('tpope/vim-rhubarb')
+" call dein#add('tpope/vim-surround')
+" call dein#add('tyru/caw.vim')
+" call dein#add('vim-scripts/Align')
+" call dein#add('w0rp/ale')
+"
+" call dein#end()
+"
+" filetype plugin indent on
 
 " If you want to install not installed plugins on startup.
 "if dein#check_install()
@@ -240,10 +240,10 @@ let g:Align_xstrlen = 3
 
 let g:unite_enable_start_insert=1
 
-call unite#custom#source('buffer,file_rec/git', 'matchers', 'matcher_fuzzy')
-call unite#custom#source('buffer,file_rec/git', 'converters', 'converter_relative_abbr')
-call unite#custom#source('buffer,file_rec/git', 'sorters', 'sorter_selecta') " may slower
-call unite#custom#source('buffer,file_rec/git', 'ignore_pattern', '\(png\|gif\|jpeg\|jpg\)$')
+" call unite#custom#source('buffer,file_rec/git', 'matchers', 'matcher_fuzzy')
+" call unite#custom#source('buffer,file_rec/git', 'converters', 'converter_relative_abbr')
+" call unite#custom#source('buffer,file_rec/git', 'sorters', 'sorter_selecta') " may slower
+" call unite#custom#source('buffer,file_rec/git', 'ignore_pattern', '\(png\|gif\|jpeg\|jpg\)$')
 
 "-------------------------------------------------
 " IndentGuides
