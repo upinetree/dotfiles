@@ -50,7 +50,7 @@
 	fm = "!git fetch origin $(git main)"
 	fmr = "!git fm && git rebase origin/$(git main)"
 	p = pull
-	b-tidy = "!git branch --merged | grep -Ev '(master|main)' | xargs git branch -d"
+	b-tidy = "!git branch --merged | grep -Ev $(git main) | xargs git branch -d"
 
 	# snapshotting
 	s = status -sbu
