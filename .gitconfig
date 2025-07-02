@@ -55,7 +55,7 @@
 	# snapshotting
 	s = status -sbu
 	a = add -p
-	aa = "!git ls-files --modified --others --exclude-standard | fzf -m --cycle --preview 'git diff {} | delta --color-only' --preview-window 'up:80%' | xargs git add && git s"
+	aa = "!git ls-files --modified --others --exclude-standard | fzf -m --cycle --preview 'git diff {} | delta' --preview-window 'up:80%' | xargs git add && git s"
 	ao = "!git ls-files --others --exclude-standard | fzf -m --cycle --preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window 'up:80%' | xargs git add && git s"
 	ci = commit
 	cm = commit -m

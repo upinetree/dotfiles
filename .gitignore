@@ -27,6 +27,7 @@ tags
 # Project local
 __bin
 __tmp
+__doc
 .envrc
 MyProcfile
 .devcontainer/devcontainer.json
