@@ -20,11 +20,11 @@ make_base_dirs() {
   mkdir -p ~/.config/nvim
   mkdir -p ~/.config/yabai
   mkdir -p ~/.config/skhd
+  mkdir -p ~/.claude
 }
 
 unlink_all() {
-  for dotfile_map in "${DOTFILE_MAPS[@]}"
-  do
+  for dotfile_map in "${DOTFILE_MAPS[@]}"; do
     src_dst=($dotfile_map)
 
     log "unlink ${src_dst[1]}"
@@ -33,8 +33,7 @@ unlink_all() {
 }
 
 link_all() {
-  for dotfile_map in "${DOTFILE_MAPS[@]}"
-  do
+  for dotfile_map in "${DOTFILE_MAPS[@]}"; do
     log "ln -s $dotfile_map"
     eval "ln -s $dotfile_map"
   done
@@ -56,6 +55,8 @@ listup_dotfiles() {
     "~/.dotfiles/.zsh/.zplug.zsh       ~/.zsh/.zplug.zsh"
     "~/.dotfiles/.zshrc                ~/.zshrc"
     "~/.dotfiles/.config/nvim/init.vim ~/.config/nvim/init.vim"
+    "~/.dotfiles/.claude/settings.json ~/.claude/settings.json"
+    "~/.dotfiles/.claude/commands      ~/.claude/commands"
   )
 
   if [ "$PLATFORM" = "osx" ]; then
@@ -73,8 +74,7 @@ echo_conditions() {
   log info "------- platform ------"
   log info "$PLATFORM"
   log info "--- target dotfiles ---"
-  for map in "${DOTFILE_MAPS[@]}"
-  do
+  for map in "${DOTFILE_MAPS[@]}"; do
     log info "$map"
   done
   log info "-----------------------"
