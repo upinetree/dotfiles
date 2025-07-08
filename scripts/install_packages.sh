@@ -70,17 +70,6 @@ install_brew() {
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
-install_go() {
-  if ! exists anyenv; then
-    return 1
-  fi
-
-  anyenv install goenv
-  eval "$(anyenv init -)"
-  goenv install latest
-  goenv global latest
-}
-
 install_dein() {
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/Shougo/dein-installer.vim/master/installer.sh)"
 }
@@ -125,6 +114,7 @@ if [ "$PLATFORM" = "osx" ]; then
       ctags \
       direnv \
       gh \
+      ghq \
       git \
       git-delta \
       gnu-sed \
@@ -231,21 +221,6 @@ if exists fzf; then
 else
   install_fzf
   log success "fzf is deployed, Re-Login to apply it."
-fi
-
-if exists go; then
-  log info "go is already exists"
-else
-  install_go
-  result go
-fi
-
-if exists ghq; then
-  log info "ghq is already exists"
-else
-  go install github.com/x-motemen/ghq@latest
-  goenv rehash
-  result ghq
 fi
 
 # TODO: fix dein installation and settings
