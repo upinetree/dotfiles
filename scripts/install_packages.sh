@@ -49,7 +49,7 @@ install_zplug() {
   curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 }
 
-# TODO: install via anyenv
+# TODO: install via mise
 install_rbenv() {
   git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
   git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
@@ -108,7 +108,6 @@ if [ "$PLATFORM" = "osx" ]; then
 
   if exists brew; then
     brew install \
-      anyenv \
       bat \
       coreutils \
       ctags \
@@ -119,6 +118,7 @@ if [ "$PLATFORM" = "osx" ]; then
       git-delta \
       gnu-sed \
       jq \
+      mise \
       openssl \
       readline \
       ripgrep \
@@ -153,11 +153,6 @@ if [ "$PLATFORM" = "osx" ]; then
     log error "brew command not found"
     exit 1
   fi
-
-  # anyenv
-  anyenv init
-  mkdir -p $(anyenv root)/plugins
-  git clone https://github.com/znz/anyenv-update.git $(anyenv root)/plugins/anyenv-update
 fi
 
 if [ "$PLATFORM" = "linux" ]; then
