@@ -101,7 +101,7 @@ http-status-code() {
 }
 
 cop() {
-  local files=($(git diff --name-only --diff-filter=AM "*.rb"))
+  local files=($(git ls-files --modified --others --exclude-standard '*.rb'))
   if [[ ${#files[@]} -eq 0 ]]; then
     # 差分がなければ main ブランチからの差分を取得
     local main=$(git main)
