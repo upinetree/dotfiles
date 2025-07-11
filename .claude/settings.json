@@ -11,6 +11,7 @@
     "deny": [
       "Bash(sudo:*)",
       "Bash(rm:*)",
+      "Bash(rm -rf:*)",
       "Bash(rmdir:*)",
       "Bash(diskutil:*)",
       "Bash(dd:*)",
@@ -23,9 +24,22 @@
       "Bash(sh:*)",
       "Bash(bash:*)",
       "Bash(zsh:*)",
+      "Bash(brew:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(nc:*)",
+      "Bash(git config:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
       "Bash(git push:*)",
       "Bash(git reset:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "Read(.env.*)",
+      "Read(mise.*)",
+      "Read(.mise.*)",
+      "Read(id_rsa)",
+      "Read(id_ed25519)",
+      "Read(*.key)"
     ]
   },
   "hooks": {
