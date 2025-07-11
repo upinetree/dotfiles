@@ -20,6 +20,7 @@ make_base_dirs() {
   mkdir -p ~/.config/nvim
   mkdir -p ~/.config/yabai
   mkdir -p ~/.config/skhd
+  mkdir -p ~/.config/alacritty
   mkdir -p ~/.claude
 }
 
@@ -55,6 +56,7 @@ listup_dotfiles() {
     "~/.dotfiles/.zsh/.zplug.zsh       ~/.zsh/.zplug.zsh"
     "~/.dotfiles/.zshrc                ~/.zshrc"
     "~/.dotfiles/.config/nvim/init.vim ~/.config/nvim/init.vim"
+    "~/.dotfiles/.config/alacritty/alacritty.toml ~/.config/alacritty/alacritty.toml"
     "~/.dotfiles/.claude/settings.json ~/.claude/settings.json"
     "~/.dotfiles/.claude/commands      ~/.claude/commands"
   )
