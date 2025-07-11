@@ -1,5 +1,4 @@
 pry
-ec2ssh
-solargraph
 gem-ctags
+gem-src
 ripper-tags

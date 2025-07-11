@@ -49,7 +49,6 @@ install_zplug() {
   curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 }
 
-# TODO: install via mise
 install_rbenv() {
   git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
   git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
@@ -58,7 +57,7 @@ install_rbenv() {
   git clone https://github.com/rkh/rbenv-update.git ~/.rbenv/plugins/rbenv-update
   git clone https://github.com/tpope/rbenv-ctags.git ~/.rbenv/plugins/rbenv-ctags
 
-  ln -s ~/.dotfiles/.rbenv/default-gems ~/.rbenv/default-gems
+  ln -s ~/.dotfiles/default-gems ~/.rbenv/default-gems
 }
 
 install_fzf() {
@@ -204,11 +203,15 @@ else
   result tmux
 fi
 
-if exists rbenv; then
-  log info "rbenv is already exists"
-else
-  install_rbenv
-  log success "rbenv is deployed, Re-Login to apply it."
+# if exists rbenv; then
+#   log info "rbenv is already exists"
+# else
+#   install_rbenv
+#   log success "rbenv is deployed, Re-Login to apply it."
+fi
+
+if exists mise; then
+  mise install
 fi
 
 if exists fzf; then
