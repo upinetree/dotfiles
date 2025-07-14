@@ -53,9 +53,9 @@ install_rbenv() {
   git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
   git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
   git clone https://github.com/rbenv/rbenv-default-gems.git ~/.rbenv/plugins/rbenv-default-gems
-  git clone https://github.com/amatsuda/gem-src.git ~/.rbenv/plugins/gem-src
+  git clone https://github.com/amatsuda/gem-src.git ~/.rbenv/plugins/gem-src # mise 移行メモ: ruby install 時のグローバルな hook が未提供 https://github.com/jdx/mise/issues/4748
   git clone https://github.com/rkh/rbenv-update.git ~/.rbenv/plugins/rbenv-update
-  git clone https://github.com/tpope/rbenv-ctags.git ~/.rbenv/plugins/rbenv-ctags
+  git clone https://github.com/tpope/rbenv-ctags.git ~/.rbenv/plugins/rbenv-ctags # mise 移行メモ: gem ctags 単体では bundler hook がないので若干不便 (必要に応じて手動実行でも運用上は十分そうではある)
 
   ln -s ~/.dotfiles/default-gems ~/.rbenv/default-gems
 }
@@ -208,7 +208,7 @@ fi
 # else
 #   install_rbenv
 #   log success "rbenv is deployed, Re-Login to apply it."
-fi
+# fi
 
 if exists mise; then
   mise install
