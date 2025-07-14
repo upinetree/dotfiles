@@ -126,6 +126,7 @@ if [ "$PLATFORM" = "osx" ]; then
       tree \
       vim \
       watch \
+      zellij \
       zsh
 
     brew install --cask \
