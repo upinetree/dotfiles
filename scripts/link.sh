@@ -2,8 +2,9 @@ set -u
 
 . ./scripts/lib.sh
 
-declare -A DOTFILE_MAPS
 declare DOTFILE_DIR="~/.dotfiles/"
+declare -A DOTFILE_MAPS
+declare -A OBSOLETED_LIST
 
 init() {
   detect_platform
@@ -21,8 +22,6 @@ make_base_dirs() {
   mkdir ~/.zsh
   mkdir ~/bin
   mkdir -p ~/.config/nvim
-  mkdir -p ~/.config/yabai
-  mkdir -p ~/.config/skhd
   mkdir -p ~/.config/mise
   mkdir -p ~/.config/alacritty
   mkdir -p ~/.claude
@@ -31,6 +30,12 @@ make_base_dirs() {
 unlink_all() {
   for src in "${!DOTFILE_MAPS[@]}"; do
     dst="${DOTFILE_MAPS[$src]}"
+    log "unlink $dst"
+    eval "unlink $dst"
+  done
+
+  for src in "${!OBSOLETED_LIST[@]}"; do
+    dst="${OBSOLETED_LIST[$src]}"
     log "unlink $dst"
     eval "unlink $dst"
   done
@@ -68,12 +73,15 @@ listup_dotfiles() {
   )
 
   if [ "$PLATFORM" = "osx" ]; then
-    DOTFILE_MAPS["osx/.slate"]="~/.slate"
-    DOTFILE_MAPS["osx/.vimperatorrc"]="~/.vimperatorrc"
     DOTFILE_MAPS["osx/bin/git-completion.bash"]="~/bin/git-completion.bash"
-    DOTFILE_MAPS[".config/skhd/skhdrc"]="~/.config/skhd/skhdrc"
-    DOTFILE_MAPS[".config/yabai/yabaicmd"]="~/.config/yabai/yabaicmd"
   fi
+
+  OBSOLETED_LIST=(
+    ["osx/.slate"]="~/.slate"
+    ["osx/.vimperatorrc"]="~/.vimperatorrc"
+    [".config/skhd/skhdrc"]="~/.config/skhd/skhdrc"
+    [".config/yabai/yabaicmd"]="~/.config/yabai/yabaicmd"
+  )
 }
 
 echo_conditions() {
