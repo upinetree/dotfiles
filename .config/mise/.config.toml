@@ -1,5 +1,5 @@
 [settings]
-idiomatic_version_file_enable_tools = []
+idiomatic_version_file_enable_tools = [] # see https://github.com/jdx/mise/blob/5f5c46b5d0626fc68fe4667b28dfe37344dbeb5a/docs/configuration.md#L326
 ruby.default_packages_file = "./default-gems"
 
 [tools]

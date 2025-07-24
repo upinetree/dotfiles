@@ -49,6 +49,7 @@ install_zplug() {
   curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 }
 
+# DEPRECATED: すでに呼ばれなくなっているが、一部 mise に移行しきれていない部分の処遇が決まっていないので残している
 install_rbenv() {
   git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
   git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
