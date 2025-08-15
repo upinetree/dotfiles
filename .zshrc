@@ -45,7 +45,7 @@ if [ -x /opt/homebrew/bin/brew ]; then
 fi
 
 # direnv
-eval "$(direnv hook zsh)"
+type direnv &>/dev/null && eval "$(direnv hook zsh)"
 
 # anyenv
 type anyenv &>/dev/null && eval "$(anyenv init -)"
