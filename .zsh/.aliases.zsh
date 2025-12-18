@@ -41,6 +41,7 @@ alias pg-stop='pg_ctl -D /usr/local/var/postgres stop -s -m fast'
 
 # Misc :)
 alias be='bundle exec'
+alias ra=rails
 alias dev='devcontainer open'
 alias f='fg'
 alias v='vim'
