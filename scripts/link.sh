@@ -77,8 +77,6 @@ listup_dotfiles() {
   fi
 
   OBSOLETED_LIST=(
-    ["osx/.slate"]="~/.slate"
-    ["osx/.vimperatorrc"]="~/.vimperatorrc"
     [".config/skhd/skhdrc"]="~/.config/skhd/skhdrc"
     [".config/yabai/yabaicmd"]="~/.config/yabai/yabaicmd"
   )
