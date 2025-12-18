@@ -15,12 +15,9 @@ go.work
 go.work.sum
 
 # Editor
-*.sublime-project
-*.sublime-workspace
 *.swo
 *.swp
 Session.vim
-.vscode
 TAGS
 tags
 
@@ -29,5 +26,5 @@ __bin
 __tmp
 __doc
 .envrc
-MyProcfile
-.devcontainer/devcontainer.json
+mise.local.toml
+.claude/settings.local.json
