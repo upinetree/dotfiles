@@ -20,4 +20,8 @@ if ! zplug check --verbose; then
 fi
 
 # Then, source plugins and add commands to $PATH
-zplug load #--verbose
+# NOTE: claude code Bash tool fails with enhancd
+# similler issue. https://github.com/anthropics/claude-code/issues/2632
+if [[ "$CLAUDECODE" != "1" ]]; then
+  zplug load #--verbose
+fi
