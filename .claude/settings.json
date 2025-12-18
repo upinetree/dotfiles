@@ -9,6 +9,7 @@
       "Bash(rg:*)",
       "Bash(find:*)",
       "WebFetch(domain:github.com)",
+      "Bash(bundle show:*)",
       "Bash(bundle exec rspec:*)"
     ],
     "deny": [
@@ -38,8 +39,8 @@
       "Bash(git reset:*)",
       "Bash(git rebase:*)",
       "Read(.env.*)",
-      "Read(mise.*)",
-      "Read(.mise.*)",
+      "Read(mise.local.toml)",
+      "Read(.mise.local.toml)",
       "Read(id_rsa)",
       "Read(id_ed25519)",
       "Read(*.key)"
@@ -67,6 +68,26 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".rb\") or endswith(\".rake\"))' | xargs -r bundle exec rubocop -A"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".md\"))' | xargs -r prettier --write"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".rb\") or endswith(\".rake\"))' >> ~/.claude/recently_edited_files.txt"
+          }
+        ]
+      }
     ]
-  }
+  },
+  "alwaysThinkingEnabled": true
 }
