@@ -2,8 +2,8 @@
 
 ## Requirement
 
-* Git
-* Make
+- Git
+- Make
 
 ## Setup
 
@@ -14,7 +14,7 @@ cd ~/.dotfiles && make install
 
 Or run the scripts in `./etc/scripts` if your environment does not have a `make`.
 
-## Change origin
+## Change origin to ssh push
 
 After [GitHub SSH configuration](https://docs.github.com/ja/authentication/connecting-to-github-with-ssh):
 
