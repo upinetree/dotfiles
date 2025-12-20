@@ -143,8 +143,4 @@ fi
 
 # Auto added...
 #------------------
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/upinetree/google-cloud-sdk/path.zsh.inc' ]; then source '/Users/upinetree/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/upinetree/google-cloud-sdk/completion.zsh.inc' ]; then source '/Users/upinetree/google-cloud-sdk/completion.zsh.inc'; fi
+# 以下、追加されたら処遇を検討する
