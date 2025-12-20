@@ -3,7 +3,7 @@
 https://gist.github.com/greneholt/e7d5373f96cc0f815717c7666790324d
 
 ```
-cp ./*.keylayout ~/Library/Keyboard Layouts/
+cp ./*.keylayout ~/Library/Keyboard\ Layouts/
 ```
 
 1. メニューバーの入力ソースアイコンから「キーボード設定を開く」
