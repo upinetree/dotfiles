@@ -5,6 +5,7 @@ ruby.default_packages_file = "./default-gems"
 
 [tools]
 node = "latest"
-"npm:@anthropic-ai/claude-code" = "latest"
+claude = "latest"
 ruby = "latest"
 terraform = "latest"
+python = "latest"
