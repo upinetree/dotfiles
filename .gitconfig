@@ -52,6 +52,10 @@
 	fmr = "!git fm && git rebase origin/$(git main)"
 	p = pull
 	b-tidy = "!git branch --merged | grep -Ev $(git main) | xargs git branch -d"
+	b-select = "!git branch | grep -v '^[*]' | sed 's/^ *//' | fzf -m --cycle --preview \"git show {} | delta\" --preview-window 'up:80%'"
+	b-delete = "!f() { BRANCHES=$(git b-select); [ -z \"$BRANCHES\" ] && return; echo \"$BRANCHES\"; printf 'Delete these branches? [y/N] '; read ANS; [ \"$ANS\" = y ] && echo \"$BRANCHES\" | xargs git branch -D; }; f"
+
+	aicommit = "!f() { COMMITMSG=$(claude --no-session-persistence --print 'Generate ONLY a one-line Git commit message in English using imperative mood. The message should summarize what was changed and why, based strictly on the contents of `git diff --cached`. DO NOT add an explanation or a body. Output ONLY the commit summary line.'); git commit -m \"$COMMITMSG\" -e; }; f"
 
 	# snapshotting
 	s = status -sbu
