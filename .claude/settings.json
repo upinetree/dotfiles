@@ -3,14 +3,38 @@
     "CLAUDECODE": "1"
   },
   "permissions": {
+    "defaultMode": "auto",
     "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(ls:*)",
       "Bash(grep:*)",
       "Bash(rg:*)",
       "Bash(find:*)",
-      "WebFetch(domain:github.com)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
+      "Bash(git add:*)",
+      "Bash(git fetch:*)",
+      "Bash(git grep:*)",
+      "Bash(git log:*)",
+      "Bash(git mv:*)",
+      "Bash(git pull:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(curl:*)",
+      "Bash(gem dependency:*)",
+      "Bash(gem fetch:*)",
+      "Bash(gem list:*)",
+      "Bash(gem search:*)",
+      "Bash(gem spec:*)",
+      "Bash(bundle exec rspec:*)",
+      "Bash(bundle install:*)",
       "Bash(bundle show:*)",
-      "Bash(bundle exec rspec:*)"
+      "Bash(bundle info:*)"
     ],
     "deny": [
       "Bash(sudo:*)",
@@ -29,21 +53,28 @@
       "Bash(bash:*)",
       "Bash(zsh:*)",
       "Bash(brew:*)",
-      "Bash(curl:*)",
       "Bash(wget:*)",
       "Bash(nc:*)",
       "Bash(git config:*)",
-      "Bash(git checkout:*)",
-      "Bash(git switch:*)",
-      "Bash(git push:*)",
-      "Bash(git reset:*)",
-      "Bash(git rebase:*)",
       "Read(.env.*)",
       "Read(mise.local.toml)",
       "Read(.mise.local.toml)",
       "Read(id_rsa)",
       "Read(id_ed25519)",
       "Read(*.key)"
+    ],
+    "ask": [
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(git rebase:*)",
+      "Bash(curl *-X POST*)",
+      "Bash(curl *--request POST*)",
+      "Bash(curl *-d *)",
+      "Bash(curl *--data*)",
+      "Bash(curl *-F *)",
+      "Bash(curl *--form *)"
     ]
   },
   "hooks": {
@@ -75,7 +106,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path | select(endswith(\".rb\") or endswith(\".rake\"))' | xargs -r bundle exec rubocop -A"
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".rb\") or endswith(\".rake\"))' | xargs -r bundle exec rubocop --force-exclusion -A"
           },
           {
             "type": "command",
@@ -88,6 +119,15 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "sh /Users/rody/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "ruby-lsp@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true
 }
