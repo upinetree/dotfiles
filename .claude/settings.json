@@ -3,7 +3,6 @@
     "CLAUDECODE": "1"
   },
   "permissions": {
-    "defaultMode": "auto",
     "allow": [
       "WebSearch",
       "WebFetch(domain:github.com)",
@@ -75,7 +74,8 @@
       "Bash(curl *--data*)",
       "Bash(curl *-F *)",
       "Bash(curl *--form *)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "hooks": {
     "Notification": [
@@ -129,5 +129,6 @@
     "skill-creator@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true
   },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": true,
+  "skipAutoPermissionPrompt": true
 }
