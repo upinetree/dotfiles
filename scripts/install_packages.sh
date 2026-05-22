@@ -141,7 +141,7 @@ if [ "$PLATFORM" = "osx" ]; then
       google-cloud-sdk \
       kap \
       karabiner-elements \
-      keepassx \
+      keepassxc \
       maccy \
       meetingbar
 
