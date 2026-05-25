@@ -25,6 +25,7 @@ make_base_dirs() {
   mkdir -p ~/.config/mise
   mkdir -p ~/.config/alacritty
   mkdir -p ~/.claude
+  mkdir -p ~/.claude/skills
 }
 
 unlink_all() {
@@ -70,12 +71,17 @@ listup_dotfiles() {
     ".config/mise/.config.toml:~/.config/mise/config.toml"
     "default-gems:~/.config/mise/default-gems"
     ".claude/settings.json:~/.claude/settings.json"
-    ".claude/commands:~/.claude/commands"
   )
 
   if [ "$PLATFORM" = "osx" ]; then
     DOTFILE_PAIRS+=("osx/bin/git-completion.bash:~/bin/git-completion.bash")
   fi
+
+  for skill_dir in .claude/skills/*/; do
+    [ -d "$skill_dir" ] || continue
+    skill_name=$(basename "$skill_dir")
+    DOTFILE_PAIRS+=(".claude/skills/$skill_name:~/.claude/skills/$skill_name")
+  done
 
   OBSOLETED_PAIRS=(
     ".config/skhd/skhdrc:~/.config/skhd/skhdrc"
