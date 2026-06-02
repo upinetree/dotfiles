@@ -1,7 +1,8 @@
 source ~/.zplug/init.zsh
 
 zplug 'zplug/zplug', hook-build:'zplug --self-manage'
-zplug "zsh-users/zsh-completions"
+# carapace-bin に役割を移譲。使用状況を見て不要なら削除する
+# zplug "zsh-users/zsh-completions"
 zplug "zsh-users/zsh-syntax-highlighting"
 zplug "zsh-users/zsh-history-substring-search"
 zplug "b4b4r07/enhancd", use:init.sh

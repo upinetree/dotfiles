@@ -95,7 +95,8 @@ git-branch-vault() {
     echo "Renamed $branch to $vault/$branch"
   done
 }
-compdef _git git-branch-vault=git-branch
+# carapace-bin 導入により _git 関数経由の補完は機能しない可能性が高いためコメントアウト
+# compdef _git git-branch-vault=git-branch
 
 http-status-code() {
   ruby -rrack -e 'puts Rack::Utils::HTTP_STATUS_CODES[ARGV[0].to_i]' -- $1

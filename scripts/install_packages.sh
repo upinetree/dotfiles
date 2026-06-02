@@ -109,6 +109,7 @@ if [ "$PLATFORM" = "osx" ]; then
   if exists brew; then
     brew install \
       bat \
+      carapace \
       coreutils \
       ctags \
       direnv \
@@ -165,7 +166,7 @@ if [ "$PLATFORM" = "linux" ]; then
   fi
 
   if exists brew; then
-    brew install bat ctags git-delta ripgrep git gh nvim
+    brew install bat carapace ctags git-delta ripgrep git gh nvim
   else
     log error "brew command not found"
     exit 1

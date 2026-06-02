@@ -12,7 +12,6 @@ autoload -Uz compinit && compinit
 zstyle ':completion:*' use-cache yes
 zstyle ':completion:*:default' menu select=2
 zstyle ':completion::complete:make:*:targets' call-command true
-source <(docker completion zsh)
 
 # word split chars
 # ctrl-w などの動作に影響する
@@ -129,6 +128,14 @@ source ~/.zsh/.exports.zsh
 # alias/function を読み込む
 # compdef は zplug の後に読み込まないとうまく動かない
 source ~/.zsh/.aliases.zsh
+
+# carapace-bin による補完。compinit と zplug より後で読み込んで上書きさせる
+# CARAPACE_BRIDGES: carapace 未対応コマンドは既存の zsh/bash 補完にフォールバックする
+if type carapace &>/dev/null; then
+  export CARAPACE_BRIDGES='zsh,bash'
+  zstyle ':completion:*:git:*' group-order 'main commands' 'alias commands' 'external commands'
+  source <(carapace _carapace)
+fi
 
 # 環境依存の追加設定はここに定義（上書きできるよう最後に読み込む）
 [ -f ~/.env.zsh ] && source ~/.env.zsh
