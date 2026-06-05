@@ -113,3 +113,5 @@
 
 [url "ssh://git@github.com/heyinc/"]
 	insteadOf = https://github.com/heyinc/
+[init]
+	defaultBranch = main
