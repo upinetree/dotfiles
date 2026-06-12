@@ -71,6 +71,7 @@ listup_dotfiles() {
     ".config/mise/.config.toml:~/.config/mise/config.toml"
     "default-gems:~/.config/mise/default-gems"
     ".claude/settings.json:~/.claude/settings.json"
+    ".claude/hooks:~/.claude/hooks"
   )
 
   if [ "$PLATFORM" = "osx" ]; then

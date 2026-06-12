@@ -27,7 +27,10 @@ This repo manages dotfiles via **symlinks** on macOS and Linux. The authoritativ
 - Permission allow/deny/ask lists for Bash commands and file reads (POST-style `curl`, `git checkout/switch/push/reset/rebase` are gated by `ask`)
 - PostToolUse hooks: auto-runs `rubocop -A` on `.rb`/`.rake` files, `prettier --write` on `.md` files, and appends edited Ruby file paths to `~/.claude/recently_edited_files.txt`
 - macOS notification hooks on Stop and Notification events via `osascript`
+- `report-session` auto-suggest hooks (scripts in `.claude/hooks/`, referenced via `$HOME/.claude/hooks/...`): a `UserPromptSubmit` hook fires on user satisfaction/completion phrases (gated by transcript length), and a `PostToolUse` Bash hook fires on `git commit`/`push`; both inject `additionalContext` nudging Claude to offer running `/report-session`, with the final go/no-go left to the model
 - Default model `opus[1m]`, `language: "日本語"`, `alwaysThinkingEnabled`, and enabled plugins (`ruby-lsp`, `skill-creator`, `frontend-design`, `security-guidance`)
+
+**`.claude/hooks/`** (symlinked to `~/.claude/hooks`) — shell scripts invoked by the hooks in `settings.json`. Referenced as `$HOME/.claude/hooks/...` so settings.json stays independent of the repo location.
 
 **`.claude/skills/<name>/SKILL.md`** — per-skill definitions auto-linked by `scripts/link.sh`. Add a new skill by creating a directory under `.claude/skills/` with a `SKILL.md`; running `make link` symlinks it into `~/.claude/skills/<name>` (no manual `DOTFILE_PAIRS` edit needed).
 
