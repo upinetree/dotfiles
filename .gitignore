@@ -10,6 +10,9 @@ vendor/bundler
 .byebug_history
 .irb_history
 
+# Python
+__pycache__
+
 # Go
 go.work
 go.work.sum

@@ -107,6 +107,10 @@
           {
             "type": "command",
             "command": "osascript -e 'display notification \"asking...\" with title \"Claude Code\" sound name \"Submarine\"'"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/hooks/voicevox-speak.py\""
           }
         ]
       }
@@ -118,6 +122,10 @@
           {
             "type": "command",
             "command": "osascript -e 'display notification \"done!\" with title \"Claude Code\" sound name \"Glass\"'"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/hooks/voicevox-speak.py\""
           }
         ]
       }
