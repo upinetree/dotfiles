@@ -24,4 +24,7 @@ description: Squash branch commits into one with a well-organized commit message
   - 何を・なぜ変更したか（"what" と "why"）
   - 複数のトピックがあればセクションに分けて整理する
   - 設計上の判断や背景など、コードから読み取りにくい情報を含める
-- フッター: `Co-Authored-By: Claude <noreply@anthropic.com>`
+- フッター: squash 対象の元コミットの方針に従う
+  - `git log $BASE..HEAD` で元コミットのフッター（`Co-Authored-By` や `Signed-off-by` など）を確認する
+  - 元コミットで使われているフッターがあればそれを引き継ぐ。複数あれば重複を除いてまとめる
+  - 元コミットにフッターが無ければ付与しない
