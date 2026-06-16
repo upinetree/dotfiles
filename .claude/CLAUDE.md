@@ -1,19 +1,16 @@
 # ユーザーローカル CLAUDE.md（全プロジェクト共通）
 
-このファイルは `~/.dotfiles/.claude/CLAUDE.md` が実体で、`~/.claude/CLAUDE.md` から symlink される。編集はこの dotfiles 側で行う（`hooks/` と同じ運用）。
+実体は `~/.dotfiles/.claude/CLAUDE.md`、`~/.claude/CLAUDE.md` から symlink される。編集はこの dotfiles 側で行う。
 
-## `~/.claude` 環境の構成と落とし穴
+## Claude の設定・hooks・skills を変更するとき
 
-dotfiles（toplevel `~/.dotfiles`、`master` ブランチ）で管理している。`.claude` 配下の同期方式が項目ごとに違うので注意:
+`~/.claude` 配下の設定は dotfiles からの symlink である（`~/.dotfiles/scripts/link.sh` の `DOTFILE_PAIRS`、`make link` で適用）。
 
-- **`hooks/` は symlink**: `~/.claude/hooks → ~/.dotfiles/.claude/hooks`。1か所を編集すれば live にも追跡対象にも反映される。
-- **`settings.json` は symlink ではなく独立した2ファイル**:
-  - `~/.claude/settings.json` … Claude Code が実際に読む live ファイル
-  - `~/.dotfiles/.claude/settings.json` … dotfiles の追跡ファイル
-  - **片方だけ編集すると設定が食い違う。両方を同一内容に更新すること。** 変更後は `diff` で一致を確認する。
-- コミットは `~/.dotfiles` で行う（`git -C ~/.dotfiles ...`）。
+- `~/.claude/settings.json` → `~/.dotfiles/.claude/settings.json`
+- `~/.claude/hooks` → `~/.dotfiles/.claude/hooks`
+- `~/.claude/skills/<name>` → `~/.dotfiles/.claude/skills/<name>`（ディレクトリ単位で自動 link）
+- `~/.claude/CLAUDE.md` → `~/.dotfiles/.claude/CLAUDE.md`
 
-## 自作スクリプトの言語方針
+変更は **dotfiles 側の実体を編集**し、`~/.dotfiles` でコミットする。`~/.claude` 側を直接編集しない。
 
-- `~/.claude` 配下の自作スクリプト（hooks / skills のヘルパー）は **Ruby に統一**する。新規も Ruby で書き、Python は使わない。
-- Obsidian 連携など外部 CLI を叩くスクリプトの設計知見はプロジェクトメモリ（`reference_obsidian_cli_vault` 等）を参照。
+対象が symlink ではなく実ファイルになっていたら symlink が壊れている（Claude Code が設定を直接書き換えると起きうる）。`make link`（または該当 1 本を貼り直し）で復旧してから編集し、内容が分岐した 2 コピーを残さない。

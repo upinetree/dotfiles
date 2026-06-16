@@ -21,6 +21,17 @@ This repo manages dotfiles via **symlinks** on macOS and Linux. The authoritativ
 - `scripts/install_packages.sh` — installs Homebrew, then brew packages and casks; handles macOS/Linux branches
 - `git-hooks/pre-commit` — Ruby script that blocks commits containing `binding.pry`, `debugger`, `focus: true`, `save_and_open_page`, or merge conflict markers
 
+## Self-authored script language
+
+Self-authored scripts under `.claude/` (hook helpers, skill helpers) and repo automation are written in **Ruby** by default, to keep a single runtime across the repo. Ruby is always available (managed via mise). `git-hooks/pre-commit` is Ruby; the `voicevox-speak` hook and the `report-session` skill scripts were ported from Python to Ruby for this reason — prefer Ruby for new scripts and don't introduce Python.
+
+Breaking the Ruby default is fine in these cases:
+- **Thin shell glue / triggers** where shell is the natural fit and there's little logic (e.g. the existing `.claude/hooks/report-session-*.sh` trigger wrappers).
+- **Integration constraints** — the target tool only ships an SDK/library in another language, so that language is required.
+- **Vendored / third-party scripts** — keep them in their original language; don't port for uniformity's sake.
+
+When breaking the default, keep the logic minimal; if a script grows real logic, move it to Ruby.
+
 ## Key configurations
 
 **`.claude/settings.json`** (symlinked to `~/.claude/settings.json`) — Claude Code configuration including:
