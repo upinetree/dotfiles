@@ -110,7 +110,7 @@
           },
           {
             "type": "command",
-            "command": "python3 \"$HOME/.claude/hooks/voicevox-speak.py\""
+            "command": "ruby \"$HOME/.claude/hooks/voicevox-speak.rb\""
           }
         ]
       }
@@ -125,7 +125,7 @@
           },
           {
             "type": "command",
-            "command": "python3 \"$HOME/.claude/hooks/voicevox-speak.py\""
+            "command": "ruby \"$HOME/.claude/hooks/voicevox-speak.rb\""
           }
         ]
       }
