@@ -11,6 +11,13 @@
 # of the note if it does not exist), and writes the file back in place.
 # Idempotent: skips if the target is already linked.
 
+# Force UTF-8 everywhere regardless of locale. When invoked without LANG/LC_ALL
+# set (as in non-interactive harnesses), Ruby defaults the external/filesystem
+# encodings to US-ASCII, so File.read returns US-ASCII content. Comparing that
+# against a multibyte argument raises Encoding::CompatibilityError.
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
+
 SECTION = '## Claude Reports'
 
 # Run the obsidian CLI and return stdout. The CLI prints non-fatal
@@ -18,7 +25,10 @@ SECTION = '## Claude Reports'
 # for the meaningful line themselves.
 def obs(*args) = `obsidian #{args.join(' ')}`
 
-target = ARGV[0] or abort 'Usage: link_to_daily.rb "<wikilink target>"'
+# ARGV strings are tagged with the startup locale's encoding, which the
+# assignment above cannot retroactively change — retag the raw bytes as UTF-8.
+target = ARGV[0]&.dup&.force_encoding(Encoding::UTF_8)
+abort 'Usage: link_to_daily.rb "<wikilink target>"' unless target
 
 # Vault root: the line beginning with "path\t".
 vault = obs('vault').lines.grep(/\Apath\t/).first&.split("\t", 2)&.last&.strip
