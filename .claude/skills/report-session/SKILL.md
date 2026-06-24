@@ -88,12 +88,12 @@ tags:
 `which obsidian` で確認する。コマンドが存在すれば有効とみなす。
 （アプリが起動していなければ最初のコマンド実行時に自動起動する）
 
-1. `obsidian tags` で既存タグ候補を確認し（「タグ」節を参照）、frontmatter（最大3タグ）+ 本文の順でレポート内容を生成して `/tmp/report-session.md` に書き出す（Write ツール）
+1. `obsidian tags` で既存タグ候補を確認し（「タグ」節を参照）、frontmatter（最大3タグ）+ 本文の順でレポート内容を生成して `/tmp/report-session-TIMESTAMP.md` に書き出す（Write ツール）
 2. vault の `claude-report/` フォルダに **ファイルを直接コピー** して作成する:
 
 ```bash
 VAULT=$(obsidian vault | awk -F'\t' '/^path\t/{print $2}')
-cp /tmp/report-session.md "$VAULT/claude-report/TIMESTAMP TITLE.md"
+cp /tmp/report-session-TIMESTAMP.md "$VAULT/claude-report/TIMESTAMP TITLE.md"
 ```
 
 Obsidian は vault のファイルシステムを監視しており、新規ファイルを自動でインデックスする。
