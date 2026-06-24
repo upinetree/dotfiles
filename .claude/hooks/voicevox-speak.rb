@@ -44,6 +44,9 @@ ENGINE_BIN = ENV.fetch(
 LAUNCH_LOCK = '/tmp/voicevox-engine.launching'
 LAUNCH_COOLDOWN = 60 # 秒。直近に起動を試みていたら再起動しない(立ち上がり待ち)
 
+# 読み上げにくいパターンを省略するときに代わりに読む語
+OMIT_WORDS = %w[ぺけぺけ うんたら なんちゃら ほにゃらら].freeze
+
 # ずんだもんのスタイル ID(エンジンの /speakers 由来)。選択時に「のだ」口調にする
 _zunda_default = '1,3,5,7,22,38,75,76'
 ZUNDAMON_STYLES = ENV.fetch('VOICEVOX_ZUNDAMON_STYLES', _zunda_default)
@@ -130,12 +133,22 @@ end
 
 # マークダウン/コード/URL/記号を落として読み上げ用の素のテキストにする。
 def clean(text)
-  text = text.gsub(/```.*?```/m, '')           # コードブロック
-  text = text.gsub(/`([^`]*)`/, '\1')          # インラインコード
-  text = text.gsub(%r{https?://\S+}, '')       # URL
-  text = text.gsub(/!?\[([^\]]*)\]\([^)]*\)/, '\1') # リンク/画像
-  text = text.gsub(/^\s*[#>\-*|]+\s*/, '')     # 行頭記号
-  text = text.gsub(/[*_~#>`|]/, '')            # 残りの装飾記号
+  text = text.gsub(/```.*?```/m, '')                  # コードブロック
+  text = text.gsub(/`([^`]*)`/, '\1')                 # インラインコード(内容は残す)
+  text = text.gsub(%r{https?://\S+}, '')              # URL
+  text = text.gsub(/!?\[([^\]]*)\]\([^)]*\)/, '\1')  # リンク/画像
+  text = text.gsub(/^\s*[#>\-*|]+\s*/, '')            # 行頭記号
+
+  # 読み上げにくい技術的パターンを省略語に置換（アンダースコア除去より先に行う）
+  omit = proc { OMIT_WORDS.sample }
+  text = text.gsub(%r{(?:~?/|\.{1,2}/)[\w.\-]+(?:/[\w.\-]+)+}, &omit)  # ファイルパス
+  # 英字・数字の両方を含む16進数列のみ(純英単語・純数字の誤検知を抑制)
+  text = text.gsub(/\b(?=[a-f0-9]*[a-f])(?=[a-f0-9]*[0-9])[a-f0-9]{7,40}\b/, &omit) # コミットハッシュ
+  text = text.gsub(/\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/) { |m| m.downcase.tr('_', ' ') } # 環境変数・定数名
+  text = text.gsub(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/) { |m| m.tr('_', ' ') } # スネークケース識別子
+  text = text.gsub(/\bv?\d+(?:\.\d+){2,}\b/, &omit)                      # バージョン番号(3桁以上)
+
+  text = text.gsub(/[*_~#>`|]/, '')                   # 残りの装飾記号
   text = text.tr("\n", ' ')
   text.gsub(/\s+/, ' ').strip
 end
