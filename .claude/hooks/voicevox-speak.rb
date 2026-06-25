@@ -26,35 +26,35 @@
 #   (停止後、次の hook で自動的に再起動される。完全に止めるなら本スクリプトの
 #    hook 登録を settings.json から外すか VOICEVOX_ENGINE_BIN を空にする)
 
-require 'json'
-require 'net/http'
-require 'uri'
-require 'tempfile'
+require "json"
+require "net/http"
+require "uri"
+require "tempfile"
 
-HOST = ENV.fetch('VOICEVOX_HOST', '127.0.0.1:50021')
-SPEAKER = ENV.fetch('VOICEVOX_SPEAKER', '3')
-MAXLEN = Integer(ENV.fetch('VOICEVOX_MAXLEN', '120'))
+HOST = ENV.fetch("VOICEVOX_HOST", "127.0.0.1:50021")
+SPEAKER = ENV.fetch("VOICEVOX_SPEAKER", "3")
+MAXLEN = Integer(ENV.fetch("VOICEVOX_MAXLEN", "120"))
 BASE = "http://#{HOST}".freeze
 
 # エンジン未起動なら GUI なしでバックグラウンド起動する(初回はその回をスキップ)
 ENGINE_BIN = ENV.fetch(
-  'VOICEVOX_ENGINE_BIN',
-  '/Applications/VOICEVOX.app/Contents/Resources/vv-engine/run'
+  "VOICEVOX_ENGINE_BIN",
+  "/Applications/VOICEVOX.app/Contents/Resources/vv-engine/run"
 )
-LAUNCH_LOCK = '/tmp/voicevox-engine.launching'
+LAUNCH_LOCK = "/tmp/voicevox-engine.launching"
 LAUNCH_COOLDOWN = 60 # 秒。直近に起動を試みていたら再起動しない(立ち上がり待ち)
 
 # 読み上げにくいパターンを省略するときに代わりに読む語
 OMIT_WORDS = %w[ぺけぺけ うんたら なんちゃら ほにゃらら].freeze
 
 # ずんだもんのスタイル ID(エンジンの /speakers 由来)。選択時に「のだ」口調にする
-_zunda_default = '1,3,5,7,22,38,75,76'
-ZUNDAMON_STYLES = ENV.fetch('VOICEVOX_ZUNDAMON_STYLES', _zunda_default)
-                     .split(',').map(&:strip).reject(&:empty?).to_set
+zunda_default = "1,3,5,7,22,38,75,76"
+ZUNDAMON_STYLES = ENV.fetch("VOICEVOX_ZUNDAMON_STYLES", zunda_default)
+  .split(",").map(&:strip).reject(&:empty?).to_set
 
 def http(method, path, data: nil, headers: {}, timeout: 10)
   uri = URI("#{BASE}#{path}")
-  klass = method == 'POST' ? Net::HTTP::Post : Net::HTTP::Get
+  klass = (method == "POST") ? Net::HTTP::Post : Net::HTTP::Get
   req = klass.new(uri)
   headers.each { |k, v| req[k] = v }
   req.body = data if data
@@ -64,9 +64,9 @@ def http(method, path, data: nil, headers: {}, timeout: 10)
 end
 
 def engine_alive?
-  http('GET', '/version', timeout: 1)
+  http("GET", "/version", timeout: 1)
   true
-rescue StandardError
+rescue
   false
 end
 
@@ -85,84 +85,84 @@ def try_launch_engine
     # ロックファイルがまだ無い場合は続行
   end
 
-  lock = File.open(LAUNCH_LOCK, 'w') # open("w") で mtime 更新 = クールダウン起点
+  lock = File.open(LAUNCH_LOCK, "w") # open("w") で mtime 更新 = クールダウン起点
   return unless lock.flock(File::LOCK_EX | File::LOCK_NB) # 別の hook が起動処理中
 
-  host, port = HOST.split(':')
-  logf = File.open('/tmp/voicevox-engine.log', 'ab')
+  host, port = HOST.split(":")
+  logf = File.open("/tmp/voicevox-engine.log", "ab")
   pid = Process.spawn(
-    ENGINE_BIN, '--host', host || '127.0.0.1', '--port', port || '50021',
+    ENGINE_BIN, "--host", host || "127.0.0.1", "--port", port || "50021",
     out: logf, err: logf, in: File::NULL,
     pgroup: true # 親(hook プロセス)終了後も生存させる
   )
   Process.detach(pid)
-rescue StandardError
+rescue
   nil
 end
 
 # transcript(JSONL) から、テキストを含む最後の assistant 発言を返す。
 def last_assistant_text(transcript_path)
-  text = ''
-  File.foreach(transcript_path, encoding: 'utf-8') do |line|
+  text = ""
+  File.foreach(transcript_path, encoding: "utf-8") do |line|
     line = line.strip
     next if line.empty?
 
     begin
       obj = JSON.parse(line)
-    rescue StandardError
+    rescue
       next
     end
-    next unless obj['type'] == 'assistant'
+    next unless obj["type"] == "assistant"
 
-    content = (obj['message'] || {})['content']
+    content = (obj["message"] || {})["content"]
     case content
     when String
       text = content unless content.strip.empty?
     when Array
       joined = content
-               .select { |b| b.is_a?(Hash) && b['type'] == 'text' }
-               .map { |b| b['text'].to_s }
-               .join.strip
+        .select { |b| b.is_a?(Hash) && b["type"] == "text" }
+        .map { |b| b["text"].to_s }
+        .join.strip
       text = joined unless joined.empty?
     end
   end
   text
-rescue StandardError
+rescue
   text
 end
 
 # マークダウン/コード/URL/記号を落として読み上げ用の素のテキストにする。
 def clean(text)
-  text = text.gsub(/```.*?```/m, '')                  # コードブロック
+  text = text.gsub(/```.*?```/m, "")                  # コードブロック
   text = text.gsub(/`([^`]*)`/, '\1')                 # インラインコード(内容は残す)
-  text = text.gsub(%r{https?://\S+}, '')              # URL
+  text = text.gsub(%r{https?://\S+}, "")              # URL
   text = text.gsub(/!?\[([^\]]*)\]\([^)]*\)/, '\1')  # リンク/画像
-  text = text.gsub(/^\s*[#>\-*|]+\s*/, '')            # 行頭記号
+  text = text.gsub(/^\s*[#>\-*|]+\s*/, "")            # 行頭記号
 
   # 読み上げにくい技術的パターンを省略語に置換（アンダースコア除去より先に行う）
   omit = proc { OMIT_WORDS.sample }
-  text = text.gsub(%r{(?:~?/|\.{1,2}/)[\w.\-]+(?:/[\w.\-]+)+}, &omit)  # ファイルパス
+  text = text.gsub(%r{(?:~?/|\.{1,2}/)[\w.-]+(?:/[\w.-]+)+}, &omit)  # ファイルパス
   # 英字・数字の両方を含む16進数列のみ(純英単語・純数字の誤検知を抑制)
   text = text.gsub(/\b(?=[a-f0-9]*[a-f])(?=[a-f0-9]*[0-9])[a-f0-9]{7,40}\b/, &omit) # コミットハッシュ
-  text = text.gsub(/\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/) { |m| m.downcase.tr('_', ' ') } # 環境変数・定数名
-  text = text.gsub(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/) { |m| m.tr('_', ' ') } # スネークケース識別子
+  text = text.gsub(/\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/) { |m| m.downcase.tr("_", " ") } # 環境変数・定数名
+  text = text.gsub(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/) { |m| m.tr("_", " ") } # スネークケース識別子
   text = text.gsub(/\bv?\d+(?:\.\d+){2,}\b/, &omit)                      # バージョン番号(3桁以上)
 
-  text = text.gsub(/[*_~#>`|]/, '')                   # 残りの装飾記号
-  text = text.tr("\n", ' ')
-  text.gsub(/\s+/, ' ').strip
+  text = text.gsub(/[*_~#>`|]/, "")                   # 残りの装飾記号
+  text = text.tr("\n", " ")
+  text.gsub(/\s+/, " ").strip
 end
 
 # 先頭 max_sentences 文、ただし MAXLEN 文字でも打ち切る。
 def head_sentences(text, max_sentences: 2)
   sentences = text.split(/(?<=[。！？!?])/, -1)
-  out = +''
+  out = +""
   sentences.each do |s|
     next if s.empty?
     break if !out.empty? && out.length + s.length > MAXLEN
 
     out << s
-    count = out.count('。！？!?')
+    count = out.count("。！？!?")
     break if count >= max_sentences
   end
   out = text if out.empty?
@@ -214,7 +214,7 @@ def zundamon_style(text)
 
     body = seg.rstrip
     tail = seg[body.length..] # 末尾空白を保持
-    unless body.end_with?('のだ') # 既に「のだ」口調なら二重変換しない
+    unless body.end_with?("のだ") # 既に「のだ」口調なら二重変換しない
       ZUNDA_RULES.each do |key, val|
         if body.end_with?(key)
           body = body[0...-key.length] + val
@@ -228,23 +228,23 @@ end
 
 # Notification を一般化したずんだもんの定型セリフ(詳細は画面で分かる前提)
 NOTIFY_ZUNDA = {
-  'permission' => [
-    '許可がほしいのだ！',
-    'ボクに権限をくれるのだ？',
-    '確認してほしいのだ！',
-    'ゴーサインを待ってるのだ！',
-    'ポチッとしてほしいのだ！'
+  "permission" => [
+    "許可がほしいのだ！",
+    "ボクに権限をくれるのだ？",
+    "確認してほしいのだ！",
+    "ゴーサインを待ってるのだ！",
+    "ポチッとしてほしいのだ！"
   ],
-  'idle' => [
-    '次の指示がほしいのだ！',
-    'ボク、待ってるのだ！',
-    'ボク、手が空いちゃったのだ。',
-    'なにをすればいいのだ？'
+  "idle" => [
+    "次の指示がほしいのだ！",
+    "ボク、待ってるのだ！",
+    "ボク、手が空いちゃったのだ。",
+    "なにをすればいいのだ？"
   ],
-  'default' => [
-    'お知らせなのだ！',
-    'ちょっと見てほしいのだ！',
-    '呼んでるのだ！'
+  "default" => [
+    "お知らせなのだ！",
+    "ちょっと見てほしいのだ！",
+    "呼んでるのだ！"
   ]
 }.freeze
 
@@ -259,11 +259,11 @@ def notification_text(message)
   msg = message.to_s.downcase
   key =
     if %w[permission approve allow].any? { |k| msg.include?(k) }
-      'permission'
+      "permission"
     elsif %w[waiting input idle].any? { |k| msg.include?(k) }
-      'idle'
+      "idle"
     else
-      'default'
+      "default"
     end
   NOTIFY_ZUNDA[key].sample
 end
@@ -271,16 +271,16 @@ end
 def speak(text)
   return if text.empty?
 
-  q = URI.encode_www_form('text' => text, 'speaker' => SPEAKER)
-  query = http('POST', "/audio_query?#{q}", timeout: 10)
-  wav = http('POST', "/synthesis?speaker=#{SPEAKER}", data: query,
-                                                      headers: { 'Content-Type' => 'application/json' }, timeout: 30)
-  tf = Tempfile.new(['voicevox', '.wav'])
+  q = URI.encode_www_form("text" => text, "speaker" => SPEAKER)
+  query = http("POST", "/audio_query?#{q}", timeout: 10)
+  wav = http("POST", "/synthesis?speaker=#{SPEAKER}", data: query,
+    headers: {"Content-Type" => "application/json"}, timeout: 30)
+  tf = Tempfile.new(["voicevox", ".wav"])
   tf.binmode
   tf.write(wav)
   tf.close
   begin
-    system('afplay', tf.path)
+    system("afplay", tf.path)
   ensure
     begin
       File.unlink(tf.path)
@@ -293,15 +293,15 @@ end
 def main
   begin
     data = JSON.parse($stdin.read)
-  rescue StandardError
+  rescue
     return
   end
 
-  case data['hook_event_name']
-  when 'Notification'
-    text = notification_text(data['message'].to_s)
-  when 'Stop'
-    raw = last_assistant_text(data['transcript_path'].to_s)
+  case data["hook_event_name"]
+  when "Notification"
+    text = notification_text(data["message"].to_s)
+  when "Stop"
+    raw = last_assistant_text(data["transcript_path"].to_s)
     text = head_sentences(clean(raw))
   else
     return
@@ -318,7 +318,7 @@ def main
 
   begin
     speak(text)
-  rescue StandardError
+  rescue
     nil
   end
 end

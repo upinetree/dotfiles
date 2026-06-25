@@ -36,7 +36,7 @@ When breaking the default, keep the logic minimal; if a script grows real logic,
 
 **`.claude/settings.json`** (symlinked to `~/.claude/settings.json`) — Claude Code configuration including:
 - Permission allow/deny/ask lists for Bash commands and file reads (POST-style `curl`, `git checkout/switch/push/reset/rebase` are gated by `ask`)
-- PostToolUse hooks: auto-runs `rubocop -A` on `.rb`/`.rake` files, `prettier --write` on `.md` files, and appends edited Ruby file paths to `~/.claude/recently_edited_files.txt`
+- PostToolUse hooks: auto-formats `.rb`/`.rake` files via `.claude/hooks/ruby-format.rb` (uses `standardrb --fix` when `standard` is in the bundle, falls back to `rubocop -A`), runs `prettier --write` on `.md` files, and appends edited Ruby file paths to `~/.claude/recently_edited_files.txt`
 - macOS notification hooks on Stop and Notification events via `osascript`
 - `report-session` auto-suggest hooks (scripts in `.claude/hooks/`, referenced via `$HOME/.claude/hooks/...`): a `UserPromptSubmit` hook fires on user satisfaction/completion phrases (gated by transcript length), and a `PostToolUse` Bash hook fires on `git commit`/`push`; both inject `additionalContext` nudging Claude to offer running `/report-session`, with the final go/no-go left to the model
 - Default model `opus[1m]`, `language: "日本語"`, `alwaysThinkingEnabled`, and enabled plugins (`ruby-lsp`, `skill-creator`, `frontend-design`, `security-guidance`)
@@ -44,6 +44,8 @@ When breaking the default, keep the logic minimal; if a script grows real logic,
 **`.claude/hooks/`** (symlinked to `~/.claude/hooks`) — shell scripts invoked by the hooks in `settings.json`. Referenced as `$HOME/.claude/hooks/...` so settings.json stays independent of the repo location.
 
 **`.claude/skills/<name>/SKILL.md`** — per-skill definitions auto-linked by `scripts/link.sh`. Add a new skill by creating a directory under `.claude/skills/` with a `SKILL.md`; running `make link` symlinks it into `~/.claude/skills/<name>` (no manual `DOTFILE_PAIRS` edit needed).
+
+**`Gemfile`** — declares `gem "standard"` (standardrb). Dotfiles scripts are few and don't warrant maintaining a custom rubocop rule set; standardrb provides zero-config formatting. The `.vscode/settings.json` sets `rubyLsp.formatter: "standard"` so VSCode format-on-save also uses standardrb.
 
 **`.config/mise/.config.toml`** — manages runtime versions for node, ruby, python, terraform, and claude via [mise](https://mise.jdx.dev/)
 

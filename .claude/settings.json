@@ -96,7 +96,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "opus",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -154,7 +154,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path | select(endswith(\".rb\") or endswith(\".rake\"))' | xargs -r bundle exec rubocop --force-exclusion -A"
+            "command": "ruby \"$HOME/.claude/hooks/ruby-format.rb\""
           },
           {
             "type": "command",
