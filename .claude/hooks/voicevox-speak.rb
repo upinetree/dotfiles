@@ -20,6 +20,10 @@
 #   VOICEVOX_ZUNDAMON_STYLES 既定 1,3,5,7,22,38,75,76
 #                       (この SPEAKER のとき語尾を「のだ」口調に簡易変換する)
 #
+# 一時ミュート(ミーティング中など。zsh エイリアス: .zsh/.aliases.zsh で定義):
+#   vvmute / vvunmute / vvtoggle / vvstatus
+#   実体は /tmp/voicevox-mute の touch/rm。ファイルがあれば読み上げをスキップする。
+#
 # エンジンの手動操作:
 #   停止 : lsof -ti:50021 | xargs kill
 #   状態 : curl -s http://127.0.0.1:50021/version
@@ -30,6 +34,11 @@ require "json"
 require "net/http"
 require "uri"
 require "tempfile"
+
+# このファイルが存在する間は読み上げをスキップ(ミーティング中の一時ミュート用)。
+# 切り替えは zsh エイリアス vvmute / vvunmute / vvtoggle / vvstatus。
+# /tmp に置くので Mac 再起動で自動的に解除される。
+MUTE_FLAG = ENV.fetch("VOICEVOX_MUTE_FLAG", "/tmp/voicevox-mute")
 
 HOST = ENV.fetch("VOICEVOX_HOST", "127.0.0.1:50021")
 SPEAKER = ENV.fetch("VOICEVOX_SPEAKER", "3")
@@ -291,6 +300,8 @@ def speak(text)
 end
 
 def main
+  return if File.exist?(MUTE_FLAG) # 一時ミュート中はなにも読まない
+
   begin
     data = JSON.parse($stdin.read)
   rescue

@@ -134,6 +134,14 @@ edit-func() {
   vim ~/.zsh/.aliases.zsh
 }
 
+# VOICEVOX 読み上げ(Claude Code hook: .claude/hooks/voicevox-speak.rb)の一時ミュート
+# ミーティング中などに使う。フラグは /tmp なので Mac 再起動で自動解除される。
+VOICEVOX_MUTE_FLAG="/tmp/voicevox-mute"
+vvmute()   { touch "$VOICEVOX_MUTE_FLAG"  && echo "🔇 VOICEVOX muted"; }
+vvunmute() { command rm -f "$VOICEVOX_MUTE_FLAG" && echo "🔊 VOICEVOX unmuted"; }
+vvtoggle() { [[ -e "$VOICEVOX_MUTE_FLAG" ]] && vvunmute || vvmute; }
+vvstatus() { [[ -e "$VOICEVOX_MUTE_FLAG" ]] && echo "🔇 muted" || echo "🔊 unmuted"; }
+
 # for WSL
 if [ -n "$WSLENV" ]; then
   alias pbcopy='win32yank.exe -i'
