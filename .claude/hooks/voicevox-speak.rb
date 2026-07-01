@@ -145,38 +145,42 @@ def clean(text)
   text = text.gsub(/```.*?```/m, "")                  # コードブロック
   text = text.gsub(/`([^`]*)`/, '\1')                 # インラインコード(内容は残す)
   text = text.gsub(%r{https?://\S+}, "")              # URL
-  text = text.gsub(/!?\[([^\]]*)\]\([^)]*\)/, '\1')  # リンク/画像
+  text = text.gsub(/!?\[([^\]]*)\]\([^)]*\)/, '\1')   # リンク/画像
   text = text.gsub(/^\s*[#>\-*|]+\s*/, "")            # 行頭記号
 
   # 読み上げにくい技術的パターンを省略語に置換（アンダースコア除去より先に行う）
   omit = proc { OMIT_WORDS.sample }
-  text = text.gsub(%r{(?:~?/|\.{1,2}/)[\w.-]+(?:/[\w.-]+)+}, &omit)  # ファイルパス
+  text = text.gsub(%r{(?:~?/|\.{1,2}/)[\w.-]+(?:/[\w.-]+)+}, &omit) # ファイルパス
   # 英字・数字の両方を含む16進数列のみ(純英単語・純数字の誤検知を抑制)
   text = text.gsub(/\b(?=[a-f0-9]*[a-f])(?=[a-f0-9]*[0-9])[a-f0-9]{7,40}\b/, &omit) # コミットハッシュ
   text = text.gsub(/\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/) { |m| m.downcase.tr("_", " ") } # 環境変数・定数名
   text = text.gsub(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/) { |m| m.tr("_", " ") } # スネークケース識別子
-  text = text.gsub(/\bv?\d+(?:\.\d+){2,}\b/, &omit)                      # バージョン番号(3桁以上)
+  text = text.gsub(/\bv?\d+(?:\.\d+){2,}\b/, &omit)   # バージョン番号(3桁以上)
 
   text = text.gsub(/[*_~#>`|]/, "")                   # 残りの装飾記号
-  text = text.tr("\n", " ")
-  text.gsub(/\s+/, " ").strip
+  # 空白は詰めつつ、改行は文の区切りとして残す(head_sentences で使う)
+  text = text.gsub(/[^\S\n]+/, " ")                   # 改行以外の連続空白 → 1 スペース
+  text = text.gsub(/ ?\n ?/, "\n")                    # 改行前後のスペースを除去
+  text = text.squeeze("\n")                           # 連続改行 → 1 つ
+  text.strip
 end
 
 # 先頭 max_sentences 文、ただし MAXLEN 文字でも打ち切る。
+# 句読点(。！？!?)に加えて改行も文の区切りとして扱う。
 def head_sentences(text, max_sentences: 2)
-  sentences = text.split(/(?<=[。！？!?])/, -1)
-  out = +""
+  sentences = text.split(/(?<=[。！？!?])|\n/).map(&:strip).reject(&:empty?)
+  out = []
+  total = 0
   sentences.each do |s|
-    next if s.empty?
-    break if !out.empty? && out.length + s.length > MAXLEN
+    break if !out.empty? && total + s.length > MAXLEN
 
     out << s
-    count = out.count("。！？!?")
-    break if count >= max_sentences
+    total += s.length
+    break if out.length >= max_sentences
   end
-  out = text if out.empty?
-  out = out[0, MAXLEN] if out.length > MAXLEN
-  out.strip
+  result = (out.empty? ? [text] : out).join("\n")
+  result = result[0, MAXLEN] if result.length > MAXLEN
+  result.strip
 end
 
 # 文末表現 → ずんだもん口調。長い/具体的なものから順に判定する(最初の一致を採用)
@@ -217,7 +221,7 @@ ZUNDA_RULES = [
 # 形態素解析はしないので、よくある文末パターンだけを文ごとに置換する。
 # 変換できない文末(体言止め等)はそのまま残す。
 def zundamon_style(text)
-  parts = text.split(/([。！？!?])/, -1) # 区切り文字も保持して分割
+  parts = text.split(/([。！？!?\n])/, -1) # 区切り文字(改行含む)も保持して分割
   parts.each_with_index.map do |seg, i|
     next seg if i.odd? # 区切り文字はそのまま
 
