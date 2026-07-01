@@ -161,14 +161,16 @@ def clean(text)
   # 空白は詰めつつ、改行は文の区切りとして残す(head_sentences で使う)
   text = text.gsub(/[^\S\n]+/, " ")                   # 改行以外の連続空白 → 1 スペース
   text = text.gsub(/ ?\n ?/, "\n")                    # 改行前後のスペースを除去
-  text = text.squeeze("\n")                           # 連続改行 → 1 つ
+  text = text.gsub(/\n{2,}/, "\n\n")                  # 連続改行 → 空行1つ(段落区切り)
   text.strip
 end
 
 # 先頭 max_sentences 文、ただし MAXLEN 文字でも打ち切る。
 # 句読点(。！？!?)に加えて改行も文の区切りとして扱う。
+# 空行(連続改行)は段落の切れ目とみなし、最初の段落だけを対象にする。
 def head_sentences(text, max_sentences: 2)
-  sentences = text.split(/(?<=[。！？!?])|\n/).map(&:strip).reject(&:empty?)
+  head = text.split(/\n{2,}/, 2).first.to_s
+  sentences = head.split(/(?<=[。！？!?])|\n/).map(&:strip).reject(&:empty?)
   out = []
   total = 0
   sentences.each do |s|
@@ -178,7 +180,7 @@ def head_sentences(text, max_sentences: 2)
     total += s.length
     break if out.length >= max_sentences
   end
-  result = (out.empty? ? [text] : out).join("\n")
+  result = (out.empty? ? [head] : out).join("\n")
   result = result[0, MAXLEN] if result.length > MAXLEN
   result.strip
 end
