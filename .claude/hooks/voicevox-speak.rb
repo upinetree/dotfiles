@@ -155,6 +155,8 @@ def clean(text)
   text = text.gsub(/\b(?=[a-f0-9]*[a-f])(?=[a-f0-9]*[0-9])[a-f0-9]{7,40}\b/, &omit) # コミットハッシュ
   text = text.gsub(/\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/) { |m| m.downcase.tr("_", " ") } # 環境変数・定数名
   text = text.gsub(/\b[a-z][a-z0-9]*_[a-z0-9_]+\b/) { |m| m.tr("_", " ") } # スネークケース識別子
+  # 6文字以上の全大文字語は小文字化(FLUSHALL 等のスペルアウトを回避。短い頭字語 API/OIDC 等は温存)
+  text = text.gsub(/\b[A-Z][A-Z0-9]{5,}\b/, &:downcase)
   text = text.gsub(/\bv?\d+(?:\.\d+){2,}\b/, &omit)   # バージョン番号(3桁以上)
 
   text = text.gsub(/[*_~#>`|]/, "")                   # 残りの装飾記号
