@@ -1,6 +1,7 @@
 {
   "env": {
-    "CLAUDECODE": "1"
+    "CLAUDECODE": "1",
+    "CLAUDE_CODE_FORK_SUBAGENT": "1"
   },
   "attribution": {
     "commit": "",
