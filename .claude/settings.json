@@ -183,10 +183,12 @@
   "language": "日本語",
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
+  "tui": "fullscreen",
   "voice": {
     "enabled": false,
     "mode": "hold"
   },
+  "remoteControlAtStartup": true,
   "skipAutoPermissionPrompt": true,
   "voiceEnabled": false
 }
