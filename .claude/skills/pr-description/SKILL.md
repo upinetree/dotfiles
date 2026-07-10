@@ -11,7 +11,7 @@ description: Generate a pull request description based on the repository's `.git
 
 1. デフォルトブランチを確認する: `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`（gh が使えなければ `git symbolic-ref refs/remotes/origin/HEAD`）
 2. `git log <default-branch>..HEAD --oneline` と `git diff <default-branch>... --name-only` で変更のスコープを把握し、必要に応じて変更ファイルを読んで文脈を理解する
-3. リポジトリのテンプレートを読む: `.github/PULL_REQUEST_TEMPLATE.md`（無ければ下記フォールバック構成を使う）
+3. リポジトリのテンプレートを読む: `.github/PULL_REQUEST_TEMPLATE.md`（無ければ下記フォールバック構成を使う）。テンプレート内の HTML コメントは記入ガイドとして解釈し、コメントアウトされたセクションは任意とみなして「情報の取捨選択」に照らして書く価値があるものだけ起こす
 4. 個人ルールを読む（存在するものだけ）:
    - `~/.claude/pr-description/rules.md` — 全リポジトリ共通の個人ルール
    - `~/.claude/pr-description/repos/<org>/<repo>.md` — リポジトリ別の個人ルール。`git remote get-url origin` から org/repo を導出する
