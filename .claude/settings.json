@@ -5,7 +5,8 @@
   },
   "attribution": {
     "commit": "",
-    "pr": ""
+    "pr": "",
+    "sessionUrl": false
   },
   "permissions": {
     "allow": [
@@ -18,6 +19,7 @@
       "Bash(find:*)",
       "Bash(tail:*)",
       "Bash(head:*)",
+      "Bash(date:*)",
       "Bash(git add:*)",
       "Bash(git config --get:*)",
       "Bash(git config --get-all:*)",
