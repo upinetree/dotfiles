@@ -30,8 +30,11 @@ report = File.join(vault, 'claude-report', "#{target}.md")
 abort "Report not found: #{report}" unless File.exist?(report)
 
 body = File.read(report)
-agent = body.scan(%r{#learn/agent\b}).size
-knowledge = body.scan(%r{#learn/knowledge\b}).size
+# Ignore tag mentions inside fenced code blocks and inline code spans — those
+# are references to the convention, not tagged learning items.
+prose = body.gsub(/^[ \t]*```.*?^[ \t]*```[ \t]*$/m, '').gsub(/`[^`\n]+`/, '')
+agent = prose.scan(%r{#learn/agent\b}).size
+knowledge = prose.scan(%r{#learn/knowledge\b}).size
 if agent.zero? && knowledge.zero?
   puts 'No #learn tags found, skipping'
   exit
