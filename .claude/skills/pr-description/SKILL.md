@@ -7,6 +7,8 @@ description: Generate a pull request description based on the repository's `.git
 
 リポジトリのテンプレートと個人ルールを実行時に読み込み、以下の原則に従って PR 説明文を生成する。
 
+引数に `--bootstrap` が含まれる場合は説明文を生成せず、「Bootstrap」節の手順でリポジトリ個別ルールの初期化を行う。
+
 ## Steps
 
 1. デフォルトブランチを確認する: `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`（gh が使えなければ `git symbolic-ref refs/remotes/origin/HEAD`）
@@ -32,6 +34,19 @@ description: Generate a pull request description based on the repository's `.git
 - 該当事項がない任意セクション（スコープ外・相談事項など）は省略する
 - issue 番号などの必須情報が不明な場合はプレースホルダ（`#XXX` 等）のままにして、ユーザーに確認を促す
 - コードブロックで囲まず、そのままテキストとして出力する
+
+## Bootstrap（`--bootstrap`）
+
+リポジトリ個別ルール `~/.claude/pr-description/repos/<org>/<repo>.md` を対話的に初期化する。
+
+1. `git remote get-url origin` から org/repo を導出し、個別ルールファイルの有無を確認する。既存なら内容を読み込み、以降は新規作成ではなく既存設定の更新として扱う（回答済みの項目は現在値をデフォルトとして提示する）
+2. リポジトリの `.github/PULL_REQUEST_TEMPLATE.md` を読み、セクションを列挙して「固定（コメントアウトされていない）／任意（コメントアウトされている・任意と明記されている）」に分類する。テンプレートが無い場合はその旨を伝え、フォールバック構成を前提に進める
+3. AskUserQuestion でカスタマイズ方針を質問する。質問はテンプレートの実セクション名を使って具体的に組み立てる:
+   - 任意セクションそれぞれの扱い — 「常に書く／条件を満たすとき書く／省略する」。条件付きの場合はどんなときに書くか（例: バグ修正のとき）も確認する
+   - 出力言語と表記の規約 — ただし共通ルール `rules.md` で既に決まっている項目は聞かない（重複を作らない）
+   - チェックボックス類（チェックリスト等）の扱い — 省略するか、残してどうチェックするか
+4. 回答をもとに個別ルールファイルを生成・保存する。構成は「テンプレートの扱い」（セクションごとの書く基準）と「表記」の 2 節。共通 `rules.md` と重複する内容は書かない（複数リポジトリで通用すると確認できた項目は共通側へ昇格させる運用のため）
+5. 保存したファイルの内容を表示し、次回以降の `/pr-description` で自動的に読み込まれることを伝える
 
 ## フォールバックテンプレート
 
