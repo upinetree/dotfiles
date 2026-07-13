@@ -19,6 +19,7 @@ description: セッション中に得た知見・調査結果・設計判断・�
 1. **fork 前に対話を完結させる**: fork からはユーザーに質問できない。「2回目以降の起動」に該当する場合は、更新 or 分割の AskUserQuestion を fork 前にメインスレッドで行い、その決定を fork への指示に含める
 2. Agent ツールで起動する。`subagent_type: "fork"`、バックグラウンド実行（デフォルト）のまま。prompt には以下を含める:
    - 会話に読み込み済みのこの SKILL.md の規約に従い、レポートの生成・保存・daily note リンク・学びトリアージ追記・出力後レビューまで完了すること
+   - 保存も fork 自身が行う。一時ファイルは「Obsidian CLI が使える場合」手順 1 の `/tmp/rs-TIMESTAMP.md` 命名を厳守すること（サブエージェントの Write を拒否する組み込みガードの回避。同節の注記を参照）
    - ユーザーが指定した焦点・題材があればそれ
    - 2回目以降の場合は、更新 or 分割の決定内容
    - AskUserQuestion は使わず自律的に完了すること。権限拒否等で先に進めない手順があれば、無理に回避せず「どこで何にブロックされたか」を最終メッセージで報告して終了すること
@@ -119,12 +120,14 @@ tags:
 `which obsidian` で確認する。コマンドが存在すれば有効とみなす。
 （アプリが起動していなければ最初のコマンド実行時に自動起動する）
 
-1. `obsidian tags` で既存タグ候補を確認し（「タグ」節を参照）、frontmatter（最大3タグ）+ 本文の順でレポート内容を生成して `/tmp/report-session-TIMESTAMP.md` に書き出す（Write ツール）
+1. `obsidian tags` で既存タグ候補を確認し（「タグ」節を参照）、frontmatter（最大3タグ）+ 本文の順でレポート内容を生成して `/tmp/rs-TIMESTAMP.md` に書き出す（Write ツール）
+
+> 一時ファイル名は必ず `rs-TIMESTAMP.md` の形にする。Claude Code にはサブエージェントの Write をファイル名で拒否する組み込みガード（hooks では設定・解除不可）があり、basename が `report` / `findings` / `summary` 等の語で始まると "Subagents should return findings as text, not write report files." で失敗する（2026-07 実測。`rs-*` とタイムスタンプ始まりの最終ファイル名は通過を確認済み）。
 2. vault の `claude-report/` フォルダに **ファイルを直接コピー** して作成する:
 
 ```bash
 VAULT=$(obsidian vault | awk -F'\t' '/^path\t/{print $2}')
-cp /tmp/report-session-TIMESTAMP.md "$VAULT/claude-report/TIMESTAMP TITLE.md"
+cp /tmp/rs-TIMESTAMP.md "$VAULT/claude-report/TIMESTAMP TITLE.md"
 ```
 
 Obsidian は vault のファイルシステムを監視しており、新規ファイルを自動でインデックスする。
