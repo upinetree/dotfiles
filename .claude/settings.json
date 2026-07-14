@@ -162,10 +162,6 @@
           {
             "type": "command",
             "command": "/opt/homebrew/bin/jq -r '.tool_input.file_path | select(endswith(\".md\"))' | xargs -r /opt/homebrew/bin/prettier --write"
-          },
-          {
-            "type": "command",
-            "command": "/opt/homebrew/bin/jq -r '.tool_input.file_path | select(endswith(\".rb\") or endswith(\".rake\"))' >> ~/.claude/recently_edited_files.txt"
           }
         ]
       }
