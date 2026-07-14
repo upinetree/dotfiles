@@ -121,6 +121,7 @@ if [ "$PLATFORM" = "osx" ]; then
       jq \
       mise \
       openssl \
+      prettier \
       readline \
       ripgrep \
       source-highlight \
