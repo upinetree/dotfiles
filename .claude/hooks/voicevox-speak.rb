@@ -89,7 +89,7 @@ def try_launch_engine
 
   # 直近に起動を試みていれば、立ち上がり待ちとみなしスキップ
   begin
-    return if Time.zone.now - File.mtime(LAUNCH_LOCK) < LAUNCH_COOLDOWN
+    return if Time.now - File.mtime(LAUNCH_LOCK) < LAUNCH_COOLDOWN
   rescue SystemCallError
     # ロックファイルがまだ無い場合は続行
   end
@@ -311,7 +311,9 @@ def main
   return if File.exist?(MUTE_FLAG) # 一時ミュート中はなにも読まない
 
   begin
-    data = JSON.parse($stdin.read)
+    # Claude Desktop 起動の hook 環境には LANG/LC_* が無く default external が
+    # US-ASCII になるため、UTF-8 を明示しないと日本語を含む入力の parse で落ちる
+    data = JSON.parse($stdin.read.force_encoding(Encoding::UTF_8).scrub)
   rescue
     return
   end
