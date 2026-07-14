@@ -161,7 +161,7 @@
           },
           {
             "type": "command",
-            "command": "/opt/homebrew/bin/jq -r '.tool_input.file_path | select(endswith(\".md\"))' | xargs -r /opt/homebrew/bin/prettier --write"
+            "command": "if [ -f /tmp/.claude-skip-format ]; then cat >/dev/null; else /opt/homebrew/bin/jq -r '.tool_input.file_path | select(endswith(\".md\"))' | xargs -r /opt/homebrew/bin/prettier --write; fi"
           }
         ]
       }
