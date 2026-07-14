@@ -122,7 +122,7 @@
           },
           {
             "type": "command",
-            "command": "ruby \"$HOME/.claude/hooks/voicevox-speak.rb\""
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/voicevox-speak.rb\""
           }
         ]
       }
@@ -137,7 +137,7 @@
           },
           {
             "type": "command",
-            "command": "ruby \"$HOME/.claude/hooks/voicevox-speak.rb\""
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/voicevox-speak.rb\""
           }
         ]
       }
@@ -157,15 +157,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "ruby \"$HOME/.claude/hooks/ruby-format.rb\""
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/ruby-format.rb\""
           },
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path | select(endswith(\".md\"))' | xargs -r prettier --write"
+            "command": "/opt/homebrew/bin/jq -r '.tool_input.file_path | select(endswith(\".md\"))' | xargs -r prettier --write"
           },
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path | select(endswith(\".rb\") or endswith(\".rake\"))' >> ~/.claude/recently_edited_files.txt"
+            "command": "/opt/homebrew/bin/jq -r '.tool_input.file_path | select(endswith(\".rb\") or endswith(\".rake\"))' >> ~/.claude/recently_edited_files.txt"
           }
         ]
       }
