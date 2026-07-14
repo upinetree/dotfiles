@@ -13,6 +13,9 @@
 
 set -euo pipefail
 
+# GUI 起動(Claude Desktop 等)では Homebrew が PATH に入らず jq が見つからないため補正
+PATH="/opt/homebrew/bin:$PATH"
+
 input="$(cat)"
 
 if ! command -v jq >/dev/null 2>&1; then

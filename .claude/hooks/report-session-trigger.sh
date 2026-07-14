@@ -13,6 +13,9 @@
 
 set -euo pipefail
 
+# GUI 起動(Claude Desktop 等)では Homebrew が PATH に入らず jq が見つからないため補正
+PATH="/opt/homebrew/bin:$PATH"
+
 # --- 設定 -------------------------------------------------------------------
 # 会話長ゲート: transcript(.jsonl) の行数がこれ未満なら発火しない
 MIN_TRANSCRIPT_LINES="${REPORT_SESSION_MIN_LINES:-12}"
