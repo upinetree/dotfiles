@@ -36,12 +36,32 @@ When breaking the default, keep the logic minimal; if a script grows real logic,
 
 **`.claude/settings.json`** (symlinked to `~/.claude/settings.json`) — Claude Code configuration including:
 - Permission allow/deny/ask lists for Bash commands and file reads (POST-style `curl`, `git checkout/switch/push/reset/rebase` are gated by `ask`)
-- PostToolUse hooks: auto-formats `.rb`/`.rake` files via `.claude/hooks/ruby-format.rb` (uses `standardrb --fix` when `standard` is in the bundle, falls back to `rubocop -A`), runs `prettier --write` on `.md` files, and appends edited Ruby file paths to `~/.claude/recently_edited_files.txt`
+- PostToolUse hooks: auto-formats `.rb`/`.rake` files via `.claude/hooks/ruby-format.rb` (uses `standardrb --fix` when `standard` is in the bundle, falls back to `rubocop -A`), and `.md` files via `.claude/hooks/md-format.rb` (prettier). Format skipping is controlled by `.claude/hooks/format-skip.rb` — see **Formatter skip** below
 - macOS notification hooks on Stop and Notification events via `osascript`
 - `report-session` auto-suggest hooks (scripts in `.claude/hooks/`, referenced via `$HOME/.claude/hooks/...`): a `UserPromptSubmit` hook fires on user satisfaction/completion phrases (gated by transcript length), and a `PostToolUse` Bash hook fires on `git commit`/`push`; both inject `additionalContext` nudging Claude to offer running `/report-session`, with the final go/no-go left to the model
-- Default model `opus[1m]`, `language: "日本語"`, `alwaysThinkingEnabled`, and enabled plugins (`ruby-lsp`, `skill-creator`, `frontend-design`, `security-guidance`)
+- `language: "日本語"`, `alwaysThinkingEnabled`, and enabled plugins (`ruby-lsp`, `skill-creator`, `frontend-design`, `security-guidance`)
+
+**PC-local settings in `settings.json`**: `settings.local.json` does not exist at the user layer (`~/.claude/`) — only at the project layer. To keep machine-specific values (model, extra plugins, etc.) out of git while keeping the symlink intact, this repo uses `git update-index --skip-worktree .claude/settings.json`. When committing a change to the shared portions, temporarily lift the flag:
+
+```bash
+git update-index --no-skip-worktree .claude/settings.json
+git add -p .claude/settings.json   # stage only the shared hunks
+git commit
+git update-index --skip-worktree .claude/settings.json
+```
 
 **`.claude/hooks/`** (symlinked to `~/.claude/hooks`) — shell scripts invoked by the hooks in `settings.json`. Referenced as `$HOME/.claude/hooks/...` so settings.json stays independent of the repo location.
+
+**Formatter skip** — `.claude/hooks/format-skip.rb` is a shared module that `ruby-format.rb` and `md-format.rb` both `require_relative`. Skip rules are evaluated in order:
+
+| Flag | Scope |
+|---|---|
+| `/tmp/.claude-skip-format` | all formatters, session-wide |
+| `/tmp/.claude-skip-format.<ext>` | extension only, session-wide |
+| `<repo>/.claude/skip-format` | all formatters, project-wide (commit to share with team) |
+| `<repo>/.claude/skip-format.local` | all formatters, project-wide personal (gitignored) |
+| `<repo>/.claude/skip-format.<ext>` | extension only, project-wide |
+| `<repo>/.claude/skip-format.local.<ext>` | extension only, project-wide personal (gitignored) |
 
 **`.claude/skills/<name>/SKILL.md`** — per-skill definitions auto-linked by `scripts/link.sh`. Add a new skill by creating a directory under `.claude/skills/` with a `SKILL.md`; running `make link` symlinks it into `~/.claude/skills/<name>` (no manual `DOTFILE_PAIRS` edit needed).
 
