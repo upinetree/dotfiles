@@ -19,6 +19,7 @@
 #                       (未起動時に自動起動するエンジン本体。空にすると自動起動しない)
 #   VOICEVOX_ZUNDAMON_STYLES 既定 1,3,5,7,22,38,75,76
 #                       (この SPEAKER のとき語尾を「のだ」口調に簡易変換する)
+#   VOICEVOX_VOLUME     既定 1.0 (afplay -v に渡す音量。0.0〜255.0、1.0 がデフォルト)
 #
 # 一時ミュート(ミーティング中など。zsh エイリアス: .zsh/.aliases.zsh で定義):
 #   vvmute / vvunmute / vvtoggle / vvstatus
@@ -43,6 +44,7 @@ MUTE_FLAG = ENV.fetch("VOICEVOX_MUTE_FLAG", "/tmp/voicevox-mute")
 HOST = ENV.fetch("VOICEVOX_HOST", "127.0.0.1:50021")
 SPEAKER = ENV.fetch("VOICEVOX_SPEAKER", "3")
 MAXLEN = Integer(ENV.fetch("VOICEVOX_MAXLEN", "120"))
+VOLUME = Float(ENV.fetch("VOICEVOX_VOLUME", "1.0"))
 BASE = "http://#{HOST}".freeze
 
 # エンジン未起動なら GUI なしでバックグラウンド起動する(初回はその回をスキップ)
@@ -297,7 +299,7 @@ def speak(text)
   tf.write(wav)
   tf.close
   begin
-    system("afplay", tf.path)
+    system("afplay", "-v", VOLUME.to_s, tf.path)
   ensure
     begin
       File.unlink(tf.path)

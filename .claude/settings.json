@@ -1,7 +1,8 @@
 {
   "env": {
     "CLAUDECODE": "1",
-    "CLAUDE_CODE_FORK_SUBAGENT": "1"
+    "CLAUDE_CODE_FORK_SUBAGENT": "1",
+    "VOICEVOX_VOLUME": "0.5"
   },
   "attribution": {
     "commit": "",
