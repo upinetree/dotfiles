@@ -31,3 +31,5 @@ __doc
 .envrc
 mise.local.toml
 **/.claude/settings.local.json
+**/.claude/skip-format.local
+**/.claude/skip-format.local.*

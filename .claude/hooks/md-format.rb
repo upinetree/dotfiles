@@ -10,15 +10,10 @@ begin
   data = JSON.parse($stdin.read.force_encoding(Encoding::UTF_8).scrub)
   file = data.dig("tool_input", "file_path").to_s
   exit 0 if file.empty? || file.start_with?("-")
-  ext = File.extname(file)
-  exit 0 unless ext.match?(/\A\.(rb|rake)\z/)
-  exit 0 if FormatSkip.skip?(file, ext)
+  exit 0 unless file.end_with?(".md")
+  exit 0 if FormatSkip.skip?(file, ".md")
 
-  if system("bundle", "show", "standard", out: File::NULL, err: File::NULL)
-    system("bundle", "exec", "standardrb", "--fix", "--", file)
-  else
-    system("bundle", "exec", "rubocop", "--force-exclusion", "-A", "--", file)
-  end
+  system("/opt/homebrew/bin/prettier", "--write", "--", file)
 rescue
   nil
 end

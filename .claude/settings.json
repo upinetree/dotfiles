@@ -161,7 +161,7 @@
           },
           {
             "type": "command",
-            "command": "if [ -f /tmp/.claude-skip-format ]; then cat >/dev/null; else /opt/homebrew/bin/jq -r '.tool_input.file_path | select(endswith(\".md\"))' | xargs -r /opt/homebrew/bin/prettier --write; fi"
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/md-format.rb\""
           }
         ]
       }
