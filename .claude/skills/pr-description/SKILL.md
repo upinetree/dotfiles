@@ -1,13 +1,13 @@
 ---
 name: pr-description
-description: Generate a pull request description based on the repository's `.github/PULL_REQUEST_TEMPLATE.md` and personal rules in `~/.claude/pr-description/`.
+description: PR の説明文・本文（body）を生成するスキル。「PR を作って」「PR 説明文を書いて」「プルリクを出したい」「gh pr create したい」「PR の description 書いて」「このブランチで PR 作りたい」などの PR 作成・文章生成の依頼で使用する。リポジトリの PULL_REQUEST_TEMPLATE と個人ルールを読み込んで生成する。
 ---
 
 # PR 説明文の生成
 
 リポジトリのテンプレートと個人ルールを実行時に読み込み、以下の原則に従って PR 説明文を生成する。
 
-引数に `--bootstrap` が含まれる場合は説明文を生成せず、「Bootstrap」節の手順でリポジトリ個別ルールの初期化を行う。
+`--bootstrap` 引数付きの場合は説明文を生成せず、「Bootstrap」節の手順でリポジトリ個別ルールの初期化を行う。
 
 ## Steps
 
