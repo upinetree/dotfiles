@@ -26,6 +26,7 @@ This repo manages dotfiles via **symlinks** on macOS and Linux. The authoritativ
 Self-authored scripts under `.claude/` (hook helpers, skill helpers) and repo automation are written in **Ruby** by default, to keep a single runtime across the repo. Ruby is always available (managed via mise). `git-hooks/pre-commit` is Ruby; the `voicevox-speak` hook and the `report-session` skill scripts were ported from Python to Ruby for this reason — prefer Ruby for new scripts and don't introduce Python.
 
 Breaking the Ruby default is fine in these cases:
+
 - **Thin shell glue / triggers** where shell is the natural fit and there's little logic (e.g. the existing `.claude/hooks/report-session-*.sh` trigger wrappers).
 - **Integration constraints** — the target tool only ships an SDK/library in another language, so that language is required.
 - **Vendored / third-party scripts** — keep them in their original language; don't port for uniformity's sake.
@@ -35,7 +36,8 @@ When breaking the default, keep the logic minimal; if a script grows real logic,
 ## Key configurations
 
 **`.claude/settings.json`** (symlinked to `~/.claude/settings.json`) — Claude Code configuration including:
-- Permission allow/deny/ask lists for Bash commands and file reads (POST-style `curl`, `git checkout/switch/push/reset/rebase` are gated by `ask`)
+
+- Permission allow/deny/ask lists for Bash commands and file reads (POST-style `curl` and `git push` are gated by `ask`; `git checkout/switch/reset/rebase` are in `allow`)
 - PostToolUse hooks: auto-formats `.rb`/`.rake` files via `.claude/hooks/ruby-format.rb` (uses `standardrb --fix` when `standard` is in the bundle, falls back to `rubocop -A`), and `.md` files via `.claude/hooks/md-format.rb` (prettier). Format skipping is controlled by `.claude/hooks/format-skip.rb` — see **Formatter skip** below
 - macOS notification hooks on Stop and Notification events via `osascript`
 - `report-session` auto-suggest hooks (scripts in `.claude/hooks/`, referenced via `$HOME/.claude/hooks/...`): a `UserPromptSubmit` hook fires on user satisfaction/completion phrases (gated by transcript length), and a `PostToolUse` Bash hook fires on `git commit`/`push`; both inject `additionalContext` nudging Claude to offer running `/report-session`, with the final go/no-go left to the model
@@ -54,14 +56,14 @@ git update-index --skip-worktree .claude/settings.json
 
 **Formatter skip** — `.claude/hooks/format-skip.rb` is a shared module that `ruby-format.rb` and `md-format.rb` both `require_relative`. Skip rules are evaluated in order:
 
-| Flag | Scope |
-|---|---|
-| `/tmp/.claude-skip-format` | all formatters, session-wide |
-| `/tmp/.claude-skip-format.<ext>` | extension only, session-wide |
-| `<repo>/.claude/skip-format` | all formatters, project-wide (commit to share with team) |
-| `<repo>/.claude/skip-format.local` | all formatters, project-wide personal (gitignored) |
-| `<repo>/.claude/skip-format.<ext>` | extension only, project-wide |
-| `<repo>/.claude/skip-format.local.<ext>` | extension only, project-wide personal (gitignored) |
+| Flag                                     | Scope                                                    |
+| ---------------------------------------- | -------------------------------------------------------- |
+| `/tmp/.claude-skip-format`               | all formatters, session-wide                             |
+| `/tmp/.claude-skip-format.<ext>`         | extension only, session-wide                             |
+| `<repo>/.claude/skip-format`             | all formatters, project-wide (commit to share with team) |
+| `<repo>/.claude/skip-format.local`       | all formatters, project-wide personal (gitignored)       |
+| `<repo>/.claude/skip-format.<ext>`       | extension only, project-wide                             |
+| `<repo>/.claude/skip-format.local.<ext>` | extension only, project-wide personal (gitignored)       |
 
 **`.claude/skills/<name>/SKILL.md`** — per-skill definitions auto-linked by `scripts/link.sh`. Add a new skill by creating a directory under `.claude/skills/` with a `SKILL.md`; running `make link` symlinks it into `~/.claude/skills/<name>` (no manual `DOTFILE_PAIRS` edit needed).
 
@@ -70,6 +72,7 @@ git update-index --skip-worktree .claude/settings.json
 **`.config/mise/.config.toml`** — manages runtime versions for node, ruby, python, terraform, and claude via [mise](https://mise.jdx.dev/)
 
 **`.gitconfig`** — notable aliases:
+
 - `git aicommit` — generates a commit message via Claude CLI, then opens editor
 - `git aa` / `git coo` / `git rr` / `git b-delete` — fzf-powered interactive git operations
 - `git fmr` — fetch + rebase onto origin/main in one step
