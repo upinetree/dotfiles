@@ -3,9 +3,12 @@
 idiomatic_version_file_enable_tools = []
 ruby.default_packages_file = "./default-gems"
 
+minimum_release_age = "7d"
+
 [tools]
 node = "latest"
 claude = "latest"
 ruby = "latest"
 terraform = "latest"
 python = "latest"
+"npm:@openai/codex" = "latest"
