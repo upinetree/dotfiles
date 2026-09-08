@@ -52,7 +52,7 @@ git commit
 git update-index --skip-worktree .claude/settings.json
 ```
 
-**`.claude/hooks/`** (symlinked to `~/.claude/hooks`) — shell scripts invoked by the hooks in `settings.json`. Referenced as `$HOME/.claude/hooks/...` so settings.json stays independent of the repo location. `.codex/hooks.json` (symlinked to `~/.codex/hooks.json`) points at the same `$HOME/.claude/hooks/` scripts, so Codex shares them with no duplicated copies.
+**`.claude/hooks/`** (symlinked to `~/.claude/hooks`) — shell scripts invoked by the hooks in `settings.json`. Referenced as `$HOME/.claude/hooks/...` so settings.json stays independent of the repo location. `.codex/hooks.json` (symlinked to `~/.codex/hooks.json`) points at the same `$HOME/.claude/hooks/` scripts, so Codex shares them with no duplicated copies. Hook **wiring** (event / matcher / command entries) is the one thing that cannot be shared — Claude Code only reads hooks from `settings.json` and Codex only reads `hooks.json`, with no include mechanism in either. When adding, removing, or re-matching a hook, update both files (as of 2026-09 six entries are identical; the `Notification` entries exist only in `settings.json`).
 
 **Codex / cross-agent sharing** — Codex reuses the Claude assets instead of maintaining forks: `~/.codex/AGENTS.md` is a symlink to `.claude/CLAUDE.md`, the repo-root `AGENTS.md` is a symlink to `CLAUDE.md`, and skills have a single source in `.agents/skills/`. Only `.codex/hooks.json` and `.codex/config.toml` are Codex-specific.
 

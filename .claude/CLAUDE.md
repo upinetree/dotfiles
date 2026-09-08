@@ -11,7 +11,7 @@
 - `~/.agents/skills/<name>` と `~/.claude/skills/<name>` → いずれも `~/.dotfiles/.agents/skills/<name>`（ディレクトリ単位で自動 link。正本はクロスエージェント標準の `.agents/skills`。Claude Code は `~/.claude/skills` しか読まないため橋渡し link も張る）
 - `~/.claude/CLAUDE.md` → `~/.dotfiles/.claude/CLAUDE.md`
 - `~/.codex/AGENTS.md` → `~/.dotfiles/.claude/CLAUDE.md`（Codex 用。実体は CLAUDE.md と共有）
-- `~/.codex/hooks.json` → `~/.dotfiles/.codex/hooks.json`
+- `~/.codex/hooks.json` → `~/.dotfiles/.codex/hooks.json`（hook の配線は settings.json と重複して持つしかない。hook の追加・削除・matcher 変更時は両ファイルを揃える）
 
 変更は **dotfiles 側の実体を編集**し、`~/.dotfiles` でコミットする。`~/.claude`・`~/.agents`・`~/.codex` 側を直接編集しない。
 
