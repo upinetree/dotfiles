@@ -17,7 +17,7 @@ Requires Git and Make. `make copy` copies a few files (`.bashrc`, `/etc/paths`) 
 This repo manages dotfiles via **symlinks** on macOS and Linux. The authoritative mapping lives in `scripts/link.sh` (`DOTFILE_PAIRS`), an indexed array of `"src:dst"` pairs (bash 3.2 compatible — macOS ships with bash 3.2 so associative arrays are avoided) that maps repo-relative paths to their home directory destinations (e.g. `.gitconfig` → `~/.gitconfig`).
 
 - `scripts/lib.sh` — shared utilities: `detect_platform` (sets `$PLATFORM` to `osx`/`linux`) and `log <level> <text>`
-- `scripts/link.sh` — creates all symlinks; also handles an `OBSOLETED_PAIRS` list for cleanup of removed mappings. Each directory under `.claude/skills/` is auto-linked into `~/.claude/skills/<name>` so machine-local skills placed directly in `~/.claude/skills/` are left untouched
+- `scripts/link.sh` — creates all symlinks; also handles an `OBSOLETED_PAIRS` list for cleanup of removed mappings. Each directory under `.agents/skills/` is auto-linked into both `~/.agents/skills/<name>` (canonical cross-agent location) and `~/.claude/skills/<name>` (bridge link — Claude Code only reads `~/.claude/skills`, verified 2026-09). Machine-local skills placed directly in either directory are left untouched
 - `scripts/install_packages.sh` — installs Homebrew, then runs `brew bundle` against the root `Brewfile`. Platform differences live in the Brewfile itself via `OS.mac?` / `OS.linux?` (casks are macOS-only)
 - `git-hooks/pre-commit` — Ruby script that blocks commits containing `binding.pry`, `debugger`, `focus: true`, `save_and_open_page`, or merge conflict markers
 
@@ -52,7 +52,9 @@ git commit
 git update-index --skip-worktree .claude/settings.json
 ```
 
-**`.claude/hooks/`** (symlinked to `~/.claude/hooks`) — shell scripts invoked by the hooks in `settings.json`. Referenced as `$HOME/.claude/hooks/...` so settings.json stays independent of the repo location.
+**`.claude/hooks/`** (symlinked to `~/.claude/hooks`) — shell scripts invoked by the hooks in `settings.json`. Referenced as `$HOME/.claude/hooks/...` so settings.json stays independent of the repo location. `.codex/hooks.json` (symlinked to `~/.codex/hooks.json`) points at the same `$HOME/.claude/hooks/` scripts, so Codex shares them with no duplicated copies.
+
+**Codex / cross-agent sharing** — Codex reuses the Claude assets instead of maintaining forks: `~/.codex/AGENTS.md` is a symlink to `.claude/CLAUDE.md`, the repo-root `AGENTS.md` is a symlink to `CLAUDE.md`, and skills have a single source in `.agents/skills/`. Only `.codex/hooks.json` and `.codex/config.toml` are Codex-specific.
 
 **Formatter skip** — `.claude/hooks/format-skip.rb` is a shared module that `ruby-format.rb` and `md-format.rb` both `require_relative`. Skip rules are evaluated in order:
 
@@ -65,7 +67,7 @@ git update-index --skip-worktree .claude/settings.json
 | `<repo>/.claude/skip-format.<ext>`       | extension only, project-wide                             |
 | `<repo>/.claude/skip-format.local.<ext>` | extension only, project-wide personal (gitignored)       |
 
-**`.claude/skills/<name>/SKILL.md`** — per-skill definitions auto-linked by `scripts/link.sh`. Add a new skill by creating a directory under `.claude/skills/` with a `SKILL.md`; running `make link` symlinks it into `~/.claude/skills/<name>` (no manual `DOTFILE_PAIRS` edit needed).
+**`.agents/skills/<name>/SKILL.md`** — per-skill definitions auto-linked by `scripts/link.sh`. Add a new skill by creating a directory under `.agents/skills/` with a `SKILL.md`; running `make link` symlinks it into `~/.agents/skills/<name>` and `~/.claude/skills/<name>` (no manual `DOTFILE_PAIRS` edit needed). The canonical copy lives in `.agents/skills/` (cross-agent standard location; skills used to live in `.claude/skills/`), while the `~/.claude/skills` bridge link exists because Claude Code does not read `~/.agents/skills` directly.
 
 **`Gemfile`** — declares `gem "standard"` (standardrb). Dotfiles scripts are few and don't warrant maintaining a custom rubocop rule set; standardrb provides zero-config formatting. The `.vscode/settings.json` sets `rubyLsp.formatter: "standard"` so VSCode format-on-save also uses standardrb.
 
@@ -82,5 +84,5 @@ git update-index --skip-worktree .claude/settings.json
 ## Adding a new dotfile
 
 1. Add the file to the repo
-2. Add its `"src:dst"` mapping to `DOTFILE_PAIRS` in `scripts/link.sh` (skip this step for skills — directories under `.claude/skills/` are picked up automatically)
+2. Add its `"src:dst"` mapping to `DOTFILE_PAIRS` in `scripts/link.sh` (skip this step for skills — directories under `.agents/skills/` are picked up automatically)
 3. Run `make link` to apply

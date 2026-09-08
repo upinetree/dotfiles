@@ -1,17 +1,19 @@
 # ユーザーローカル CLAUDE.md（全プロジェクト共通）
 
-実体は `~/.dotfiles/.claude/CLAUDE.md`、`~/.claude/CLAUDE.md` から symlink される。編集はこの dotfiles 側で行う。
+実体は `~/.dotfiles/.claude/CLAUDE.md`、`~/.claude/CLAUDE.md` から symlink される。編集はこの dotfiles 側で行う。このファイルは `~/.codex/AGENTS.md` からも symlink され、Codex のグローバルルールを兼ねる（二重管理しない）。
 
 ## Claude の設定・hooks・skills を変更するとき
 
-`~/.claude` 配下の設定は dotfiles からの symlink である（`~/.dotfiles/scripts/link.sh` の `DOTFILE_PAIRS`、`make link` で適用）。
+`~/.claude`・`~/.agents`・`~/.codex` 配下の設定は dotfiles からの symlink である（`~/.dotfiles/scripts/link.sh` の `DOTFILE_PAIRS`、`make link` で適用）。
 
 - `~/.claude/settings.json` → `~/.dotfiles/.claude/settings.json`
-- `~/.claude/hooks` → `~/.dotfiles/.claude/hooks`
-- `~/.claude/skills/<name>` → `~/.dotfiles/.claude/skills/<name>`（ディレクトリ単位で自動 link）
+- `~/.claude/hooks` → `~/.dotfiles/.claude/hooks`（Codex の hooks.json もここのスクリプトを参照する）
+- `~/.agents/skills/<name>` と `~/.claude/skills/<name>` → いずれも `~/.dotfiles/.agents/skills/<name>`（ディレクトリ単位で自動 link。正本はクロスエージェント標準の `.agents/skills`。Claude Code は `~/.claude/skills` しか読まないため橋渡し link も張る）
 - `~/.claude/CLAUDE.md` → `~/.dotfiles/.claude/CLAUDE.md`
+- `~/.codex/AGENTS.md` → `~/.dotfiles/.claude/CLAUDE.md`（Codex 用。実体は CLAUDE.md と共有）
+- `~/.codex/hooks.json` → `~/.dotfiles/.codex/hooks.json`
 
-変更は **dotfiles 側の実体を編集**し、`~/.dotfiles` でコミットする。`~/.claude` 側を直接編集しない。
+変更は **dotfiles 側の実体を編集**し、`~/.dotfiles` でコミットする。`~/.claude`・`~/.agents`・`~/.codex` 側を直接編集しない。
 
 対象が symlink ではなく実ファイルになっていたら symlink が壊れている（Claude Code が設定を直接書き換えると起きうる）。`make link`（または該当 1 本を貼り直し）で復旧してから編集し、内容が分岐した 2 コピーを残さない。
 
