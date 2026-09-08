@@ -97,8 +97,7 @@ result() {
 # ================== Entry Point
 detect_platform
 
-# TODO: ファイルに分割するなりして整理する
-if [ "$PLATFORM" = "osx" ]; then
+if [ "$PLATFORM" = "osx" ] || [ "$PLATFORM" = "linux" ]; then
   if exists brew; then
     log info "brew is already exists"
   else
@@ -107,51 +106,7 @@ if [ "$PLATFORM" = "osx" ]; then
   fi
 
   if exists brew; then
-    brew install \
-      bat \
-      carapace \
-      coreutils \
-      ctags \
-      direnv \
-      gh \
-      ghq \
-      git \
-      git-delta \
-      gnu-sed \
-      jq \
-      mise \
-      openssl \
-      prettier \
-      readline \
-      ripgrep \
-      source-highlight \
-      tig \
-      tree \
-      vim \
-      watch \
-      zellij \
-      zsh
-
-    brew install --cask \
-      1password-cli \
-      alacritty \
-      alt-tab \
-      bartender \
-      deepl \
-      docker \
-      font-myrica \
-      google-cloud-sdk \
-      kap \
-      karabiner-elements \
-      keepassxc \
-      maccy \
-      meetingbar
-
-    # TODO: replace yabai/skhd with an other tool
-    # brew install koekeishiya/formulae/yabai
-    # brew install --head koekeishiya/formulae/skhd # https://github.com/koekeishiya/skhd/issues/206
-    # brew services start yabai
-    # brew services start skhd
+    brew bundle install --file=./Brewfile
   else
     log error "brew command not found"
     exit 1
@@ -159,21 +114,7 @@ if [ "$PLATFORM" = "osx" ]; then
 fi
 
 if [ "$PLATFORM" = "linux" ]; then
-  if exists brew; then
-    log info "brew is already exists"
-  else
-    install_brew
-    result brew
-  fi
-
-  if exists brew; then
-    brew install bat carapace ctags git-delta ripgrep git gh nvim
-  else
-    log error "brew command not found"
-    exit 1
-  fi
-
-  if [ -n "$WSLENV" ]; then
+  if [ -n "${WSLENV:-}" ]; then
     if exists win32yank.exe; then
       log info "win32yank is already exists"
     else

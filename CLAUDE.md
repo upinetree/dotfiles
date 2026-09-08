@@ -18,7 +18,7 @@ This repo manages dotfiles via **symlinks** on macOS and Linux. The authoritativ
 
 - `scripts/lib.sh` — shared utilities: `detect_platform` (sets `$PLATFORM` to `osx`/`linux`) and `log <level> <text>`
 - `scripts/link.sh` — creates all symlinks; also handles an `OBSOLETED_PAIRS` list for cleanup of removed mappings. Each directory under `.claude/skills/` is auto-linked into `~/.claude/skills/<name>` so machine-local skills placed directly in `~/.claude/skills/` are left untouched
-- `scripts/install_packages.sh` — installs Homebrew, then brew packages and casks; handles macOS/Linux branches
+- `scripts/install_packages.sh` — installs Homebrew, then runs `brew bundle` against the root `Brewfile`. Platform differences live in the Brewfile itself via `OS.mac?` / `OS.linux?` (casks are macOS-only)
 - `git-hooks/pre-commit` — Ruby script that blocks commits containing `binding.pry`, `debugger`, `focus: true`, `save_and_open_page`, or merge conflict markers
 
 ## Self-authored script language
