@@ -47,6 +47,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/no-clobber-redirect.rb\""
+          }
+        ]
+      }
     ]
   }
 }
