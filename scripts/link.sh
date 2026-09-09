@@ -77,6 +77,7 @@ listup_dotfiles() {
     ".zsh/.aliases.zsh:~/.zsh/.aliases.zsh"
     ".zsh/.exports.zsh:~/.zsh/.exports.zsh"
     ".zsh/.zplug.zsh:~/.zsh/.zplug.zsh"
+    ".zshenv:~/.zshenv"
     ".zshrc:~/.zshrc"
     ".config/nvim/init.vim:~/.config/nvim/init.vim"
     ".config/alacritty/alacritty.toml:~/.config/alacritty/alacritty.toml"
