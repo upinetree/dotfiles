@@ -32,6 +32,8 @@ begin
       xml = '<toast><visual><binding template="ToastGeneric">' \
         "<text>#{CGI.escapeHTML(title)}</text><text>#{CGI.escapeHTML(message)}</text>" \
         "</binding></visual></toast>"
+      # BurntToast なら通知処理は短くなるが、追加モジュールの導入・更新管理が必要になる。
+      # 現状の通知要件では依存を維持管理しなくてよい方を優先し、標準 API を直接使う。
       script = <<~POWERSHELL
         $ErrorActionPreference = 'Stop'
         $ProgressPreference = 'SilentlyContinue'
