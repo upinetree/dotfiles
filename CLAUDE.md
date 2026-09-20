@@ -8,9 +8,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 make install          # link dotfiles + install packages
 make link             # symlink dotfiles only (no package installation)
 make install_packages # install Homebrew packages only
+make doctor           # check notification command and send a test notification
 ```
 
 Requires Git and Make. `make copy` copies a few files (`.bashrc`, `/etc/paths`) that cannot be symlinked.
+
+`make doctor` diagnoses desktop notifications using the same Ruby runtime and helper as the hooks. It reports missing commands or notification failures with a nonzero exit status; normal hooks still skip these failures. A successful command does not guarantee visible delivery: check the test notification on screen (notification permissions / Do Not Disturb may suppress it).
+
+On WSL, notifications use Windows PowerShell via `powershell.exe` (Windows interop and Windows PATH inheritance must be enabled). No Linux notification daemon or extra PowerShell module is needed. Notifications use Windows PowerShell as their sender, with the agent name in the notification title. Run `make doctor` from a WSL terminal to check delivery; an agent sandbox may prevent Windows executable interop.
+
+If doctor reports missing or disabled `binfmt WSLInterop`, save work in all WSL distributions, run `wsl --shutdown` from Windows PowerShell, then reopen WSL and retry. This stops all WSL distributions. Doctor checks both `WSLInterop` and suffixed registrations such as `WSLInterop-late`; restricted environments that cannot read these registrations also fail this check.
 
 ## Architecture
 
@@ -39,7 +46,7 @@ When breaking the default, keep the logic minimal; if a script grows real logic,
 
 - Permission allow/deny/ask lists for Bash commands and file reads (POST-style `curl` and `git push` are gated by `ask`; `git checkout/switch/reset/rebase` are in `allow`)
 - PostToolUse hooks: auto-formats `.rb`/`.rake` files via `.claude/hooks/ruby-format.rb` (uses `standardrb --fix` when `standard` is in the bundle, falls back to `rubocop -A`), and `.md` files via `.claude/hooks/md-format.rb` (prettier). Format skipping is controlled by `.claude/hooks/format-skip.rb` — see **Formatter skip** below
-- macOS notification hooks on Stop and Notification events via `osascript`
+- Desktop notification hooks on Stop and Notification events via `.claude/hooks/desktop-notify.rb` (`osascript` on macOS, Windows PowerShell on WSL, `notify-send` on other Linux environments; unavailable notifications are skipped)
 - `report-session` auto-suggest hooks (scripts in `.claude/hooks/`, referenced via `$HOME/.claude/hooks/...`): a `UserPromptSubmit` hook fires on user satisfaction/completion phrases (gated by transcript length), and a `PostToolUse` Bash hook fires on `git commit`/`push`; both inject `additionalContext` nudging Claude to offer running `/report-session`, with the final go/no-go left to the model
 - `language: "日本語"`, `alwaysThinkingEnabled`, and enabled plugins (`ruby-lsp`, `skill-creator`, `frontend-design`, `security-guidance`)
 

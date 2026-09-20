@@ -119,7 +119,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "osascript -e 'display notification \"asking...\" with title \"Claude Code\" sound name \"Submarine\"'"
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/desktop-notify.rb\" \"asking...\" \"Claude Code\" \"Submarine\""
           },
           {
             "type": "command",
@@ -134,7 +134,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "osascript -e 'display notification \"done!\" with title \"Claude Code\" sound name \"Glass\"'"
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/desktop-notify.rb\" \"done!\" \"Claude Code\" \"Glass\""
           },
           {
             "type": "command",
