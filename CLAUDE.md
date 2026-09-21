@@ -8,16 +8,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 make install          # link dotfiles + install packages
 make link             # symlink dotfiles only (no package installation)
 make install_packages # install Homebrew packages only
-make doctor           # check notification command and send a test notification
+make doctor           # check symlinks and hook runtimes/scripts
+make doctor-notify    # check notification command and send a test notification
 ```
 
 Requires Git and Make. `make copy` copies a few files (`.bashrc`, `/etc/paths`) that cannot be symlinked.
 
-`make doctor` diagnoses desktop notifications using the same Ruby runtime and helper as the hooks. It reports missing commands or notification failures with a nonzero exit status; normal hooks still skip these failures. A successful command does not guarantee visible delivery: check the test notification on screen (notification permissions / Do Not Disturb may suppress it).
+`make doctor` checks managed symlinks (including skills and the repo-root `AGENTS.md`) and the runtimes/scripts referenced by command hooks in the live Claude/Codex settings. Missing, broken, replaced, or misdirected links and unavailable runtimes/scripts cause a nonzero exit status. It reads the link inventory from `scripts/link.sh --list`, runs Ruby/Bash/sh runtime probes, and does not repair files or execute hooks. Direct interpreter/script commands are supported; other command forms are reported as unsupported. It does not check hook wiring parity, formatter dependencies, or actual hook delivery.
 
-On WSL, notifications use Windows PowerShell via `powershell.exe` (Windows interop and Windows PATH inheritance must be enabled). No Linux notification daemon or extra PowerShell module is needed. Notifications use Windows PowerShell as their sender, with the agent name in the notification title. Run `make doctor` from a WSL terminal to check delivery; an agent sandbox may prevent Windows executable interop.
+`make doctor-notify` diagnoses desktop notifications using the same Ruby runtime and helper as the hooks. It reports missing commands or notification failures with a nonzero exit status; normal hooks still skip these failures. A successful command does not guarantee visible delivery: check the test notification on screen (notification permissions / Do Not Disturb may suppress it).
 
-If doctor reports missing or disabled `binfmt WSLInterop`, save work in all WSL distributions, run `wsl --shutdown` from Windows PowerShell, then reopen WSL and retry. This stops all WSL distributions. Doctor checks both `WSLInterop` and suffixed registrations such as `WSLInterop-late`; restricted environments that cannot read these registrations also fail this check.
+On WSL, notifications use Windows PowerShell via `powershell.exe` (Windows interop and Windows PATH inheritance must be enabled). No Linux notification daemon or extra PowerShell module is needed. Notifications use Windows PowerShell as their sender, with the agent name in the notification title. Run `make doctor-notify` from a WSL terminal to check delivery; an agent sandbox may prevent Windows executable interop.
+
+If `make doctor-notify` reports missing or disabled `binfmt WSLInterop`, save work in all WSL distributions, run `wsl --shutdown` from Windows PowerShell, then reopen WSL and retry. This stops all WSL distributions. The notification diagnostic checks both `WSLInterop` and suffixed registrations such as `WSLInterop-late`; restricted environments that cannot read these registrations also fail this check.
 
 ## Architecture
 

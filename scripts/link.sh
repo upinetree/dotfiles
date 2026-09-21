@@ -127,5 +127,9 @@ echo_conditions() {
 
 ## Entry Point
 init
+if [ "${1:-}" = "--list" ]; then
+  printf '%s\0' "${DOTFILE_PAIRS[@]}"
+  exit 0
+fi
 echo_conditions
 run
