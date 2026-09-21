@@ -18,7 +18,13 @@ Requires Git and Make. `make copy` copies a few files (`.bashrc`, `/etc/paths`) 
 
 `make doctor-notify` diagnoses desktop notifications using the same Ruby runtime and helper as the hooks. It reports missing commands or notification failures with a nonzero exit status; normal hooks still skip these failures. A successful command does not guarantee visible delivery: check the test notification on screen (notification permissions / Do Not Disturb may suppress it).
 
-On WSL, notifications use Windows PowerShell via `powershell.exe` (Windows interop and Windows PATH inheritance must be enabled). No Linux notification daemon or extra PowerShell module is needed. Notifications use Windows PowerShell as their sender, with the agent name in the notification title. Run `make doctor-notify` from a WSL terminal to check delivery; an agent sandbox may prevent Windows executable interop.
+On WSL, notifications use Windows PowerShell via `powershell.exe` and the [BurntToast module](https://github.com/Windos/BurntToast) (Windows interop and Windows PATH inheritance must be enabled). Install it once in **Windows PowerShell**, for the same Windows user used by WSL:
+
+```powershell
+Install-Module -Name BurntToast -Scope CurrentUser -Repository PSGallery
+```
+
+`make doctor-notify` checks that BurntToast is available and imports successfully, prints the loaded version, and sends a test notification. Normal hooks put the agent name in the title. If missing, the diagnostic fails with the installation command; it never installs modules automatically. BurntToast handles the Windows notification API details; macOS and other Linux environments do not require it. The helper uses `-ExecutionPolicy RemoteSigned` for the notification process only, without changing persistent execution policy settings; Group Policy restrictions still apply. Run the diagnostic from a WSL terminal to check delivery; an agent sandbox may prevent Windows executable interop.
 
 If `make doctor-notify` reports missing or disabled `binfmt WSLInterop`, save work in all WSL distributions, run `wsl --shutdown` from Windows PowerShell, then reopen WSL and retry. This stops all WSL distributions. The notification diagnostic checks both `WSLInterop` and suffixed registrations such as `WSLInterop-late`; restricted environments that cannot read these registrations also fail this check.
 

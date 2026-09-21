@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "base64"
-require "cgi"
+require "json"
 
 # デスクトップ通知が使えない環境でも、エージェントの hook を失敗させない。
 doctor = ARGV.delete("--doctor")
@@ -28,30 +28,22 @@ begin
         abort "FAIL: WSL の Windows 実行機能 (binfmt WSLInterop) が未登録・無効、または参照できません。Windows 側で作業を保存して wsl --shutdown を実行し、WSL を開き直してください。" if doctor
         exit 0
       end
-      # XML と PowerShell の両方で、通知文をコードとして解釈させない。
-      xml = '<toast><visual><binding template="ToastGeneric">' \
-        "<text>#{CGI.escapeHTML(title)}</text><text>#{CGI.escapeHTML(message)}</text>" \
-        "</binding></visual></toast>"
-      # BurntToast なら通知処理は短くなるが、追加モジュールの導入・更新管理が必要になる。
-      # 現状の通知要件では依存を維持管理しなくてよい方を優先し、標準 API を直接使う。
+      # 通知文はデータとして渡し、PowerShell のコードとして解釈させない。
+      payload = Base64.strict_encode64(JSON.generate([title, message]))
+      # WinRT の互換性対応を自前で維持する代わりに BurntToast を使う。
+      # 追加依存の診断負担は doctor の導入確認・インストール案内で抑える。
       script = <<~POWERSHELL
         $ErrorActionPreference = 'Stop'
         $ProgressPreference = 'SilentlyContinue'
         [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
         try {
-          [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-          [Windows.UI.Notifications.ToastNotification, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-          [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
-          $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
-          $xml.LoadXml([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('#{Base64.strict_encode64(xml)}')))
-          # 既存の Windows PowerShell の AppUserModelID を使い、登録処理を不要にする。
-          $appId = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\WindowsPowerShell\\v1.0\\powershell.exe'
-          $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($appId)
-          # Windows PowerShell では Setting が null になる環境があるため、取得できた場合だけ判定する。
-          $setting = $notifier.Setting
-          if ($null -ne $setting -and $setting.ToString() -ne 'Enabled') { throw "Windows notifications disabled: $setting" }
-          $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-          $notifier.Show($toast)
+          if (-not (Get-Module -ListAvailable -Name BurntToast)) {
+            throw 'BurntToast is not installed. Run in Windows PowerShell: Install-Module -Name BurntToast -Scope CurrentUser -Repository PSGallery'
+          }
+          Import-Module BurntToast -ErrorAction Stop
+          #{doctor ? "Write-Output ('OK: BurntToast ' + (Get-Module BurntToast).Version)" : ""}
+          $text = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('#{payload}')) | ConvertFrom-Json
+          New-BurntToastNotification -Text $text -ErrorAction Stop | Out-Null
           exit 0
         } catch {
           [Console]::Error.WriteLine($_.Exception.Message)
@@ -59,7 +51,8 @@ begin
           exit 1
         }
       POWERSHELL
-      ["powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand", Base64.strict_encode64(script.encode("UTF-16LE"))]
+      # 既定の Restricted でもモジュールを読めるよう、このプロセスだけに適用する。
+      ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-EncodedCommand", Base64.strict_encode64(script.encode("UTF-16LE"))]
     else
       ["notify-send", "--", title, message]
     end
