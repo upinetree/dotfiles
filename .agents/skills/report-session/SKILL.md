@@ -7,33 +7,12 @@ description: セッション中に得た知見・調査結果・設計判断・�
 
 ## 実行モード
 
-**デフォルトで fork に委譲する**（ユーザーへの確認は不要）。`subagent_type: "fork"` のサブエージェントを起動し、以降の手順（本文生成〜保存〜レビュー）をすべて委譲する。fork は本会話の全履歴を継承するため、コンテキストの受け渡しは不要。メインスレッドは中断されず作業を続行できる。
+**デフォルトは、会話履歴を継承する fork への委譲**。利用する環境のサブエージェント機能で起動する。ユーザーがインライン実行を指定した場合、または履歴を継承する fork が利用できない場合は、この会話で実行する。
 
-インライン（この会話内で実行）にするのは次の場合のみ:
-
-- ユーザーが明示的に指定した（「このままここで」「インラインで」「fork せずに」等）
-- `fork` タイプが利用できない環境（Agent 起動が "Agent type 'fork' not found" 等でエラーになる）。その旨を一言伝えてフォールバックする
-
-### fork 委譲時の手順
-
-1. **fork 前に対話を完結させる**: fork からはユーザーに質問できない。「2回目以降の起動」に該当する場合は、更新 or 分割の AskUserQuestion を fork 前にメインスレッドで行い、その決定を fork への指示に含める
-2. Agent ツールで起動する。`subagent_type: "fork"`、バックグラウンド実行（デフォルト）のまま。prompt には以下を含める:
-   - 会話に読み込み済みのこの SKILL.md の規約に従い、レポートの生成・保存・daily note リンク・学びトリアージ追記・出力後レビューまで完了すること
-   - 保存も fork 自身が行う。一時ファイルは「Obsidian CLI が使える場合」手順 1 の `/tmp/rs-TIMESTAMP.md` 命名を厳守すること（サブエージェントの Write を拒否する組み込みガードの回避。同節の注記を参照）
-   - ユーザーが指定した焦点・題材があればそれ
-   - 2回目以降の場合は、更新 or 分割の決定内容
-   - AskUserQuestion は使わず自律的に完了すること。権限拒否等で先に進めない手順があれば、無理に回避せず「どこで何にブロックされたか」を最終メッセージで報告して終了すること
-   - 最終メッセージは「保存先ファイルパス・タイトル・一行サマリ」（未完了時はブロック内容）のみに絞ること（メインスレッドの文脈を汚さないため）
-3. 起動後、メインスレッドは「バックグラウンドで作成中」とユーザーに伝えて元の作業に戻る。完了通知を受けたら、ファイルパスとタイトルを報告する
-
-### fork が未完了で戻ってきた場合（権限拒否など）
-
-fork は停止後も文脈を保持したまま残っている。**新しい fork を起動し直さず**、SendMessage で同じエージェント（完了通知の agent ID）に追加指示を送って続きから再開させる:
-
-1. fork が報告したブロック内容をユーザーに伝え、対処（権限の付与・代替手順・スキップ等）を確認する
-2. 決まった対処を SendMessage で fork に指示し、残りの手順（保存・daily note リンク・レビュー）を完了させる
-
-起動し直すと、途中まで済んだ手順（一時ファイル生成・vault へのコピー等）を二重実行するリスクがあるため避ける。
+1. 更新か分割かなど、ユーザーの判断が必要な事項を委譲前に確認する。
+2. 委譲先には、このスキルの規約・ユーザーの指定・決定済みの保存先を伝え、本文生成から保存・リンク・学びキュー登録・出力後レビューまで任せる。一時ファイルは `/tmp/rs-TIMESTAMP.md`、保存は `scripts/save_report.rb` を使う。
+3. メインはバックグラウンドで作成中と伝え、元の作業を続ける。委譲先は保存先・タイトル・一行サマリを返す。未完了なら完了した工程とブロック内容を返す。
+4. 未完了の場合は原因を解消して同じエージェントで再開する。新規起動による二重保存を避け、成果物を確認してから完了を報告する。
 
 ## 内容の規約
 
@@ -84,9 +63,9 @@ fork は停止後も文脈を保持したまま残っている。**新しい for
 
 ## 2回目以降の起動（同一セッション内）
 
-すでにこのセッションで `/report-session` を実行してレポートを出力済みの場合、新たな内容を追記する前に **AskUserQuestion で必ず以下を選ばせる**:
+すでにこのセッションで `/report-session` を実行してレポートを出力済みの場合、新たな内容を追記する前に **利用可能な対話手段で以下をユーザーに選んでもらう**:
 
-1. **既存レポートを更新** — 直前のレポートファイルを Read してから Edit で追記・修正する。タイトルの主題から外れる追加は行わない。学びの項目を追記・変更した場合は `append_to_triage.rb`（「出力先の決定」の手順 4）を再実行してキューの件数を更新する
+1. **既存レポートを更新** — 直前のレポートファイルを Read してから Edit で追記・修正する。タイトルの主題から外れる追加は行わない。Obsidian 保存で学びの項目を追記・変更した場合は `ruby <skill-dir>/scripts/append_to_triage.rb "TIMESTAMP TITLE"` を再実行してキューの件数を更新する
 2. **別レポートとして切り出し** — 新規ファイルを作成し、**両レポートに相互リンクを貼る**:
    - 新レポートの冒頭（frontmatter 直後・`# TITLE` の前後どちらでも可）に `> 関連: [[既存レポートのファイル名（拡張子なし）]]` を入れる
    - 既存レポートにも同じ要領で `> 関連: [[新レポートのファイル名（拡張子なし）]]` を Edit で追記する
@@ -98,7 +77,7 @@ fork は停止後も文脈を保持したまま残っている。**新しい for
 
 レポート冒頭に YAML frontmatter で `tags:` を付ける。**最大3つまで**。記事の中心的な位置付けを表すタグに絞る（3つに限定することで焦点のブレを防ぐのが目的なので、無理に3つ埋めず2つや1つでもよい）。
 
-- **既存タグを優先する**: `obsidian tags` で vault の既存タグ一覧を取得し、内容に合うものをそこから選ぶ。該当が無いときだけ kebab-case で新規作成する。
+- **Obsidian 保存では既存タグを優先する**: `ruby <skill-dir>/scripts/obsidian.rb tags` で vault の既存タグ一覧を取得し、内容に合うものをそこから選ぶ。該当が無いとき、またはローカル保存の場合は kebab-case で作成する。
 - 表記は kebab-case（例: `agentic-coding`, `google-cloud`, `flaky-test`）。
 - `claude-report` のような分類マーカーは付けない（記事の位置付けを表すトピックタグのみ）。
 
@@ -124,46 +103,33 @@ tags:
 - ファイル名: `TIMESTAMP TITLE.md`（TIMESTAMP と TITLE の間はスペース）
 - フォルダ: 常に `claude-report/`
 
-### Obsidian CLI が使える場合
+### 保存の手順
 
-`which obsidian` で確認する。コマンドが存在すれば有効とみなす。
-（アプリが起動していなければ最初のコマンド実行時に自動起動する）
+ユーザーがローカル保存を指定している場合は Obsidian の接続確認・タグ取得・学びマップ参照を省略し、その保存先で下記の `--local` コマンドを使う。本文生成と出力後レビューは保存先によらず行う。
 
-1. `obsidian tags` で既存タグ候補を確認し（「タグ」節を参照）、frontmatter（最大3タグ）+ 本文の順でレポート内容を生成して `/tmp/rs-TIMESTAMP.md` に書き出す（Write ツール）
-
-> 一時ファイル名は必ず `rs-TIMESTAMP.md` の形にする。Claude Code にはサブエージェントの Write をファイル名で拒否する組み込みガード（hooks では設定・解除不可）があり、basename が `report` / `findings` / `summary` 等の語で始まると "Subagents should return findings as text, not write report files." で失敗する（2026-07 実測。`rs-*` とタイムスタンプ始まりの最終ファイル名は通過を確認済み）。
-
-2. vault の `claude-report/` フォルダに **ファイルを直接コピー** して作成する:
-
-```bash
-VAULT=$(obsidian vault | awk -F'\t' '/^path\t/{print $2}')
-cp /tmp/rs-TIMESTAMP.md "$VAULT/claude-report/TIMESTAMP TITLE.md"
-```
-
-Obsidian は vault のファイルシステムを監視しており、新規ファイルを自動でインデックスする。
-
-> `obsidian create content=` 方式は使わない。本文を自前エスケープ → シェル → CLI デコードと多層を通すため、コードブロック内のバックスラッシュやマルチバイト文字が破損する。素の Markdown をディスクに直接置けばエスケープ層が消え、破損が原理的に起きない。
-
-3. 作成後、今日の daily note の `## Claude Reports` セクションにレポートへのリンクを追記する:
+1. ローカル保存の指定がない場合は `ruby <skill-dir>/scripts/obsidian.rb check` で接続を確認する。終了コード 0 はアクセス可能な vault の JSON、2 は CLI 未導入、1 は接続・設定エラー。コマンドはアプリを起動する場合がある。
+   - 0: JSON の `vault` を `VAULT` として学びマップの参照に使う。複数 vault がある場合は `OBSIDIAN_VAULT` に対象名または ID を指定し、以降のコマンドでも同じ値を使う。
+   - 2: 保存先の指定を優先し、未指定なら `__doc/` または `~/Documents` を選ぶ。
+   - 1: 原因を報告して停止する。接続障害を理由に別の場所へ黙って保存しない。
+   - WSL で接続できない場合に限り [セットアップ手順](references/setup-wsl.md) を読む。
+2. Obsidian 保存の場合は既存タグを取得する。保存先によらず frontmatter と本文を `/tmp/rs-TIMESTAMP.md` に作成する。
+3. Obsidian 保存には次のコマンドを使う。`TIMESTAMP TITLE` は最終ファイル名の拡張子を除いた部分で、再実行でも同じ値を使う。
 
 ```bash
-ruby <skill-dir>/scripts/link_to_daily.rb "TIMESTAMP TITLE"
+ruby <skill-dir>/scripts/save_report.rb /tmp/rs-TIMESTAMP.md "TIMESTAMP TITLE"
 ```
 
-引数はファイル名から拡張子 `.md` を除いたもの（= wikilink のターゲット）。**ファイル名と完全一致させること**（不一致だとリンクが解決しない）。スクリプトが daily note を `obsidian daily:path` で解決し、`## Claude Reports` セクション末尾に `- [[TIMESTAMP TITLE]]` を挿入する（セクションが無ければ note 末尾に新規作成、既にリンク済みならスキップ）。
+Markdown を直接保存し、今日の既存 daily note の `## Claude Reports` にリンクを挿入し、学びがあれば `claude-report/_learning-triage.md` に登録する。daily note が未作成の場合は保存済みレポートを示して失敗する。既存の作成方法で daily note を用意してから同じコマンドを再実行する。CLI の本文引数は多層のエスケープで内容を壊しうるため使わない。
 
-4. レポートに学び（`#learn/agent` / `#learn/knowledge` タグ）がある場合、学びトリアージキューに登録する:
+CLI 未導入時、またはユーザーがローカル保存を指定した場合:
 
 ```bash
-ruby <skill-dir>/scripts/append_to_triage.rb "TIMESTAMP TITLE"
+ruby <skill-dir>/scripts/save_report.rb --local __doc /tmp/rs-TIMESTAMP.md "TIMESTAMP TITLE"
 ```
 
-スクリプトがレポート内のタグを数え、`$VAULT/claude-report/_learning-triage.md` に `- [ ] [[TIMESTAMP TITLE]] — agent N / knowledge M` を upsert する（タグが無ければ何もしない・キューが無ければヘッダー付きで新規作成）。このキューは `/learning-review` skill が消化し、学びマップ（`_learning-map.md`）の更新と CLAUDE.md / rules / skills への反映を検討する。「既存レポートを更新」で学びを追記・変更したときも再実行してよい（未チェック行は件数が更新され、チェック済みなら新しい未チェック行が積まれる）。
+指定ディレクトリの `claude-report/` に保存し、Obsidian へのリンク・キュー登録は行わない。
 
-### Obsidian CLI がない場合
-
-- パス: `__doc/` あるいは `~/Documents` を選択（パスの指定があればそれに従う）
-- `claude-report/` サブフォルダに保存する
+既存ファイルの内容が異なる場合は上書きせず失敗する。同じ内容ならリンク・キュー登録を再開できる。失敗時は保存済みパスと未完了の工程を報告する。既存レポートの更新は内容を確認して直接編集し、Obsidian 保存時は `ruby <skill-dir>/scripts/append_to_triage.rb "TIMESTAMP TITLE"` を再実行する。チェック済みの学びは再レビュー用の未チェック行になる。
 
 ## 出力後のレビュー
 

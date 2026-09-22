@@ -13,7 +13,7 @@ report-session が各レポート末尾に残した学びを横断で読み、�
 
 ## 入力の収集
 
-1. vault を解決する: `VAULT=$(obsidian vault | awk -F'\t' '/^path\t/{print $2}')`
+1. report-session と共通のヘルパーで vault を解決する: `ruby <skill-dir>/../report-session/scripts/obsidian.rb vault`。成功時の標準出力を `VAULT` として使う。失敗した場合は停止し、原因を報告する。対象を指定する場合は `OBSIDIAN_VAULT` に名前または ID を設定する。WSL の接続障害時に限り [セットアップ手順](../report-session/references/setup-wsl.md) を読む。
 2. `$VAULT/claude-report/_learning-triage.md` の未チェック行（`- [ ]`）を対象レポートとする
    - キューが無い・空のときは `grep -l '#learn/' "$VAULT/claude-report"/*.md` で全対象を拾ってよい
    - ユーザーが範囲を指定したら（「最近の分だけ」「flaky 関連だけ」等）それに従う
