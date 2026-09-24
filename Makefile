@@ -1,4 +1,4 @@
-.PHONY: help install copy link install_packages doctor doctor-notify
+.PHONY: help install copy link install_packages doctor doctor-notify pull
 
 help:
 	@echo "make install          # copy and link files, then install packages"
@@ -7,6 +7,7 @@ help:
 	@echo "make install_packages # install packages"
 	@echo "make doctor           # check symlinks and hook runtimes/scripts"
 	@echo "make doctor-notify    # send a test desktop notification"
+	@echo "make pull             # git pull, preserving skip-worktree local diffs"
 
 install: link install_packages
 
@@ -26,3 +27,7 @@ doctor:
 
 doctor-notify:
 	@"$(HOME)/.local/share/mise/shims/ruby" ./.claude/hooks/desktop-notify.rb --doctor
+
+pull:
+	@test -x "$(HOME)/.local/share/mise/shims/ruby" || { echo "FAIL: mise の Ruby shim が見つからないか実行できません。mise のセットアップを確認してください。"; exit 1; }
+	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/pull.rb

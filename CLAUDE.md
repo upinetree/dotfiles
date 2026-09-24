@@ -10,6 +10,7 @@ make link             # symlink dotfiles only (no package installation)
 make install_packages # install Homebrew packages only
 make doctor           # check symlinks and hook runtimes/scripts
 make doctor-notify    # check notification command and send a test notification
+make pull             # git pull, preserving skip-worktree local diffs
 ```
 
 Requires Git and Make. `make copy` copies a few files (`.bashrc`, `/etc/paths`) that cannot be symlinked.
@@ -67,6 +68,8 @@ git add -p .claude/settings.json   # stage only the shared hunks
 git commit
 git update-index --skip-worktree .claude/settings.json
 ```
+
+The flag also blocks a plain `git pull` whenever the remote touched `settings.json`. Use `make pull` (`scripts/pull.rb`), which lifts the flag on every skip-worktree file, stashes the local diff, pulls, pops the stash, and re-sets the flag; on a pull failure or a stash-pop conflict it stops and prints the manual recovery commands instead of rolling back automatically.
 
 **`.claude/hooks/`** (symlinked to `~/.claude/hooks`) — shell scripts invoked by the hooks in `settings.json`. Referenced as `$HOME/.claude/hooks/...` so settings.json stays independent of the repo location. `.codex/hooks.json` (symlinked to `~/.codex/hooks.json`) points at the same `$HOME/.claude/hooks/` scripts, so Codex shares them with no duplicated copies. Hook **wiring** (event / matcher / command entries) is the one thing that cannot be shared — Claude Code only reads hooks from `settings.json` and Codex only reads `hooks.json`, with no include mechanism in either. When adding, removing, or re-matching a hook, update both files (as of 2026-09 seven entries share the same wiring — the `Stop` desktop-notify entry differs only in its title argument, "Claude Code" vs "Codex" — and the `Notification` entries exist only in `settings.json`).
 
