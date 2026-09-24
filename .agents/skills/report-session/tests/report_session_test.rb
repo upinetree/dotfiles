@@ -11,7 +11,9 @@ class ReportSessionTest < Minitest::Test
 
   def setup
     @env = ENV.to_h
-    @tmp = Dir.mktmpdir("report-session-")
+    # 実装は vault / daily note を File.realpath で正規化する。macOS の mktmpdir は
+    # symlink 配下（/var → /private/var）を返すため、期待値側も先に解決して揃える
+    @tmp = File.realpath(Dir.mktmpdir("report-session-"))
     @vault = File.join(@tmp, "日本語 vault")
     FileUtils.mkdir_p(File.join(@vault, "daily"))
     @note = File.join(@vault, "daily", "today.md")
@@ -72,7 +74,7 @@ class ReportSessionTest < Minitest::Test
     assert_equal File.realpath(@vault), client.vault
     assert_equal "ruby\n", client.tags
     assert_equal @note, client.daily_path
-    args = File.readlines(ENV.fetch("FAKE_LOG")).map { JSON.parse(_1) }
+    args = File.readlines(ENV.fetch("FAKE_LOG")).map { JSON.parse(it) }
     assert_equal ["vault=Test Vault", "tags"], args[1]
     assert_equal ["vault=Test Vault", "daily:path"], args[2]
   end
@@ -111,7 +113,7 @@ class ReportSessionTest < Minitest::Test
     client = Obsidian.new(wsl: false)
     client.vault
     client.tags
-    commands = File.readlines(ENV.fetch("FAKE_LOG")).map { JSON.parse(_1) }
+    commands = File.readlines(ENV.fetch("FAKE_LOG")).map { JSON.parse(it) }
     assert_equal [["vault=vault-id", "vault"], ["vault=vault-id", "tags"]], commands
   end
 
@@ -239,7 +241,7 @@ class ReportSessionTest < Minitest::Test
   def test_updated_learning_requeues_checked_entry
     save
     File.write(queue, File.read(queue).sub("- [ ]", "- [x]"))
-    File.open(report, "a") { _1.puts "- another #learn/agent" }
+    File.open(report, "a") { it.puts "- another #learn/agent" }
     2.times do
       _, err, status = invoke("append_to_triage.rb", TARGET)
       assert status.success?, err
