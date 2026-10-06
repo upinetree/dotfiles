@@ -1,6 +1,12 @@
 ---
 name: learning-review
-description: claude-report に蓄積されたセッションレポートの学び（#learn/agent / #learn/knowledge タグ付き項目）を横断分析し、繰り返し現れるパターンを学びマップに整理して、CLAUDE.md・rules・skills・hooks への反映まで行うスキル。「学びをレビューして」「学びを分析して」「学びを横断して整理して」「learning review」「トリアージを消化して」「レポートの学びを rules や skill に落として」「Claude の振る舞い改善を分析して」などの依頼で使用する。report-session が書き溜めた _learning-triage.md のキューを消化する。個別セッションの記録作成は report-session の担当（本スキルは蓄積済みの学びの横断分析・反映のみ）。
+description: >
+  claude-report に蓄積されたセッションレポートの学び（#learn/agent / #learn/knowledge タグ付き項目）を横断分析し、
+  繰り返し現れるパターンを学びマップに整理して、CLAUDE.md・rules・skills・hooks への反映まで行うスキル。
+  「学びをレビューして」「学びを分析して」「学びを横断して整理して」「learning review」「トリアージを消化して」
+  「レポートの学びを rules や skill に落として」「Claude の振る舞い改善を分析して」などの依頼で使用する。
+  report-session が書き溜めた _learning-triage.md のキューを消化する。
+  個別セッションの記録作成は report-session の担当（本スキルは蓄積済みの学びの横断分析・反映のみ）。
 ---
 
 # 学びレビュー
