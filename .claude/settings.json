@@ -138,7 +138,8 @@
           },
           {
             "type": "command",
-            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/voicevox-speak.rb\""
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/voicevox-speak.rb\"",
+            "async": true
           }
         ]
       }
