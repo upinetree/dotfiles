@@ -38,11 +38,6 @@ if OS.mac?
   cask "keepassxc"
   cask "maccy"
   cask "meetingbar"
-
-  # TODO: replace yabai/skhd with an other tool
-  # 導入時は install 後に brew services start yabai / skhd も必要
-  # brew "koekeishiya/formulae/yabai"
-  # brew "koekeishiya/formulae/skhd", args: ["HEAD"] # https://github.com/koekeishiya/skhd/issues/206
 end
 
 if OS.linux?
