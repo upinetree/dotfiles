@@ -11,3 +11,5 @@ bind diff C ?>git checkout %(commit)
 
 # yank commit hash
 bind generic Y @sh -c "printf %(commit) | pbcopy"
+
+set wrap-lines = yes
