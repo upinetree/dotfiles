@@ -6,6 +6,7 @@ brew "gh"
 brew "git"
 brew "git-delta"
 brew "ripgrep"
+brew "zellij"
 
 if OS.mac?
   brew "coreutils"
@@ -22,7 +23,6 @@ if OS.mac?
   brew "tree"
   brew "vim"
   brew "watch"
-  brew "zellij"
   brew "zsh"
 
   cask "1password-cli"

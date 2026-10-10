@@ -1,6 +1,10 @@
 export PATH=$HOME/bin:$PATH
 type brew &> /dev/null && export PATH="/usr/local/sbin:$PATH"
 
+if [ -n "${WSL_DISTRO_NAME:-}" ]; then
+  export ZELLIJ_SOCKET_DIR="/tmp/zellij-$USER"
+fi
+
 # git
 # NOTE: diff-highlightが後々デフォルトになったら削除
 export PATH=/usr/local/share/git-core/contrib/diff-highlight:$PATH
