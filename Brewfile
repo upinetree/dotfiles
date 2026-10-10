@@ -5,6 +5,7 @@ brew "ctags"
 brew "gh"
 brew "git"
 brew "git-delta"
+brew "leaf-markdown-viewer"
 brew "ripgrep"
 brew "zellij"
 
