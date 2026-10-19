@@ -9,8 +9,8 @@ help:
 	@echo "make doctor-notify    # send a test desktop notification"
 	@echo "make pull             # git pull, preserving skip-worktree local diffs"
 	@echo "make skills-list      # list vendored third-party skills and their pins"
-	@echo "make skills-check     # compare each vendored skill's pin with its latest release"
-	@echo "make skills-update NAME=<skill> REF=<tag>  # re-vendor a skill at <tag>; review git diff before committing"
+	@echo "make skills-check     # flag vendored skills without a security-review record, or lagging their latest release"
+	@echo "make skills-update NAME=<skill> REF=<tag>  # re-vendor a skill at <tag>; review it and record before committing"
 
 install: link install_packages
 
