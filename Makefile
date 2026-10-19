@@ -1,4 +1,4 @@
-.PHONY: help install copy link install_packages doctor doctor-notify pull
+.PHONY: help install copy link install_packages doctor doctor-notify pull skills-list skills-check skills-update
 
 help:
 	@echo "make install          # copy and link files, then install packages"
@@ -8,6 +8,9 @@ help:
 	@echo "make doctor           # check symlinks and hook runtimes/scripts"
 	@echo "make doctor-notify    # send a test desktop notification"
 	@echo "make pull             # git pull, preserving skip-worktree local diffs"
+	@echo "make skills-list      # list vendored third-party skills and their pins"
+	@echo "make skills-check     # compare each vendored skill's pin with its latest release"
+	@echo "make skills-update NAME=<skill> REF=<tag>  # re-vendor a skill at <tag>; review git diff before committing"
 
 install: link install_packages
 
@@ -31,3 +34,13 @@ doctor-notify:
 pull:
 	@test -x "$(HOME)/.local/share/mise/shims/ruby" || { echo "FAIL: mise の Ruby shim が見つからないか実行できません。mise のセットアップを確認してください。"; exit 1; }
 	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/pull.rb
+
+skills-list:
+	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_skills.rb list
+
+skills-check:
+	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_skills.rb check
+
+skills-update:
+	@test -n "$(NAME)" -a -n "$(REF)" || { echo "usage: make skills-update NAME=<skill> REF=<tag>"; exit 1; }
+	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_skills.rb update "$(NAME)" "$(REF)"

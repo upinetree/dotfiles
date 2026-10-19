@@ -17,6 +17,8 @@
 
 対象が symlink ではなく実ファイルになっていたら symlink が壊れている（Claude Code が設定を直接書き換えると起きうる）。`make link`（または該当 1 本を貼り直し）で復旧してから編集し、内容が分岐した 2 コピーを残さない。
 
+他人の skill（yomiyasu など）は `gh skill install --pin <tag>` で `.agents/skills/<name>` に tag 固定のコピーとして取り込んである。SKILL.md の frontmatter に `metadata.github-repo` / `github-pinned` があるものがそれで、中身を手で直さない。更新は `make -C ~/.dotfiles skills-update NAME=<name> REF=<tag>` で取り直し、`git diff` を読んでからコミットする（`make skills-check` で pin と最新 release の差を確認できる）。
+
 ## Bash コマンド実行の作法
 
 permission classifier はコマンドの複合度と依頼文脈との乖離に反応して拒否する。

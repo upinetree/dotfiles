@@ -35,6 +35,7 @@ This repo manages dotfiles via **symlinks** on macOS and Linux. The authoritativ
 
 - `scripts/lib.sh` — shared utilities: `detect_platform` (sets `$PLATFORM` to `osx`/`linux`) and `log <level> <text>`
 - `scripts/link.sh` — creates all symlinks; also handles an `OBSOLETED_PAIRS` list for cleanup of removed mappings. Each directory under `.agents/skills/` is auto-linked into both `~/.agents/skills/<name>` (canonical cross-agent location) and `~/.claude/skills/<name>` (bridge link — Claude Code only reads `~/.claude/skills`, verified 2026-09). Machine-local skills placed directly in either directory are left untouched
+- `scripts/vendored_skills.rb` — manages third-party skills vendored via `gh skill install --pin` (`make skills-list` / `skills-check` / `skills-update`). See **Vendored third-party skills** below
 - `scripts/install_packages.sh` — installs Homebrew, then runs `brew bundle` against the root `Brewfile`. Platform differences live in the Brewfile itself via `OS.mac?` / `OS.linux?` (casks are macOS-only)
 - `git-hooks/pre-commit` — Ruby script that blocks commits containing `binding.pry`, `debugger`, `focus: true`, `save_and_open_page`, or merge conflict markers
 
@@ -87,6 +88,13 @@ The flag also blocks a plain `git pull` whenever the remote touched `settings.js
 | `<repo>/.claude/skip-format.local.<ext>` | extension only, project-wide personal (gitignored)       |
 
 **`.agents/skills/<name>/SKILL.md`** — per-skill definitions auto-linked by `scripts/link.sh`. Add a new skill by creating a directory under `.agents/skills/` with a `SKILL.md`; running `make link` symlinks it into `~/.agents/skills/<name>` and `~/.claude/skills/<name>` (no manual `DOTFILE_PAIRS` edit needed). The canonical copy lives in `.agents/skills/` (cross-agent standard location; skills used to live in `.claude/skills/`), while the `~/.claude/skills` bridge link exists because Claude Code does not read `~/.agents/skills` directly.
+
+**Vendored third-party skills** — skills written by others (e.g. `yomiyasu`) are not installed into `~/.claude/skills` directly and not tracked as submodules. They are copied into `.agents/skills/<name>/` with `gh skill install <owner/repo> <name> --pin <tag> --dir .agents/skills`, so they ride the same auto-link as self-authored skills, and the exact version is what the repo commits. A vendored skill is recognised by the `metadata.github-repo` / `github-pinned` / `github-tree-sha` keys that `gh skill` injects into the SKILL.md frontmatter; that frontmatter is the only lock record (no separate manifest). Rules:
+
+- Never hand-edit a vendored skill. If something must change, change the pin or open an issue upstream; local edits would be silently overwritten by the next `skills-update`
+- Upstream releases often (yomiyasu shipped v2.0.0 → v2.0.2 within four days of 2026-10) and its SKILL.md tells the agent to run its bundled Python scripts, so pins are deliberate: update with `make skills-update NAME=<skill> REF=<tag>`, read `git diff -- .agents/skills/<skill>` (scripts included), then commit. `make skills-check` reports pins that lag the latest GitHub release and exits nonzero when any do
+- A plain `gh skill update` does not touch the vendored copy: it does not list `yomiyasu` at all (`gh skill update yomiyasu --dry-run` answers "none of the specified skills are installed", verified 2026-10 with gh 2.101 — the symlinked directory is not scanned). The `make` target is the only update path
+- The Ruby-by-default rule does not apply inside a vendored skill (see **Self-authored script language**)
 
 **`Gemfile`** — declares `gem "standard"` (standardrb). Dotfiles scripts are few and don't warrant maintaining a custom rubocop rule set; standardrb provides zero-config formatting. The `.vscode/settings.json` sets `rubyLsp.formatter: "standard"` so VSCode format-on-save also uses standardrb.
 
