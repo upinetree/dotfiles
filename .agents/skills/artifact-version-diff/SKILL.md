@@ -64,7 +64,9 @@ diff の各行の頭の `[#id]` は、その行を囲むいちばん内側の要
    （ページ内での編集や、この手順を知らないセッション）の疑いがある。
    - 控えた版 ID が処理済みの行の `base_version_id` と同じなら、控えの取り違え（手順 3）で、publish の疑いではない
    - 確かめるには、`path:"index.html"` でページを保存し（中身は読み込まなくてよい）、`scripts/artifact_text.rb text`
-     でテキストにして `text/current.txt` と `diff` する。差が無ければ（終了コード 3）、今の版は最後の行の publish そのもの。
+     でテキストにして `text/current.txt` と `diff` する（例: `--from current.txt --to index.html`。ラベルなので値は結果に効かない）。
+     `text/current.txt` と `index.html` は `paths` で 1 回に読み、別々に読んだときは両方の結果の頭の版 ID が同じことを確かめる
+     （間に publish が入ると、違う版どうしを比べることになる）。差が無ければ（終了コード 3）、今の版は最後の行の publish そのもの。
      差があれば、その diff が手順外の publish の中身。どちらも `tool_version` が同じときだけ比べられる。
      style だけの変更などテキストに出ない変更は見えない
    - 初めて読むとき（控えが無いとき）も、今の版に手順外の publish が乗っていないかを同じ比較で確かめられる
