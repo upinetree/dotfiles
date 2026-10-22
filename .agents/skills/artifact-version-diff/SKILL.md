@@ -86,6 +86,7 @@ publish のたびに、ページの publish と同じ呼び出しで添付 3 つ
 1. **ライブ版を read する。** `action:"read"` に `url` だけを付ける。大きいページは結果がファイルに保存されるので、
    最後の行まで Read する（全行読んで初めてその版を見たことになる。数百 KB のページは offset と limit で分けて読む）。
    小さいページは HTML が結果に直接入って返り、保存ファイルは出ない。そのときは手順 2 で `index.html` も取り、それを手順 3 に使う。
+   編集して publish するファイルは、保存ファイルから外枠（`<!doctype html>…<body>` と `</body></html>`）を外したものにする。
    `path:"index.html"` の read だけでは「今の版を読んだ」とはみなされず、publish が拒否される。
 2. **添付を読む。** `paths` に `changelog.jsonl`・`text/current.txt`（小さいページは `index.html` も）を渡して 1 回で read し、
    結果の版 ID が手順 1 と同じことを確かめる。publish で上書きする path は、先に read か `list`（`scope:"files"`）で
@@ -97,7 +98,7 @@ publish のたびに、ページの publish と同じ呼び出しで添付 3 つ
    差があれば（終了コード 0）、changelog に補完の行を 1 行足す:
    - `base_version_id` は `null`。最後の行の publish が作った版 ID は changelog に残らず、手順外の publish の前の版は誰も read していないため
    - `summary` は「手順外の publish の補完（seq N の後から <read した版 ID> まで）」。誰がなぜ変えたかは分からないので書かない
-   - `published_at` はこの publish の時刻、`sections` は diff の出力を写す
+   - `published_at` は手順 7 と同じ（行を書く時刻）、`sections` は diff の出力を写す
    - 補完の行が seq を 1 つ使うので、手順 6 の自分の変更はその次の seq になる。両方を手順 8 の 1 回の publish に載せる
 5. **ページを編集する。**
 6. **差分を作る。** 編集したページから `text` で new.txt を作り、
@@ -105,12 +106,13 @@ publish のたびに、ページの publish と同じ呼び出しで添付 3 つ
    出力の `sections=` を changelog に写す。差分が意図した箇所だけかを目で確かめる。
 7. **changelog に 1 行足す。** `published_at` は行を書く時刻（publish の直前）。summary には何をなぜ変えたか、決めた人と出典を 1〜2 文で書く。
    ページのフッターに変更の経緯を書いていたなら、その内容をここに書く。日本語はエスケープせずに書き、末尾に改行を付ける。
-8. **publish する。** `url`・`file_path`（ページ）に加えて、`files` に次を渡す。
+8. **publish する。** `url`・`file_path`（ページ）に加えて、`files` に次を渡す（例は手順 4 で補完の行を足したときで、diff が 2 つになる）。
    `contentType` は `text/plain` そのもの（`; charset=utf-8` を付けると拒否される。`.jsonl` も `text/plain` で通る）。
    ```json
    {
      "changelog.jsonl": { "from": "...", "contentType": "text/plain" },
      "diffs/0003.diff": { "from": "...", "contentType": "text/plain" },
+     "diffs/0004.diff": { "from": "...", "contentType": "text/plain" },
      "text/current.txt": { "from": "<new.txt>", "contentType": "text/plain" }
    }
    ```

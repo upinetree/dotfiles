@@ -11,6 +11,7 @@
 # Ruby の標準ライブラリには HTML パーサーが無いので、artifact の HTML（タグの対応は publish 前に確かめてある）
 # を読める程度の小さなトークナイザーで済ませている。
 
+require "fileutils"
 require "json"
 require "open3"
 require "optparse"
@@ -222,6 +223,7 @@ end
 
 def write_text(html_path, out_path)
   text = to_text(File.read(html_path, encoding: "utf-8"))
+  FileUtils.mkdir_p(File.dirname(out_path))
   File.write(out_path, text)
   puts "lines=#{text.count("\n")} bytes=#{text.bytesize} tool_version=#{TOOL_VERSION}"
   0
@@ -238,6 +240,7 @@ def write_diff(old_path, new_path, out_path, from:, to:, note: "")
   end
   body = out.lines.map { |l| l.start_with?("@@") ? l.sub(/ @@\s*$/, " @@\n") : l }
   head = "# #{from} -> #{to}#{"  #{note}" unless note.empty?}\n"
+  FileUtils.mkdir_p(File.dirname(out_path)) # diffs/ が無い導入時でも書けるように
   File.write(out_path, head + body.join)
   changed = body.reject { |l| l.start_with?("+++", "---") }
   puts "+#{changed.count { |l| l.start_with?("+") }} -#{changed.count { |l| l.start_with?("-") }} bytes=#{(head + body.join).bytesize}"
