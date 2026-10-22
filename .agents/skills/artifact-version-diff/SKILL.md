@@ -40,9 +40,9 @@ Artifact ツールの read に版を指定する引数は無く、読めるの�
 ```
 
 - `seq`: 1 から振る通し番号。publish するまで新しい版の番号も版 ID も分からないので、版ではなくこれで並べる
-- `base_version_id`: 差分の比較元として read した版の ID
+- `base_version_id`: 差分の比較元として read した版の ID。手順外の publish の補完の行では `null`
 - `tool_version`: テキスト化に使った `scripts/artifact_text.rb` の `TOOL_VERSION`。`text` が出力する `tool_version=` の値を写す（手で書かない）。無い行は 1
-- `sections`: 変わった行の id。空文字はヘッダー・フッターなど id の無い場所
+- `sections`: 変わった行の id。空文字は id の付いた要素の外（ヘッダー・フッターや、節の外に置いた `<script>` など）
 - `diff`: 差分のファイル。差分の無い記録（テキストの作り直しだけなど）は `null`
 
 diff の各行の頭の `[#id]` は、その行を囲むいちばん内側の要素の id。表の行は `|2|` のようにセルの番号が付く。
@@ -83,22 +83,28 @@ diff の各行の頭の `[#id]` は、その行を囲むいちばん内側の要
 
 publish のたびに、ページの publish と同じ呼び出しで添付 3 つを更新する。
 
-1. **ライブ版を read する。** `action:"read"` に `url` だけを付け、保存されたファイルを最後の行まで Read する（全行読んで初めてその版を見たことになる）。数百 KB のページは一度に読める量を超えるので、offset と limit で分けて読む。
-   `path:"index.html"` で読んでも「今の版を読んだ」とはみなされず、publish が拒否される。
-2. **添付を読む。** `path:"changelog.jsonl"` と `path:"text/current.txt"` を read する。
-   publish で上書きする path は、先に read か `list`（`scope:"files"`）で見ておく必要がある。
-   無ければ導入時（後述）。
+1. **ライブ版を read する。** `action:"read"` に `url` だけを付ける。大きいページは結果がファイルに保存されるので、
+   最後の行まで Read する（全行読んで初めてその版を見たことになる。数百 KB のページは offset と limit で分けて読む）。
+   小さいページは HTML が結果に直接入って返り、保存ファイルは出ない。そのときは手順 2 で `index.html` も取り、それを手順 3 に使う。
+   `path:"index.html"` の read だけでは「今の版を読んだ」とはみなされず、publish が拒否される。
+2. **添付を読む。** `paths` に `changelog.jsonl`・`text/current.txt`（小さいページは `index.html` も）を渡して 1 回で read し、
+   結果の版 ID が手順 1 と同じことを確かめる。publish で上書きする path は、先に read か `list`（`scope:"files"`）で
+   見ておく必要がある（新しく足す `diffs/NNNN.diff` は要らない）。添付が無ければ導入時（後述）。
 3. **base を作る。** `ruby scripts/artifact_text.rb text <read の保存ファイル> base.txt`
 4. **手順外の publish を探す。** changelog の最後の行の `tool_version` が今のスクリプトと同じなら、
-   `diff current.txt base.txt diffs/<次の seq>.diff --from <最後の行の版> --to <read した版 ID> --note "手順外の publish の補完"`
-   を実行する。差があれば（終了コード 0）、summary を「手順外の publish の補完」として changelog に 1 行足す。
-   終了コード 3 なら差は無い。`tool_version` が違うときは、割り方の違いが全行に出るので比べない。
+   `ruby scripts/artifact_text.rb diff current.txt base.txt diffs/<次の seq>.diff --from after-seq-<最後の seq> --to <read した版 ID> --note "手順外の publish の補完"`
+   を実行する。終了コード 3 なら差は無い。`tool_version` が違うときは、割り方の違いが全行に出るので比べない。
+   差があれば（終了コード 0）、changelog に補完の行を 1 行足す:
+   - `base_version_id` は `null`。最後の行の publish が作った版 ID は changelog に残らず、手順外の publish の前の版は誰も read していないため
+   - `summary` は「手順外の publish の補完（seq N の後から <read した版 ID> まで）」。誰がなぜ変えたかは分からないので書かない
+   - `published_at` はこの publish の時刻、`sections` は diff の出力を写す
+   - 補完の行が seq を 1 つ使うので、手順 6 の自分の変更はその次の seq になる。両方を手順 8 の 1 回の publish に載せる
 5. **ページを編集する。**
 6. **差分を作る。** 編集したページから `text` で new.txt を作り、
-   `diff base.txt new.txt diffs/<次の seq>.diff --from <read した版 ID> --to next` を実行する。
+   `ruby scripts/artifact_text.rb diff base.txt new.txt diffs/<次の seq>.diff --from <read した版 ID> --to next` を実行する。
    出力の `sections=` を changelog に写す。差分が意図した箇所だけかを目で確かめる。
-7. **changelog に 1 行足す。** summary には何をなぜ変えたか、決めた人と出典を 1〜2 文で書く。
-   ページのフッターに変更の経緯を書いていたなら、その内容をここに書く。`ensure_ascii=False` で書き、末尾に改行を付ける。
+7. **changelog に 1 行足す。** `published_at` は行を書く時刻（publish の直前）。summary には何をなぜ変えたか、決めた人と出典を 1〜2 文で書く。
+   ページのフッターに変更の経緯を書いていたなら、その内容をここに書く。日本語はエスケープせずに書き、末尾に改行を付ける。
 8. **publish する。** `url`・`file_path`（ページ）に加えて、`files` に次を渡す。
    `contentType` は `text/plain` そのもの（`; charset=utf-8` を付けると拒否される。`.jsonl` も `text/plain` で通る）。
    ```json
@@ -128,7 +134,7 @@ publish のたびに、ページの publish と同じ呼び出しで添付 3 つ
 
 ## スクリプト
 
-`scripts/artifact_text.rb`（Ruby の標準ライブラリと diff(1) だけで動く。Python 版 `artifact_text.py` の移植で、tool_version 3 の出力は同じ）
+`scripts/artifact_text.rb`（Ruby の標準ライブラリと diff(1) だけで動く。以前の Python 版からの移植で、tool_version 3 の出力は同じ。Python 版は同梱していない）
 
 ```
 ruby artifact_text.rb text <page.html> <out.txt>
