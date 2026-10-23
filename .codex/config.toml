@@ -1,0 +1,6 @@
+# Codex Desktop のセッション同期は、.codex/ ディレクトリを持つプロジェクトに
+# shell_environment_policy 入りの config.toml を自動生成する（既存ファイルは上書きしない）。
+# その際、同期を実行したプロセスの環境変数スナップショットが事故的に焼き込まれるため、
+# 意図した空設定を先に置いて生成をブロックする。
+# Codex シェルへの env 注入（CLAUDECODE / VOICEVOX_VOLUME）はグローバル
+# ~/.codex/config.toml（マシンローカル・repo 管理外）が担っており、ここに書く必要はない。
