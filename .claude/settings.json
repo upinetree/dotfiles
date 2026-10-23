@@ -1,5 +1,6 @@
 {
   "env": {
+    "AGENT_SHELL": "1",
     "CLAUDECODE": "1",
     "CLAUDE_CODE_FORK_SUBAGENT": "1",
     "VOICEVOX_VOLUME": "0.5"
