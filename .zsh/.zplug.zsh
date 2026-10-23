@@ -23,6 +23,10 @@ fi
 # Then, source plugins and add commands to $PATH
 # NOTE: claude code Bash tool fails with enhancd
 # similler issue. https://github.com/anthropics/claude-code/issues/2632
+# CLAUDECODE は事実上の「エージェントシェル」フラグ。Claude Code が設定するほか、
+# グローバル ~/.codex/config.toml の shell_environment_policy が Codex のシェルにも
+# 注入しているため、このゲートは Codex 実行時にも効く（中立名への改名は、同期機構が
+# CLAUDECODE を再注入しうるため見送り）
 if [[ "$CLAUDECODE" != "1" ]]; then
   zplug load #--verbose
 fi
