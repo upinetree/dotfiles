@@ -87,6 +87,8 @@ The flag also blocks a plain `git pull` whenever the remote touched `settings.js
 | `<repo>/.claude/skip-format.<ext>`       | extension only, project-wide                             |
 | `<repo>/.claude/skip-format.local.<ext>` | extension only, project-wide personal (gitignored)       |
 
+`<repo>` is checked both as the worktree itself and as the main checkout (the parent of `git rev-parse --git-common-dir`). A gitignored `.local` flag is absent from a freshly created git worktree, so placing it once in the main checkout covers every worktree of that repository.
+
 **`.agents/skills/<name>/SKILL.md`** — per-skill definitions auto-linked by `scripts/link.sh`. Add a new skill by creating a directory under `.agents/skills/` with a `SKILL.md`; running `make link` symlinks it into `~/.agents/skills/<name>` and `~/.claude/skills/<name>` (no manual `DOTFILE_PAIRS` edit needed). The canonical copy lives in `.agents/skills/` (cross-agent standard location; skills used to live in `.claude/skills/`), while the `~/.claude/skills` bridge link exists because Claude Code does not read `~/.agents/skills` directly.
 
 **Vendored third-party skills** — skills written by others (e.g. `yomiyasu`) are not installed into `~/.claude/skills` directly and not tracked as submodules. They are copied into `.agents/skills/<name>/` with `gh skill install <owner/repo> <name> --pin <tag> --dir .agents/skills`, so they ride the same auto-link as self-authored skills, and the exact version is what the repo commits. A vendored skill is recognised by the `metadata.github-repo` / `github-pinned` / `github-tree-sha` keys that `gh skill` injects into the SKILL.md frontmatter; that frontmatter is the only lock record (no separate manifest). Rules:
