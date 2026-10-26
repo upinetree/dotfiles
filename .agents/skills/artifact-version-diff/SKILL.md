@@ -167,12 +167,12 @@ publish のたびに、ページの publish と同じ呼び出しで添付 3 つ
 
 ## スクリプト
 
-`scripts/artifact_text.rb`（Ruby の標準ライブラリと diff(1) だけで動く。以前の Python 版からの移植で、tool_version 3 の出力は同じ。Python 版は同梱していない）
+`scripts/artifact_text.rb`（Ruby の標準ライブラリと diff(1) だけで動く。以前の Python 版からの移植で、tool_version 3 までの出力は Python 版と同じ。Python 版は同梱していない）
 
 ```
 ruby artifact_text.rb text <page.html> <out.txt>
 ruby artifact_text.rb diff <old.txt> <new.txt> <out.diff> --from <版> --to <版> [--note "..."]
 ```
 
-- `text`: style・svg と mermaid のランタイムを外し、ブロックごと・「。」ごとに 1 行にする。括弧の中では割らない。インラインの `<script>` の中身は `js| ` を付けて 1 行ずつ残す（表やガントのデータを JS の配列で持つページがあり、外すとその変更が差分に出ない。tool_version 3 から）。read の保存ファイル（外枠付き）からでも、外枠を外したファイルからでも同じテキストになる
+- `text`: style・svg と mermaid のランタイムを外し、ブロックごと・「。」ごとに 1 行にする。括弧の中では割らない。表の行は `|n|` のセル番号を付け、セルの中の `<br>`・`<p>` などの区切りは同じセルの別の段として文に割る（tool_version 4 から。それまではセルの中の区切りで新しいセルに分かれ、セル番号がずれていた）。インラインの `<script>` の中身は `js| ` を付けて 1 行ずつ残す（表やガントのデータを JS の配列で持つページがあり、外すとその変更が差分に出ない。tool_version 3 から）。read の保存ファイル（外枠付き）からでも、外枠を外したファイルからでも同じテキストになる
 - `diff`: 変更があれば `+N -M` と `sections=[...]` を出す。変更が無ければファイルを書かずに終了コード 3

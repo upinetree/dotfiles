@@ -18,8 +18,9 @@ require "optparse"
 require "strscan"
 
 # 割り方を変えると、前の版で作った text/current.txt と全行が食い違う。changelog に写して見分ける。
-# 3 は Python 版（artifact_text.py）と同じ出力で、Ruby への移植では上げていない
-TOOL_VERSION = 3
+# 3 は Python 版（artifact_text.py）と同じ出力で、Ruby への移植では上げていない。
+# 4 でセルの中の <br>・<p> などで新しいセルに分かれていたのを直した（それ以降のセル番号がずれていた）
+TOOL_VERSION = 4
 
 SKIP = %w[style svg head noscript].freeze
 BLOCK = %w[
@@ -71,6 +72,7 @@ class Extractor
     @skip = 0
     @buf = []
     @cells = nil # tr の中では td/th をセルごとに集める
+    @in_cell = false
     @pre = 0
     @script = nil # インラインの script の中身。表やガントのデータを JS で持つページがある
   end
@@ -130,8 +132,15 @@ class Extractor
     text = @buf.join
     @buf = []
     unless @cells.nil?
-      text = text.strip
-      @cells << text.gsub(/\s+/, " ") unless text.empty?
+      text = text.gsub(/\s+/, " ").strip
+      return if text.empty?
+      # セルの中の <br> や <p> で区切られた分は、新しいセルにせず同じセルの別の段として足す
+      # （段ごとに文へ割るので、句点で終わらない段が次の段とつながらない）
+      if @in_cell && !@cells.empty?
+        @cells[-1] << text
+      else
+        @cells << [text]
+      end
       return
     end
     prefix = "[##{current_id}] "
@@ -166,6 +175,8 @@ class Extractor
       @cells = []
     elsif %w[td th].include?(tag) && !@cells.nil?
       flush
+      @cells << []
+      @in_cell = true
     end
     @pre += 1 if tag == "pre"
     @stack << [tag, id_of(attrs)]
@@ -189,13 +200,17 @@ class Extractor
     end
     if %w[td th].include?(tag) && !@cells.nil?
       flush
+      @in_cell = false
     elsif tag == "tr" && !@cells.nil?
       flush
-      row = @cells
+      row = @cells.reject(&:empty?)
       @cells = nil
+      @in_cell = false
       # 表の行は 1 セルの中に何文も入るので、セルごと・文ごとに割る
-      row.each_with_index do |cell, i|
-        sentences(cell).each { |sentence| @lines << "[##{current_id}] |#{i + 1}| #{sentence}" }
+      row.each_with_index do |segments, i|
+        segments.flat_map { |segment| sentences(segment) }.each do |sentence|
+          @lines << "[##{current_id}] |#{i + 1}| #{sentence}"
+        end
       end
     elsif blocky?(tag, closing: true)
       flush
