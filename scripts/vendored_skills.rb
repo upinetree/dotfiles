@@ -200,7 +200,7 @@ class VendoredSkills
       scope = base_tree ? "差分（レビュー済みの tree #{base_tree} から）" : "全体"
       puts "#{name} #{skill.pinned} を headless claude でレビューします（範囲: #{scope}、#{REVIEW_RUNS.size} 系統、各 $#{REVIEW_BUDGET_USD} まで）"
 
-      runs = REVIEW_RUNS.map { |label| Thread.new { [label, run_reviewer(skill, workspace, base_tree)] } }.map(&:value).to_h
+      runs = REVIEW_RUNS.map { |label| Thread.new { [label, run_reviewer(skill, workspace, base_tree, label)] } }.map(&:value).to_h
       runs.each { |label, run| print_run(label, run) }
 
       required = required_reads(target, base_tree && File.join(tmp, "previous"))
@@ -212,6 +212,7 @@ class VendoredSkills
         puts
         puts "記録しませんでした。機械的な確認で次の問題がありました:"
         problems.each { |p| puts "  - #{p}" }
+        puts "各系統の生ログ: #{runs.values.map { |run| run["log"] }.compact.join(" ")}"
         exit 1
       end
 
@@ -250,7 +251,7 @@ class VendoredSkills
     File.write(File.join(workspace, "changes.diff"), diff)
   end
 
-  def run_reviewer(skill, workspace, base_tree)
+  def run_reviewer(skill, workspace, base_tree, label)
     scope = if base_tree
       "前回レビュー済みの tree #{base_tree} との差分が ./changes.diff にある（a/previous が前回、b/ws/target が今回）。差分モードでレビューする。"
     else
@@ -269,10 +270,14 @@ class VendoredSkills
       "--json-schema", JSON.generate(REVIEW_SCHEMA), "--append-system-prompt", instructions, prompt,
       chdir: workspace
     )
+    # 確認に落ちたとき原因を生データで確かめられるよう、一時ディレクトリの外に残す
+    log = File.join(Dir.tmpdir, "vendored-skill-review-logs", "#{Time.now.strftime("%Y%m%d_%H%M%S")}-#{skill.name}-#{label}.jsonl")
+    FileUtils.mkdir_p(File.dirname(log))
+    File.write(log, output + error.to_s)
     events = output.each_line.filter_map { |line| JSON.parse(line) rescue nil } # standard:disable Style/RescueModifier
     result = events.rfind { |e| e["type"] == "result" }
-    return {"is_error" => true, "result" => (error.to_s + output.to_s)[-500..] || error.to_s} unless result
-    result.merge("reads" => successful_reads(events))
+    return {"is_error" => true, "result" => (error.to_s + output.to_s)[-500..] || error.to_s, "log" => log} unless result
+    result.merge("reads" => successful_reads(events), "log" => log)
   end
 
   # 要求した範囲（offset / limit）ではなく、エラーにならずに実際に返ってきた中身を Read の記録とする
@@ -299,10 +304,13 @@ class VendoredSkills
       path = [File.dirname(target), target].map { |base| File.expand_path(file["filePath"].to_s, base) }.find { |p| File.file?(p) }
       next unless path
       start = [file["startLine"].to_i, 1].max
-      lines = File.readlines(path)[start - 1, file["numLines"].to_i] || []
-      # 長い行の切り詰めなどで返った中身がファイルと食い違う Read は、読んだことにしない
-      next unless file["content"].to_s.chomp == lines.join.chomp
-      read_lines[File.realpath(path)].concat((start...(start + lines.size)).to_a)
+      actual = File.readlines(path, chomp: true)
+      # 返った中身を 1 行ずつファイルと突き合わせ、一致した行だけを読んだことにする。Read は大きな
+      # ファイルを途中の行で打ち切り、長い行も切り詰めるので、塊ごとの一致では判定できない
+      # 塊の末尾が空行のとき split("\n") はそれを落とすので、-1 で残す
+      file["content"].to_s.split("\n", -1).each_with_index do |line, i|
+        read_lines[File.realpath(path)] << start + i if line == actual[start - 1 + i]
+      end
     end
     required.reject do |rel|
       path = File.realpath(File.join(target, rel))
@@ -317,7 +325,7 @@ class VendoredSkills
     unless unread.empty?
       reads = Array(run["reads"])
       problems << "指示ファイルを全文 Read していません（#{unread.join(", ")}）。" \
-        "拾えた Read は #{reads.size} 件（例: #{reads.first(3).map { |r| r.slice("file_path", "offset", "limit") }.inspect}）"
+        "拾えた Read は #{reads.size} 件（例: #{reads.first(3).map { |r| r.slice("filePath", "startLine", "numLines", "totalLines") }.inspect}）"
     end
     denials = Array(run["permission_denials"])
     problems << "作業ディレクトリの外などへのアクセスが拒否されています（#{denials.map { |d| d["tool_input"] }.inspect[0, 300]}）" unless denials.empty?
@@ -360,15 +368,21 @@ class VendoredSkills
       path = File.join(target, rel)
       next [] unless File.file?(path)
       content = File.binread(path).force_encoding(Encoding::UTF_8)
-      next [] if content.include?("\0") # バイナリ（画像など）
+      extension = File.extname(rel).downcase
+      # NUL を含むファイルは画像などのバイナリとして飛ばすが、テキストのはずの拡張子なら
+      # NUL 1 バイトで検査を外せてしまうので止める
+      if content.include?("\0")
+        text = INSTRUCTION_EXTENSIONS.include?(extension) || SCRIPT_EXTENSIONS.include?(extension)
+        next text ? ["#{rel}: テキストのはずのファイルが NUL バイトを含みます"] : []
+      end
       # 不正な UTF-8 を飛ばすと、1 バイト混ぜるだけで検査を外せる。Read は寛容に解読して読ませるので止める
       invalid = content.valid_encoding? ? [] : ["#{rel}: 不正な UTF-8 を含みます"]
-      pattern = SCRIPT_EXTENSIONS.include?(File.extname(rel).downcase) ? BIDI_CHARS : HIDDEN_CHARS
+      pattern = SCRIPT_EXTENSIONS.include?(extension) ? BIDI_CHARS : HIDDEN_CHARS
       invalid + content.scrub.each_line.with_index(1).flat_map do |line, number|
         hits = []
         chars = line.scan(pattern).uniq.map { |c| format("U+%04X", c.ord) }
         hits << "#{rel}:#{number}: 不可視文字 #{chars.join(",")}" unless chars.empty?
-        hits << "#{rel}:#{number}: HTML コメント" if INSTRUCTION_EXTENSIONS.include?(File.extname(rel).downcase) && line.include?("<!--")
+        hits << "#{rel}:#{number}: HTML コメント" if INSTRUCTION_EXTENSIONS.include?(extension) && line.include?("<!--")
         hits
       end
     end
