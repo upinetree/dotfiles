@@ -27,7 +27,6 @@ if OS.mac?
   brew "zsh"
 
   cask "1password-cli"
-  cask "alacritty"
   cask "alt-tab"
   cask "bartender"
   cask "deepl"
