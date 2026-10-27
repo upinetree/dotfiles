@@ -34,6 +34,7 @@ class VendoredSkills
   # 双方向制御文字（Trojan Source）だけを見る
   BIDI_CHARS = /[‪-‮⁦-⁩]/
   SCRIPT_EXTENSIONS = %w[.py .rb .sh .bash .zsh .js .mjs .cjs .ts .go .rs .pl .lua].freeze
+  INSTRUCTION_EXTENSIONS = %w[.md .markdown .mdx .txt].freeze
   REVIEW_SCHEMA = {
     type: "object",
     additionalProperties: false,
@@ -200,7 +201,7 @@ class VendoredSkills
       runs = REVIEW_RUNS.map { |label| Thread.new { [label, run_reviewer(skill, workspace, base_tree)] } }.map(&:value).to_h
       runs.each { |label, run| print_run(label, run) }
 
-      required = required_reads(target, workspace, base_tree)
+      required = required_reads(target, base_tree && File.join(tmp, "previous"))
       problems = hidden_text(target).map { |hit| "隠しテキスト: #{hit}" }
       runs.each { |label, run| problems.concat(run_problems(target, run, required).map { |p| "系統 #{label}: #{p}" }) }
       verdicts = runs.values.filter_map { |run| run.dig("structured_output", "verdict") }.uniq
@@ -269,30 +270,37 @@ class VendoredSkills
     events = output.each_line.filter_map { |line| JSON.parse(line) rescue nil } # standard:disable Style/RescueModifier
     result = events.rfind { |e| e["type"] == "result" }
     return {"is_error" => true, "result" => (error.to_s + output.to_s)[-500..] || error.to_s} unless result
-    reads = events.select { |e| e["type"] == "assistant" }
-      .flat_map { |e| Array(e.dig("message", "content")) }
-      .select { |c| c["type"] == "tool_use" && c["name"] == "Read" }
-      .map { |c| c["input"] }
-    result.merge("reads" => reads)
+    result.merge("reads" => successful_reads(events))
   end
 
-  # 全体モードでは tree の指示ファイル（Markdown）すべて、差分モードでは変更された指示ファイルを全文読ませる
-  def required_reads(target, workspace, base_tree)
-    if base_tree
-      File.read(File.join(workspace, "changes.diff")).scan(%r{^\+\+\+ b/ws/target/(.+\.md)$}).flatten.uniq.sort
-    else
-      Dir.glob("**/*.md", base: target).sort
+  # 要求した範囲（offset / limit）ではなく、エラーにならずに実際に返ってきた中身を Read の記録とする
+  def successful_reads(events)
+    events.select { |e| e["type"] == "user" && e["tool_use_result"].is_a?(Hash) && e["tool_use_result"]["file"] }
+      .reject { |e| Array(e.dig("message", "content")).any? { |c| c["type"] == "tool_result" && c["is_error"] } }
+      .map { |e| e["tool_use_result"]["file"] }
+  end
+
+  # 全体モードでは tree の指示として読まれうるテキストすべて、差分モードではそのうち中身が変わったものを全文読ませる
+  def required_reads(target, previous = nil)
+    Dir.glob("**/*", File::FNM_DOTMATCH, base: target).sort.select do |rel|
+      path = File.join(target, rel)
+      next false unless File.file?(path) && INSTRUCTION_EXTENSIONS.include?(File.extname(rel).downcase)
+      old = previous && File.join(previous, rel)
+      previous.nil? || !File.file?(old) || File.binread(old) != File.binread(path)
     end
   end
 
   def unread_files(target, reads, required)
     read_lines = Hash.new { |h, k| h[k] = [] }
-    reads.each do |input|
+    reads.each do |file|
       # claude の cwd は target の 1 つ上なので、相対パスはどちらを基準にしても解決できるようにする
-      path = [File.dirname(target), target].map { |base| File.expand_path(input["file_path"].to_s, base) }.find { |p| File.file?(p) }
+      path = [File.dirname(target), target].map { |base| File.expand_path(file["filePath"].to_s, base) }.find { |p| File.file?(p) }
       next unless path
-      offset = [input["offset"].to_i, 1].max
-      read_lines[File.realpath(path)].concat((offset...(offset + (input["limit"] || 2000).to_i)).to_a)
+      start = [file["startLine"].to_i, 1].max
+      lines = File.readlines(path)[start - 1, file["numLines"].to_i] || []
+      # 長い行の切り詰めなどで返った中身がファイルと食い違う Read は、読んだことにしない
+      next unless file["content"].to_s.chomp == lines.join.chomp
+      read_lines[File.realpath(path)].concat((start...(start + lines.size)).to_a)
     end
     required.reject do |rel|
       path = File.realpath(File.join(target, rel))
@@ -344,19 +352,21 @@ class VendoredSkills
   end
 
   # LLM の申告に頼らず、指示として読まれうる隠しテキストを数える。HTML コメントは
-  # スクリプトの文字列として正当に現れるので Markdown だけを見る
+  # スクリプトの文字列として正当に現れるので指示テキスト（INSTRUCTION_EXTENSIONS）だけを見る
   def hidden_text(target)
     Dir.glob("**/*", File::FNM_DOTMATCH, base: target).sort.flat_map do |rel|
       path = File.join(target, rel)
       next [] unless File.file?(path)
       content = File.binread(path).force_encoding(Encoding::UTF_8)
-      next [] unless content.valid_encoding?
-      pattern = SCRIPT_EXTENSIONS.include?(File.extname(rel)) ? BIDI_CHARS : HIDDEN_CHARS
-      content.each_line.with_index(1).flat_map do |line, number|
+      next [] if content.include?("\0") # バイナリ（画像など）
+      # 不正な UTF-8 を飛ばすと、1 バイト混ぜるだけで検査を外せる。Read は寛容に解読して読ませるので止める
+      invalid = content.valid_encoding? ? [] : ["#{rel}: 不正な UTF-8 を含みます"]
+      pattern = SCRIPT_EXTENSIONS.include?(File.extname(rel).downcase) ? BIDI_CHARS : HIDDEN_CHARS
+      invalid + content.scrub.each_line.with_index(1).flat_map do |line, number|
         hits = []
         chars = line.scan(pattern).uniq.map { |c| format("U+%04X", c.ord) }
         hits << "#{rel}:#{number}: 不可視文字 #{chars.join(",")}" unless chars.empty?
-        hits << "#{rel}:#{number}: HTML コメント" if rel.end_with?(".md") && line.include?("<!--")
+        hits << "#{rel}:#{number}: HTML コメント" if INSTRUCTION_EXTENSIONS.include?(File.extname(rel).downcase) && line.include?("<!--")
         hits
       end
     end
