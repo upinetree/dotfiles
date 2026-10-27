@@ -36,7 +36,8 @@ This repo manages dotfiles via **symlinks** on macOS and Linux. The authoritativ
 - `scripts/lib.sh` — shared utilities: `detect_platform` (sets `$PLATFORM` to `osx`/`linux`) and `log <level> <text>`
 - `scripts/link.sh` — creates all symlinks; also handles an `OBSOLETED_PAIRS` list for cleanup of removed mappings. Each directory under `.agents/skills/` is auto-linked into both `~/.agents/skills/<name>` (canonical cross-agent location) and `~/.claude/skills/<name>` (bridge link — Claude Code only reads `~/.claude/skills`, verified 2026-09). Machine-local skills placed directly in either directory are left untouched
 - `scripts/vendored_skills.rb` — manages third-party skills vendored via `gh skill install --pin` (`make skills-list` / `skills-check` / `skills-update`). See **Vendored third-party skills** below
-- `scripts/install_packages.sh` — installs Homebrew, then runs `brew bundle` against the root `Brewfile`. Platform differences live in the Brewfile itself via `OS.mac?` / `OS.linux?` (casks are macOS-only)
+- `scripts/vendored_apps.rb` — tracks macOS apps installed from GitHub releases through mise's `macos-app` (`make apps-list` / `apps-check` / `apps-update`). See **Vendored macOS apps** below
+- `scripts/install_packages.sh` — installs Homebrew, then runs `brew bundle` against the root `Brewfile`, then `mise install` and `mise bootstrap packages apply`. Platform differences live in the Brewfile itself via `OS.mac?` / `OS.linux?` (casks are macOS-only)
 - `git-hooks/pre-commit` — Ruby script that blocks commits containing `binding.pry`, `debugger`, `focus: true`, `save_and_open_page`, or merge conflict markers
 
 ## Self-authored script language
@@ -99,9 +100,17 @@ The flag also blocks a plain `git pull` whenever the remote touched `settings.js
 - A plain `gh skill update` does not touch the vendored copy: it does not list `yomiyasu` at all (`gh skill update yomiyasu --dry-run` answers "none of the specified skills are installed", verified 2026-10 with gh 2.101 — the symlinked directory is not scanned). The `make` target is the only update path
 - The Ruby-by-default rule does not apply inside a vendored skill (see **Self-authored script language**)
 
+**Vendored macOS apps** — apps whose Homebrew cask is unusable (e.g. `alacritty`, disabled on 2026-09-01 with `fails_gatekeeper_check` because upstream refuses to notarize) are declared in `.config/mise/.config.toml` as `[bootstrap.packages."macos-app:<name>"]` with a pinned `version`, a GitHub release `url` using `{{version}}`, its `sha256`, and `artifact`. mise downloads, verifies and places the app; `install_packages.sh` runs `mise bootstrap packages apply`. Rules:
+
+- mise's `macos-app` cannot discover new releases, so `scripts/vendored_apps.rb` fills that gap: `make apps-check` compares each pin with the latest GitHub release (nonzero when lagging), and `make apps-update NAME=<app> [REF=<tag>]` rewrites `version` / `sha256` from the release's asset digest and applies it. Read `git diff` before committing. The script reads the TOML with regexes, so keep each entry in the table form with string values (an inline `"macos-app:x" = { ... }` entry is not seen)
+- No security-review record is required, unlike vendored skills: the artifact is an upstream binary that cannot be meaningfully read, and the trust is the same as the cask's (the cask pinned the same DMG with the same sha256)
+- To migrate a machine off the cask, run `brew uninstall --cask <name>` first. mise refuses to overwrite an app it does not own; do not set `adopt = true` to get around it while the cask is still installed, because a later `brew uninstall --cask` deletes the app mise now manages
+- `bootstrap` is a new mise feature (its docs were restructured in 2026-10) and mise is not version-pinned in the Brewfile; if `apply` starts failing after a mise upgrade, check the release notes first
+- Post-install steps stay app-specific glue in `install_packages.sh` (alacritty's terminfo is symlinked into the bundle, as the cask did, so it follows upgrades without a re-run)
+
 **`Gemfile`** — declares `gem "standard"` (standardrb). Dotfiles scripts are few and don't warrant maintaining a custom rubocop rule set; standardrb provides zero-config formatting. The `.vscode/settings.json` sets `rubyLsp.formatter: "standard"` so VSCode format-on-save also uses standardrb.
 
-**`.config/mise/.config.toml`** — manages runtime versions for node, ruby, python, terraform, and claude via [mise](https://mise.jdx.dev/)
+**`.config/mise/.config.toml`** — manages runtime versions for node, ruby, python, terraform, and claude via [mise](https://mise.jdx.dev/), and declares the vendored macOS apps under `[bootstrap.packages]`
 
 **`.gitconfig`** — notable aliases:
 

@@ -1,4 +1,4 @@
-.PHONY: help install copy link install_packages doctor doctor-notify pull skills-list skills-check skills-update
+.PHONY: help install copy link install_packages doctor doctor-notify pull skills-list skills-check skills-update apps-list apps-check apps-update
 
 help:
 	@echo "make install          # copy and link files, then install packages"
@@ -11,6 +11,9 @@ help:
 	@echo "make skills-list      # list vendored third-party skills and their pins"
 	@echo "make skills-check     # flag vendored skills without a security-review record, or lagging their latest release"
 	@echo "make skills-update NAME=<skill> REF=<tag>  # re-vendor a skill at <tag>; review it and record before committing"
+	@echo "make apps-list        # list vendored macOS apps (mise macos-app) and installed versions"
+	@echo "make apps-check       # flag vendored apps lagging their latest GitHub release"
+	@echo "make apps-update NAME=<app> [REF=<tag>]  # pin an app to <tag> (default: latest) and install it"
 
 install: link install_packages
 
@@ -44,3 +47,13 @@ skills-check:
 skills-update:
 	@test -n "$(NAME)" -a -n "$(REF)" || { echo "usage: make skills-update NAME=<skill> REF=<tag>"; exit 1; }
 	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_skills.rb update "$(NAME)" "$(REF)"
+
+apps-list:
+	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_apps.rb list
+
+apps-check:
+	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_apps.rb check
+
+apps-update:
+	@test -n "$(NAME)" || { echo "usage: make apps-update NAME=<app> [REF=<tag>]"; exit 1; }
+	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_apps.rb update "$(NAME)" $(REF)

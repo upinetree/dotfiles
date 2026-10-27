@@ -11,3 +11,12 @@ ruby = "latest"
 terraform = "latest"
 python = "latest"
 go = "latest"
+
+# Homebrew の cask が disabled になった（upstream が公証しない）アプリを release から直接入れる。
+# macos-app は新しい release を検知しないので、`make apps-check` / `make apps-update` で追う
+[bootstrap.packages."macos-app:alacritty"]
+version = "0.17.0"
+url = "https://github.com/alacritty/alacritty/releases/download/v{{version}}/Alacritty-v{{version}}.dmg"
+sha256 = "ad8d7de35fb38e43184776cac6dfee05ca325caa0b6639a06a55e54e4b026620"
+artifact = "Alacritty.app"
+os = "macos"

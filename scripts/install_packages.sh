@@ -85,48 +85,14 @@ install_tmux() {
   ~/.tmux/plugins/tpm/bin/install_plugins
 }
 
-# Homebrew cask は upstream が公証しないため 2026-09-01 に disabled になった。cask と同じ DMG を同じ sha256 で固定して取る
-# https://github.com/alacritty/alacritty/issues/8749
-ALACRITTY_VERSION="0.17.0"
-ALACRITTY_DMG_SHA256="ad8d7de35fb38e43184776cac6dfee05ca325caa0b6639a06a55e54e4b026620"
-
-installed_alacritty_version() {
-  defaults read /Applications/Alacritty.app/Contents/Info CFBundleShortVersionString 2>/dev/null
-}
-
-install_alacritty() {
-  local base="https://github.com/alacritty/alacritty/releases/download/v${ALACRITTY_VERSION}"
-  local work
-  local dmg
-
-  # cask が残ったまま置き換えると、後の brew uninstall --cask が新しい版を消す
-  if brew list --cask alacritty &>/dev/null; then
-    log error "alacritty cask is still installed. Run \`brew uninstall --cask alacritty\` first"
-    return 1
-  fi
-
-  work="$(mktemp -d)"
-  dmg="$work/Alacritty-v${ALACRITTY_VERSION}.dmg"
-  curl -fsSLo "$dmg" "$base/Alacritty-v${ALACRITTY_VERSION}.dmg" || return 1
-  echo "${ALACRITTY_DMG_SHA256}  ${dmg}" | shasum -a 256 -c - || return 1
-
-  # ditto は既存の bundle に上書きマージして旧版のファイルを残すので、旧版はよけてから置く
-  if [ -d /Applications/Alacritty.app ]; then
-    mv /Applications/Alacritty.app "$work/"
-    log info "Previous Alacritty.app is moved to $work"
-  fi
-
-  mkdir "$work/mnt"
-  hdiutil attach -nobrowse -readonly -mountpoint "$work/mnt" "$dmg" >/dev/null || return 1
-  ditto "$work/mnt/Alacritty.app" /Applications/Alacritty.app
-  hdiutil detach "$work/mnt" >/dev/null
-
-  # cask はアプリ内の terminfo へ symlink していた。sha256 照合済みの bundle からコピーし、
-  # 別ダウンロードの未検証ファイルを持ち込まず、アプリの置き場所にも依存させない
+# alacritty 本体は mise の [bootstrap.packages] macos-app で入る。terminfo は cask が張っていたのと同じく
+# bundle 内へ symlink し、mise が版を上げても後処理なしで追従させる
+link_alacritty_terminfo() {
+  local resources=/Applications/Alacritty.app/Contents/Resources/61
+  [ -d "$resources" ] || return 0
   mkdir -p ~/.terminfo/61
-  cp /Applications/Alacritty.app/Contents/Resources/61/alacritty \
-    /Applications/Alacritty.app/Contents/Resources/61/alacritty-direct \
-    ~/.terminfo/61/
+  ln -sfn "$resources/alacritty" ~/.terminfo/61/alacritty
+  ln -sfn "$resources/alacritty-direct" ~/.terminfo/61/alacritty-direct
 }
 
 result() {
@@ -154,16 +120,6 @@ if [ "$PLATFORM" = "osx" ] || [ "$PLATFORM" = "linux" ]; then
   else
     log error "brew command not found"
     exit 1
-  fi
-fi
-
-if [ "$PLATFORM" = "osx" ]; then
-  if [ "$(installed_alacritty_version)" = "$ALACRITTY_VERSION" ]; then
-    log info "alacritty $ALACRITTY_VERSION is already installed"
-  elif install_alacritty; then
-    log success "alacritty $ALACRITTY_VERSION is successfully installed!"
-  else
-    log error "Failed to install alacritty"
   fi
 fi
 
@@ -211,6 +167,14 @@ fi
 
 if exists mise; then
   mise install
+
+  # cask が置いた Alacritty.app は mise の管理外なので apply が上書きを拒否する。adopt で引き取らせると
+  # 後の brew uninstall --cask が mise の入れたアプリを消すため、cask を外させる
+  if [ "$PLATFORM" = "osx" ] && brew list --cask alacritty &>/dev/null; then
+    log warn "alacritty cask is still installed. Run \`brew uninstall --cask alacritty\`, then rerun"
+  fi
+  mise bootstrap packages apply --yes
+  [ "$PLATFORM" = "osx" ] && link_alacritty_terminfo
 fi
 
 if exists fzf; then
