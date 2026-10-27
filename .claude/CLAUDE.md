@@ -17,7 +17,7 @@
 
 対象が symlink ではなく実ファイルになっていたら symlink が壊れている（Claude Code が設定を直接書き換えると起きうる）。`make link`（または該当 1 本を貼り直し）で復旧してから編集し、内容が分岐した 2 コピーを残さない。
 
-他人の skill（yomiyasu など）は `gh skill install --pin <tag>` で `.agents/skills/<name>` に tag 固定のコピーとして取り込んである。SKILL.md の frontmatter に `metadata.github-repo` / `github-pinned` があるものがそれで、中身を手で直さない。取り込み・更新は `make -C ~/.dotfiles skills-update NAME=<name> REF=<tag>` で取り直し、`git diff` を読み、**セキュリティレビュー（観点は dotfiles の CLAUDE.md「Vendored third-party skills」）をして `.agents/vendored-skills-reviews.yml` に記録してから**コミットする。レビュー記録が無い tree は `make skills-check` が UNREVIEWED として nonzero を返す。レビュー無しで commit しない。
+他人の skill（yomiyasu など）は `gh skill install --pin <tag>` で `.agents/skills/<name>` に tag 固定のコピーとして取り込んである。SKILL.md の frontmatter に `metadata.github-repo` / `github-pinned` があるものがそれで、中身を手で直さない。取り込み・更新は `make -C ~/.dotfiles skills-update NAME=<name> REF=<tag>` で取り直す。続けて headless の claude がセキュリティレビューし（観点は `vendored-skill-review` skill、仕組みは dotfiles の CLAUDE.md「Vendored third-party skills」）、機械的な確認を通れば `.agents/vendored-skills-reviews.yml` に記録される。**skill と記録の `git diff` を読んでから**コミットする。自動レビューが記録せずに止まったら、同じ skill で手でレビューして記録する。レビュー記録が無い tree は `make skills-check` が UNREVIEWED として nonzero を返す。レビュー無しで commit しない。
 
 ## Bash コマンド実行の作法
 

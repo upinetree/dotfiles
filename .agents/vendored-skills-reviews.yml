@@ -1,6 +1,6 @@
 # 取り込んだ他人の skill のセキュリティレビュー記録。
 # scripts/vendored_skills.rb が skill + tree_sha で突き合わせ、記録の無い tree を UNREVIEWED にする。
-# 観点とやり方は CLAUDE.md「Vendored third-party skills」。1 エントリ = 1 tree。
+# 観点は .agents/skills/vendored-skill-review、仕組みは CLAUDE.md「Vendored third-party skills」。1 エントリ = 1 tree。
 # verdict: ok | ok-with-notes | rejected
 - skill: yomiyasu
   ref: v2.0.2
