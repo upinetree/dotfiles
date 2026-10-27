@@ -26,7 +26,9 @@ class VendoredSkills
   # すべて通ったときだけこのスクリプトが書く。人は commit 前の diff で最終確認する。
   REVIEW_SKILL = ".agents/skills/vendored-skill-review/SKILL.md"
   REVIEW_RUNS = %w[A B].freeze
-  REVIEW_BUDGET_USD = 2.5 # 1 系統あたり。2 系統で 5 ドルが上限
+  # 1 系統あたり。yomiyasu 全体を全文読みさせて $1.5-1.6 だった。上限に当たるとそれまでの費用が
+  # 無駄になり記録もされないので、通常の費用ではなく暴走の止めとして余裕を持たせる
+  REVIEW_BUDGET_USD = 4.0
   REVIEW_TOOLS = "Read,Grep,Glob"
   SEVERITIES = %w[high medium low info].freeze
   HIDDEN_CHARS = /[​-‏‪-‮⁠-⁤⁦-⁩﻿]/
