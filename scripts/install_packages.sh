@@ -121,9 +121,12 @@ install_alacritty() {
   ditto "$work/mnt/Alacritty.app" /Applications/Alacritty.app
   hdiutil detach "$work/mnt" >/dev/null
 
-  # cask はアプリ内の terminfo へ symlink していた。tic で実体を置き、アプリの置き場所に依存させない
-  curl -fsSLo "$work/alacritty.info" "$base/alacritty.info" || return 1
-  tic -xe alacritty,alacritty-direct "$work/alacritty.info"
+  # cask はアプリ内の terminfo へ symlink していた。sha256 照合済みの bundle からコピーし、
+  # 別ダウンロードの未検証ファイルを持ち込まず、アプリの置き場所にも依存させない
+  mkdir -p ~/.terminfo/61
+  cp /Applications/Alacritty.app/Contents/Resources/61/alacritty \
+    /Applications/Alacritty.app/Contents/Resources/61/alacritty-direct \
+    ~/.terminfo/61/
 }
 
 result() {
