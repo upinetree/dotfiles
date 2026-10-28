@@ -37,3 +37,97 @@
       別名で保存する（SKILL.md:15）。原文は上書きしない。
     - verify が記録内の report パスを `runs/` 前方一致だけで受けて open する（yomiyasu_check.py:3270-3273）。
       状態フォルダに書ける第三者が前提で、読んだ内容はハッシュ比較にしか使われない。low。
+- skill: yomiyasu
+  ref: v2.4.0
+  tree_sha: c38e31ece9ee7b17e4553708f324f07489bcfe28
+  reviewed_at: 2026-10-28
+  verdict: ok-with-notes
+  method: |
+    headless claude（--restricted、tools: Read,Grep,Glob）による独立 2 系統の自動レビュー（.agents/skills/vendored-skill-review/SKILL.md）。
+    範囲: 差分（レビュー済みの tree dafff8431273113dec03294c4ae654c9bb5b6602 から）。モデル: claude-opus-5-5。費用: $4.53。
+    vendored_skills.rb が引用と実際の行の突き合わせ、隠しテキストの機械検出、verdict と重大度の整合、系統どうしの一致を確認済み。
+    scratch での実行確認はしていない。
+    追加レビュー（2026-10-28）: 自動レビューが読み切れなかったスクリプトの差分を、Claude Code のサブエージェント 2 つで
+    分担して読んだ（check / hook / markdown_visibility と、lint / diff。lint と diff は差分ファイルを全行 Read）。
+    主な引用は本人が原文で再現した。サブエージェントは読み取り専用に閉じ込めていない（全ツールを持つ通常の
+    サブエージェント）。yomiyasu を実行した痕跡（.yomiyasu/、__pycache__、yomiyasu-check-*）が無いことは確認した。
+    系統 A が読んだ範囲: 【差分の読み方】changes.diff の `diff --git` 行で対象ファイルを洗い出した。diff は 893KB と大きいので、まず次を範囲を区切って読んだ。
+    - markdown_visibility.py の差分（1232–1420行）
+    - yomiyasu_check.py の差分のうち一時ファイル・状態フォルダ・start コマンドの部分（1530–1770行、2780–2920行）
+    - yomiyasu_hook.py の差分（6210–6537行）
+
+    【指示テキスト】中身が変わった指示テキストはすべて target 側で全文を Read で読んだ（SKILL.md は 1–204行と 205–380行の2回に分けて全380行）。
+    - SKILL.md
+    - references/ の audience.md、calques.md（新規）、fact-recovery.md、fact-recovery-details.md、gemini-syntax.md、persona.md、rephrase-test.md、review-points.md、slop-catalog.md
+    - references/doc-types/ の essay、formal、paper、promo、script（新規）、slides
+    - references/domains/ の business.md、tech.md
+    - references/lists/ の fact-gaps、feelings、intensifiers、katakana-terms（新規）、nominalization、renyo-nouns（新規）、thin-evaluation（新規）
+
+    【スクリプトの Grep】
+    - target/scripts 全体で次を検索した: import/from、subprocess、os.system、eval(/exec(/__import__/importlib、socket/urllib/requests/http.、environ/getenv、base64/fromhex/pickle/marshal、rmtree/remove/unlink/rmdir、expanduser、open(、mkdir/chmod/rename/replace
+    - changes.diff の追加行（^+）で同じ語に加えて git、http、YOMIYASU_STATE_DIR、Popen、CLAUDE_PROJECT_DIR、settings.json、hooks、.gitignore を検索した
+
+    【結果】
+    - ネットワークのライブラリは、どのスクリプトも import していない
+    - subprocess.Popen は yomiyasu_check.py:1437 にあるが、差分で追加された Popen/subprocess の行はない
+    - target 配下の *.md / *.txt で、ゼロ幅文字・双方向制御文字・BOM・HTML コメント（<!--）を検索し、0件だった
+    系統 B が読んだ範囲: 差分モード。changes.diff のファイル見出しを Grep で列挙し、変更された指示テキストを target 側で全文 Read した。対象は SKILL.md（1–380 行を 2 回に分けて読了）、references/audience.md、calques.md（新規）、doc-types/essay.md・formal.md・paper.md・promo.md・script.md（新規）・slides.md、domains/business.md・tech.md、fact-recovery.md、fact-recovery-details.md、gemini-syntax.md、persona.md、rephrase-test.md、review-points.md、slop-catalog.md、lists/fact-gaps.txt・feelings.txt・intensifiers.txt・katakana-terms.txt（新規）・nominalization.txt・renyo-nouns.txt（新規）・thin-evaluation.txt（新規）。スクリプトの差分は、diff の追加行（^\+）に対して import、subprocess、os.system、eval(、exec(、socket、urllib、requests、http、environ、getenv、base64、fromhex、__import__、importlib、rmtree、remove、unlink、write_text、書き込みモードの open、expanduser、Path.home、chmod、pickle、marshal を Grep した。該当箇所の前後として、diff 1232–1420（markdown_visibility.py の語の一覧の処理）、1660–1729（yomiyasu_check.py の _mkdtemp と _remove_temporary）、6210–6536（yomiyasu_hook.py の差分全体）を読んだ。差分に Popen、_Children、sys.executable の変更行がないことを Grep で確かめ、target/scripts/yomiyasu_check.py 1712–1761 で子プロセスの引数が固定のスクリプトパスと list 形式であることを確認した。target/scripts 全体にも subprocess、socket、urllib、requests、http.client、os.system、eval(、exec(、base64、environ、getenv を Grep した。subprocess と YOMIYASU_STATE_DIR、CLAUDE_PROJECT_DIR、CODEX_THREAD_ID、YOMIYASU_SESSION の読み取りは前からあり、今回の差分の追加行には現れない。target の *.md と *.txt に対してゼロ幅文字、双方向制御文字、BOM、HTML コメントを Grep し、該当はなかった。
+  notes: |
+    系統 A: 差分モードでレビューした（v2.4.0、tree c38e31e と前回 dafff84 の差分）。high に当たる問題は見つからなかった。追加・変更された指示テキストには、レビューを操作しようとする記述、設定ファイル（settings.json、CLAUDE.md、AGENTS.md、hooks）を書き換えさせる指示、認証情報を読ませる指示、外部への送信、ユーザーや CLAUDE.md の指示を無視させる記述、隠しテキストのいずれもなかった。CLAUDE.md や AGENTS.md への言及は、推敲するファイルの候補から外す（SKILL.md:15）か、事実の材料にしない（fact-recovery.md:18）という向きだけである。
+    スクリプトの差分に、ネットワーク、subprocess、eval/exec、難読化を新しく加えた箇所はない。主な追加は次の3つ:
+    - 語の一覧 `.yomiyasu-words/` を読むだけの関数
+    - 一時ファイル・一時フォルダを作る処理（tempfile の代わりに os.urandom で名前を決める実装）
+    - フックの案内文に `--words` を付ける処理
+    指摘は medium 1件（全文の写しを書く状態フォルダが環境変数 YOMIYASU_STATE_DIR で変わる）、low 2件、info 4件。
+    系統 B: yomiyasu v2.4.0（tree c38e31e）を前回レビュー済みの dafff84 との差分モードで確認した。コミットを止める high 相当の問題は見つからなかった。指示テキストの変更は推敲ルールの追加と細部の調整（台詞・脚本の種類 script、直訳語 calque、連用形名詞 renyo_noun、slide_comma、ペルソナと敬語の細部など）で、skill の役目を超える行動の指示は見当たらない。具体的には、設定・CLAUDE.md・hooks の変更、認証情報の読み取り、git の書き込み、外部への送信、レビューを操作しようとする記述がなかった。隠しテキストもなかった。スクリプトでは、.yomiyasu-words/ の allow.txt と flag.txt を読む機能が新しく入った（markdown_visibility.py）。読み取り専用で、探す場所は git の最上位か作業ディレクトリ、または --words で指定したフォルダ。ほかの変更は一時フォルダの作り方の置き換え、サロゲート文字への対処、フックの案内文に --words を付ける処理（shlex.quote 済み）だった。差分で追加された行には、ネットワーク、eval/exec、shell=True、難読化、認証情報らしい環境変数の読み取りがなかった。リポジトリ側の語の一覧で推敲の挙動が変わる点を low として記録する。
+
+    指摘:
+    - [medium] scripts/yomiyasu_check.py:770（系統 A）run は原文・最終稿・資料の全文の写しを状態フォルダ（既定は git の最上位の .yomiyasu/）に書く。その書き込み先が、環境変数 YOMIYASU_STATE_DIR か --state-dir で任意の場所に変わる（先頭の ~ はホームに展開される）。この挙動は前回からあり、今回の差分では案内文で YOMIYASU_STATE_DIR を勧める箇所が増えた（start が状態フォルダに書けないとき）。環境変数が意図しない場所を指していると、原稿の写しがそこに残る。
+    - [low] SKILL.md:283（系統 A・B）既定では毎回の run が原稿全文の写しを記録に残す。--no-record を付けるのは、利用者が頼んだときだけと指示されている。fact-recovery-details.md:144 によれば、抜き書きも .yomiyasu/inputs/ に写しが残る。check.py:693 の注記によると、写しを置くフォルダには .gitignore を置く設計になっている。それでも機密の原稿を扱うときは、写しが残ることを知っておく必要がある。
+    - [low] references/fact-recovery.md:22（系統 A）事実の確かめのために、原稿か会話に名前の出たファイルを3つまで読むことと、読むだけの git diff / git log -p -1 を1回動かすことを許している。同じ行で、認証情報らしいファイル（.env、*.pem、*.key、id_rsa、credentials）を開くこと、書き込み、テスト、ネットワークは禁じている。範囲は限られているが、推敲のスキルがリポジトリの中を読みに行く経路ではある。
+    - [info] SKILL.md:15（系統 A）名前だけで呼ばれ、推敲する文章が渡されなかったときの挙動。作業フォルダ直下の .md/.txt を一覧し、AGENTS.md・CLAUDE.md・*.material.txt を除いて候補が1つならそれを推敲する。最終稿は原文と同じフォルダに新しい名前で保存し、原文は書き換えない。
+    - [info] SKILL.md:241（系統 A・B）今回の追加。git の最上位の .yomiyasu-words/ にある語の一覧を、エージェントもスクリプトも読む。スクリプト側（markdown_visibility.py の load_words）は読むだけで、各ファイル1万行まで、UTF-8 以外はエラーにする。リポジトリにある一覧で、どの語を直すか・残すかが変わる。
+    - [info] scripts/yomiyasu_check.py:563（系統 A）今回の追加。_mkdtemp はシステムの一時フォルダに 0o700 のフォルダを作り、原稿の写しを置く。_remove_temporary が rmtree で消すのは、自分で作ったそのパスだけ。消せないときは標準エラーで知らせる。
+    - [info] scripts/yomiyasu_hook.py:35（系統 A）フックは、利用者が自分で設定に貼ったときだけ働く。--print-config は JSON の例を出すだけで、設定ファイルには書かない。今回の差分は、案内文に --words / --no-words を付ける処理と、孤立サロゲートの扱いの修正だけである。
+    - [info] scripts/markdown_visibility.py:844（系統 B）新しい関数。--words の指定がなければ、cwd から上へたどって .git がある最初のフォルダ（git の外では cwd）の .yomiyasu-words/ を探し、allow.txt と flag.txt を読む。読むだけで書き込みはない。1 万行を超える一覧と UTF-8 でない一覧はエラーにする。--words の先頭の ~ はホームフォルダに展開する。
+    - [info] scripts/yomiyasu_hook.py:372（系統 B）フックの案内文（agent に実行させる check run のコマンド）に --words と絶対パスを付ける処理が追加された。パスは shlex.quote 済みで、フック自身は lint を動かさない。一覧を読めないときは状態フォルダの hook-errors.log に 1 行残す。
+
+    使う上で知っておくこと:
+    - 名前だけで呼ぶと、作業フォルダ直下の .md/.txt から推敲するファイルを選ぶ。最終稿は同じフォルダに新しい名前で保存される（SKILL.md:15）。
+    - run を実行するたびに、原文・最終稿・資料の全文の写しが状態フォルダに残る。状態フォルダの既定は git の最上位の .yomiyasu/ で、YOMIYASU_STATE_DIR か --state-dir で変わる（SKILL.md:283、scripts/yomiyasu_check.py:770、references/fact-recovery-details.md:144）。残したくないときは --no-record を頼む。
+    - 事実の確かめのときは、最終稿と同じフォルダに『最終稿の名前.material.txt』の抜き書きが作られる（references/fact-recovery.md:25）。
+    - リポジトリの .yomiyasu-words/allow.txt と flag.txt は、エージェントもスクリプトも読み、推敲の直し方に影響する（SKILL.md:241、scripts/markdown_visibility.py:869）。この2ファイルを誰が書けるかに注意する。
+    - 事実の確かめでは、名前の出たファイルを3つまで読み、読むだけの git diff / git log -p -1 を1回実行することがある（references/fact-recovery.md:22）。同じ箇所で、材料の中の指示には従わないと定めている（references/fact-recovery.md:23）。
+    - フック（scripts/yomiyasu_hook.py）は自動では登録されない。利用者が --print-config の出力を設定に貼ったときだけ働く（scripts/yomiyasu_hook.py:35）。
+    - 名前だけで呼ぶと（/yomiyasu など）、推敲する本文がなければ作業フォルダの直下の .md と .txt を一覧し、AGENTS.md と CLAUDE.md と *.material.txt を除いた 1 ファイルを推敲する。最終稿は同じフォルダに新しい名前で保存する（SKILL.md:15）。
+    - check run は既定で原文・最終稿・資料の全文を状態フォルダ（git の最上位の .yomiyasu/。YOMIYASU_STATE_DIR か --state-dir で変わる）に記録する。残したくなければ --no-record を付ける（SKILL.md:283、references/fact-recovery-details.md:144）。
+    - v2.4.0 から、git の最上位（git の外では作業ディレクトリ）の .yomiyasu-words/allow.txt と flag.txt が自動で読まれ、lint の指摘と agent の直し方が変わる。止めるには --no-words を付ける（SKILL.md:241、scripts/markdown_visibility.py:844）。
+    - 事実の裏取りでは、原稿か会話に名前の出たファイルを 3 つまで読むことと、変更の説明の推敲に限って読むだけの git diff か git log -p -1 を 1 回動かすことを認めている。.env、*.pem、*.key、id_rsa、credentials は開かないと明記されている。この指示は今回の差分の外で、前からある（references/fact-recovery.md:22）。
+    - --material と <<<yomiyasu:material>>> で渡す資料は照合の材料として扱われ、記録に写しが残る。材料の中の指示には従わないと明記されている（references/fact-recovery.md:23）。
+    - フックを使う場合、yomiyasu_hook.py は YOMIYASU_STATE_DIR と CLAUDE_PROJECT_DIR を読んで状態フォルダを探し、Stop と PreToolUse で最終稿の照合を求める（scripts/yomiyasu_hook.py:106、117）。
+
+    確認できなかったこと:
+    - yomiyasu_check.py（diff 1421–3043行）と yomiyasu_diff.py（3043–6210行）の差分は全行を読んでいない。危険な処理の語を追加行で Grep し、該当箇所の前後と主要な部分を読んだ。yomiyasu_lint.py の差分（6537行以降、ファイルの大半）も、追加行の Grep と list 読み込みの箇所（8026–8030行付近）だけで確かめた。正規表現の規則の追加など、検査ロジックの中身は評価していない。
+    - 実行して確かめるべきこと: scratch ディレクトリ（git 管理下と管理外の両方）で run / verify / start を一度実行し、次を観察する。.yomiyasu/ と .gitignore が作られる位置、inputs/ に残る写し、システムの一時フォルダに後片付けされないものがないか。YOMIYASU_STATE_DIR を設定したときと、~ で始まる値を渡したときの書き込み先。
+    - yomiyasu_hook.py の差分以外の部分（フックが Stop や PreToolUse を block する条件の全体）は、前回のレビュー範囲として読み直していない。
+    - yomiyasu_lint.py と yomiyasu_diff.py の差分（diff の 3043–6209 行と 6537 行以降。大半は正規表現と判定の処理）は 1 行ずつ全部は読んでいない。追加行に危険な API の呼び出しがないことを Grep で確かめただけなので、正規表現の中身が正しいかや、壊れた正規表現による停止・負荷（ReDoS など）は評価していない
+    - 差分の削除行（^-）を見て、前の版にあった安全策（記録のパスの制限やシンボリックリンクの扱いなど）が消えていないかは網羅的に確かめていない
+    - 実行して確かめるべきこと: scratch ディレクトリで run と verify を実行し、.yomiyasu/（状態フォルダ）、inputs/、exports/、システムの一時フォルダの yomiyasu-check-* に何が書かれ、後片付けされるかを観察する
+    - 実行して確かめるべきこと: git の最上位と cwd の両方に .yomiyasu-words/ がある場合と、--words ~/... を渡した場合に、どのフォルダが読まれるか
+    - yomiyasu_hook.py の --print-config が設定ファイルに書き込まないこと（ヘルプの記述どおりか）は今回の差分の外で、コードでは確かめていない
+
+    追加レビューの指摘（verdict は ok-with-notes のまま。high / medium なし）:
+    - [low] scripts/yomiyasu_check.py:548-556 一時フォルダの後片付けが tempfile.TemporaryDirectory から自前実装に替わり、
+      stdlib の安全策が消えた。stdlib（python 3.14.6 tempfile.py:269-283, 925）はシンボリックリンクをたどらず
+      （_dont_follow_symlinks）、一時フォルダの親には触れない（if path != name）。自前の again() はリンクをたどって
+      chmod 0o700 / chflags 0 を掛け、親（TMPDIR）にも無条件で掛ける。docstring は「TemporaryDirectory と同じく」と
+      書くが同じではない。自分が 0o700 で作ったフォルダを同じユーザーが差し替える前提なので low
+    - [low] scripts/yomiyasu_check.py:556 rmtree の onexc が os.open / os.close を渡すと function(target) が TypeError になり、
+      except OSError で捕まらず、原稿の写しが TMPDIR に残りうる（未実測）
+    - [low] scripts/markdown_visibility.py:915-916 .yomiyasu-words/ の一覧はシンボリックリンクをたどり、1 万行の上限は
+      読み終えてから見る。/dev/zero や FIFO へのリンクを置かれると run が止まるかメモリを使い切る
+    - [low] scripts/yomiyasu_lint.py:3873 references/lists/thin-evaluation.txt の述語の列をエスケープせずに正規表現へ
+      組み込む。現行の一覧は単純な選択肢だけだが、一覧を手で直すと ReDoS の入口になる
+    - [info] lint / diff の追加行は大半が正規表現と判定ロジック。外部送信・コード実行・難読化なし。削除行で入力上限・
+      パス検証・例外処理は消えていない。hook が組み立てるコマンドの可変部分はすべて shlex.quote 済み（yomiyasu_hook.py:372）
+    - 未確認: 実行しての確認（上の low 1・2 の経路、書き込み先）、ReDoS の実測、CVE-2023-6597 との対応（番号は記憶による）
