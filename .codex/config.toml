@@ -1,11 +1,8 @@
-# この repo での Codex 実行に意図して置く project 設定（zplug スキップ用の AGENT_SHELL と読み上げ音量）。
-# Codex Desktop の CONFIG 同期は、settings.json の env を翻訳した config.toml を
-# .codex/ を持つプロジェクトに自動生成することがある（経緯は git log 参照）。
-# 生成形には CLAUDECODE / CLAUDE_CODE_FORK_SUBAGENT も含まれる。この 2 つがここに
-# 無いのは意図的で、もし現れたら同期がこのファイルを上書きした証拠（方針を立て直す）。
 [shell_environment_policy]
 inherit = "core"
 
 [shell_environment_policy.set]
 AGENT_SHELL = "1"
 VOICEVOX_VOLUME = "0.5"
+CLAUDECODE = "1"
+CLAUDE_CODE_FORK_SUBAGENT = "1"
