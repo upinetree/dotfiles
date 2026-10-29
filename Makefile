@@ -11,7 +11,7 @@ help:
 	@echo "make skills-list      # list vendored third-party skills and their pins"
 	@echo "make skills-check     # flag vendored skills without a security-review record, or lagging their latest release"
 	@echo "make skills-update NAME=<skill> REF=<tag>  # re-vendor a skill at <tag>, then run skills-review"
-	@echo "make skills-review NAME=<skill> [FULL=1] [DRY_RUN=1]  # headless claude review; records it only if the mechanical checks pass"
+	@echo "make skills-review NAME=<skill> [FULL=1] [DEEP=1] [BUDGET=<usd>] [DRY_RUN=1]  # headless claude review; records it only if the mechanical checks pass (DEEP=1 also reads scripts in full)"
 	@echo "make apps-list        # list vendored macOS apps (mise macos-app) and installed versions"
 	@echo "make apps-check       # flag vendored apps lagging their latest GitHub release"
 	@echo "make apps-update NAME=<app> [REF=<tag>]  # pin an app to <tag> (default: latest) and install it"
@@ -50,8 +50,8 @@ skills-update:
 	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_skills.rb update "$(NAME)" "$(REF)"
 
 skills-review:
-	@test -n "$(NAME)" || { echo "usage: make skills-review NAME=<skill> [FULL=1] [DRY_RUN=1]"; exit 1; }
-	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_skills.rb review "$(NAME)" $(if $(FULL),--full) $(if $(DRY_RUN),--dry-run)
+	@test -n "$(NAME)" || { echo "usage: make skills-review NAME=<skill> [FULL=1] [DEEP=1] [BUDGET=<usd>] [DRY_RUN=1]"; exit 1; }
+	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_skills.rb review "$(NAME)" $(if $(FULL),--full) $(if $(DEEP),--deep) $(if $(BUDGET),--budget $(BUDGET)) $(if $(DRY_RUN),--dry-run)
 
 apps-list:
 	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/vendored_apps.rb list
