@@ -17,7 +17,7 @@ class Obsidian
         "/mnt/c/Users/*/AppData/Local/Obsidian/Obsidian.com",
         "/mnt/c/Users/*/AppData/Local/Programs/Obsidian/Obsidian.com",
         "/mnt/c/Program Files/Obsidian/Obsidian.com"
-      ]).select { File.executable?(_1) }.then do |paths|
+      ]).select { File.executable?(it) }.then do |paths|
         raise Error, "Multiple Windows CLIs found; set OBSIDIAN_CLI to one executable path" if paths.size > 1
         paths.first
       end
@@ -27,7 +27,7 @@ class Obsidian
   end
 
   def executable(name)
-    ENV.fetch("PATH", "").split(File::PATH_SEPARATOR).map { File.join(_1, name) }.find { File.file?(_1) && File.executable?(_1) }
+    ENV.fetch("PATH", "").split(File::PATH_SEPARATOR).map { File.join(it, name) }.find { File.file?(it) && File.executable?(it) }
   end
 
   def run(*args)
@@ -44,6 +44,25 @@ class Obsidian
     run(@command, *(@name ? ["vault=#{@name}"] : []), command)
   end
 
+  # CLI は起動直後などに同一コマンドでも間欠的に失敗・不完全応答を返すことがあり、
+  # 直後の再実行では成功する（2026-10-29 のレポート保存で観測）。読み取り系の
+  # CLI 呼び出しとその出力パースだけを包むこと（ファイルシステムの検証など、
+  # 再実行しても結果が変わらない安定条件には使わない）。
+  RETRY_ATTEMPTS = 3
+
+  def retrying
+    attempt = 0
+    begin
+      yield
+    rescue Error => e
+      attempt += 1
+      raise if attempt >= RETRY_ATTEMPTS
+      warn "retrying (#{attempt}/#{RETRY_ATTEMPTS - 1}) after: #{e.message.lines.first&.strip}"
+      sleep attempt
+      retry
+    end
+  end
+
   def local_path(path)
     if @wsl && path.match?(/\A(?:[A-Za-z]:[\\\/]|\\\\)/)
       run("wslpath", "-u", path).strip
@@ -54,11 +73,14 @@ class Obsidian
 
   def vault
     return @vault if @vault
-    info = query("vault").lines.filter_map do |line|
-      key, value = line.strip.split("\t", 2)
-      [key, value] if value
-    end.to_h
-    raise Error, "Could not resolve vault name/path" unless info["name"] && info["path"]
+    info = retrying do
+      parsed = query("vault").lines.filter_map do |line|
+        key, value = line.strip.split("\t", 2)
+        [key, value] if value
+      end.to_h
+      raise Error, "Could not resolve vault name/path" unless parsed["name"] && parsed["path"]
+      parsed
+    end
     path = local_path(info.fetch("path"))
     raise Error, "Vault is not an accessible absolute directory: #{path}" unless path.start_with?("/") && File.directory?(path) && File.readable?(path) && File.executable?(path)
     @name ||= info.fetch("name")
@@ -67,8 +89,11 @@ class Obsidian
 
   def daily_path
     root = vault
-    rel = query("daily:path").lines.map(&:strip).reject(&:empty?).last
-    raise Error, "Could not resolve daily note path" unless rel && rel.end_with?(".md")
+    rel = retrying do
+      line = query("daily:path").lines.map(&:strip).reject(&:empty?).last
+      raise Error, "Could not resolve daily note path" unless line&.end_with?(".md")
+      line
+    end
     path = File.expand_path(local_path(rel).tr("\\", "/"), root)
     raise Error, "Daily note not found: #{path}" unless File.file?(path)
     path = File.realpath(path)
@@ -78,7 +103,7 @@ class Obsidian
 
   def tags
     vault
-    query("tags")
+    retrying { query("tags") }
   end
 end
 
