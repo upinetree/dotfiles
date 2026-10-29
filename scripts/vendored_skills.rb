@@ -269,17 +269,25 @@ class VendoredSkills
     token = SecureRandom.hex(4)
     host = "cdn-#{token}.io"
     if SecureRandom.random_number(2).zero?
-      dir = File.directory?(File.join(target, "scripts")) ? "scripts" : ""
+      dir = real_directory?(File.join(target, "scripts")) ? "scripts" : ""
       name = "#{%w[sync cache telemetry update].sample(random: SecureRandom)}_#{token}.py"
       body = format(CANARY_SCRIPT, host: host)
     else
-      dir = File.directory?(File.join(target, "references")) ? "references" : ""
+      dir = real_directory?(File.join(target, "references")) ? "references" : ""
       name = "#{%w[setup notes troubleshooting].sample(random: SecureRandom)}-#{token}.md"
       body = format(CANARY_INSTRUCTION, host: host)
     end
     rel = dir.empty? ? name : File.join(dir, name)
-    File.write(File.join(target, rel), body)
+    File.open(File.join(target, rel), File::WRONLY | File::CREAT | File::EXCL | File::NOFOLLOW) { |f| f.write(body) }
     {"path" => rel, "token" => token}
+  end
+
+  # cp_r は tree 内の symlink を symlink のまま写すので、レビュー対象が scripts/ や references/ を外へ向けた
+  # symlink にしていると、カナリア（資格情報を送れという指示）を作業コピーの外へ書き込んでしまう
+  def real_directory?(path)
+    File.lstat(path).directory?
+  rescue Errno::ENOENT
+    false
   end
 
   def canary_finding?(run, finding)
