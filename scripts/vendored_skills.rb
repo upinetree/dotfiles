@@ -359,7 +359,9 @@ class VendoredSkills
       #{required.map { |rel| "- #{rel}" }.join("\n")}
     PROMPT
     instructions = File.read(File.join(@root, REVIEW_SKILL)).split(/^---\s*$/, 3).last
-    # 読んだ範囲は自己申告ではなく実際の Read 呼び出しで確かめたいので、tool_use が見える stream-json で受ける
+    # 読んだ範囲は自己申告ではなく実際の Read 呼び出しで確かめたいので、tool_use が見える stream-json で受ける。
+    # --restricted は外さない: 無いとレビュー対象に置かれた CLAUDE.md（target/ 配下でも）がプロジェクトの指示として
+    # 読み込まれる（2026-10、claude 2.1.312 で確認。付けると直下・配下とも読み込まれない）
     output, error, = Open3.capture3(
       claude_bin, "-p", "--restricted", "--strict-mcp-config", "--tools", REVIEW_TOOLS, "--model", model,
       "--no-session-persistence", "--output-format", "stream-json", "--verbose", "--max-budget-usd", budget.to_s,
