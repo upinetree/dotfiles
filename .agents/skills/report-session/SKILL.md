@@ -77,7 +77,7 @@ description: セッション中に得た知見・調査結果・設計判断・�
 
 レポート冒頭に YAML frontmatter で `tags:` を付ける。**最大3つまで**。記事の中心的な位置付けを表すタグに絞る（3つに限定することで焦点のブレを防ぐのが目的なので、無理に3つ埋めず2つや1つでもよい）。
 
-- **Obsidian 保存では既存タグを優先する**: `ruby <skill-dir>/scripts/obsidian.rb tags` で vault の既存タグ一覧を取得し、内容に合うものをそこから選ぶ。該当が無いとき、またはローカル保存の場合は kebab-case で作成する。
+- **Obsidian 保存では既存タグを優先する**: `ruby <skill-dir>/scripts/obsidian.rb tags` で vault の既存タグ一覧（`#` なし、使われている数の多い順）を取得し、内容に合うものをそこから選ぶ。該当が無いとき、またはローカル保存の場合は kebab-case で作成する。
 - 表記は kebab-case（例: `agentic-coding`, `google-cloud`, `flaky-test`）。
 - `claude-report` のような分類マーカーは付けない（記事の位置付けを表すトピックタグのみ）。
 

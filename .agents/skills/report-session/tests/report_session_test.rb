@@ -26,7 +26,7 @@ class ReportSessionTest < Minitest::Test
       require "json"
       File.open(ENV.fetch("FAKE_LOG"), "a") { _1.puts JSON.generate(ARGV) }
       abort "simulated CLI failure" if ENV["FAKE_FAIL"] == "1"
-      case ARGV.last
+      case ARGV.reject { it.start_with?("vault=") }.first
       when "vault"
         if ENV["FAKE_BAD"] == "1"
           puts "Error: CLI disabled"
@@ -36,7 +36,8 @@ class ReportSessionTest < Minitest::Test
       when "daily:path"
         puts ENV.fetch("FAKE_DAILY", "daily/today.md")
       when "tags"
-        puts "ruby"
+        print "Loading updated app package\\nYour Obsidian installer is out of date.\\n"
+        print "#learn\\t9\\n#learn/agent\\t5\\n#agentic-coding\\t4\\n#217）。\\t3\\n#304\\t2\\n#132（AI\\t1\\n#ruby\\t1\\n#日本語\\t1\\n"
       else
         abort "unexpected command"
       end
@@ -72,10 +73,10 @@ class ReportSessionTest < Minitest::Test
   def test_native_cli_and_vault_pinning
     client = Obsidian.new(wsl: false)
     assert_equal File.realpath(@vault), client.vault
-    assert_equal "ruby\n", client.tags
+    assert_equal "agentic-coding\nruby\n日本語\n", client.tags
     assert_equal @note, client.daily_path
     args = File.readlines(ENV.fetch("FAKE_LOG")).map { JSON.parse(it) }
-    assert_equal ["vault=Test Vault", "tags"], args[1]
+    assert_equal ["vault=Test Vault", "tags", "counts", "sort=count"], args[1]
     assert_equal ["vault=Test Vault", "daily:path"], args[2]
   end
 
@@ -114,7 +115,7 @@ class ReportSessionTest < Minitest::Test
     client.vault
     client.tags
     commands = File.readlines(ENV.fetch("FAKE_LOG")).map { JSON.parse(it) }
-    assert_equal [["vault=vault-id", "vault"], ["vault=vault-id", "tags"]], commands
+    assert_equal [["vault=vault-id", "vault"], ["vault=vault-id", "tags", "counts", "sort=count"]], commands
   end
 
   def test_connection_failure_does_not_save_elsewhere

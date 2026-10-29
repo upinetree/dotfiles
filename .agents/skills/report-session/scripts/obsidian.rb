@@ -40,8 +40,8 @@ class Obsidian
     raise Error, e.message
   end
 
-  def query(command)
-    run(@command, *(@name ? ["vault=#{@name}"] : []), command)
+  def query(command, *options)
+    run(@command, *(@name ? ["vault=#{@name}"] : []), command, *options)
   end
 
   # CLI は起動直後などに同一コマンドでも間欠的に失敗・不完全応答を返すことがあり、
@@ -101,9 +101,17 @@ class Obsidian
     path
   end
 
+  # NOTE: CLI の tags は stdout に起動メッセージを混ぜ、本文の issue 番号（`#217）。` など）までタグとして数える
+  #   （2026-10-29 に 253 行中の大半がこれだった）。タグに書ける文字だけで、数字だけでないものに絞る
+  TAG_LINE = %r{\A#(?![\d/]+\t)([\p{Alnum}_\-/]+)\t\d+\z}
+  # 学びの項目に付ける目印で、frontmatter に選ぶトピックのタグではない
+  LEARNING_TAG = %r{\Alearn(?:/|\z)}
+
+  # @return [String] 1 行 1 タグ（# なし）。使われている数の多い順
   def tags
     vault
-    retrying { query("tags") }
+    out = retrying { query("tags", "counts", "sort=count") }
+    out.lines.filter_map { it.strip[TAG_LINE, 1] }.grep_v(LEARNING_TAG).map { "#{it}\n" }.join
   end
 end
 
