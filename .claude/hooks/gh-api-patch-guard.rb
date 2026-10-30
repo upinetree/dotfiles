@@ -107,12 +107,15 @@ def gh_api_like?(plain)
   plain.scan(/(?<![\w-])gh(?![\w-])\s*(\S*)/).flatten.any? { |s| s == "api" || !s.match?(/\A[a-z][a-z-]*\z/) }
 end
 
-# 引用符の外の ; & | などでコマンド文字列を区切る
+# 引用符の外の ; & | と改行でコマンド文字列を区切る。リダイレクト（gh api x 2>/dev/null $A の
+# $A は gh の引数）やプロセス置換（>(cat) $A）の後ろも同じコマンドの語なので、< > ( ) では区切らない
+SEPARATOR_CHARS = [";", "&", "|", "\n"].freeze
+
 def simple_commands(cmd)
   segments = [+""]
   state = nil
   cmd.each_char do |c|
-    if state.nil? && OPERATOR_CHARS.include?(c)
+    if state.nil? && SEPARATOR_CHARS.include?(c)
       segments << +""
       next
     end
