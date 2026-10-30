@@ -183,10 +183,13 @@ rescue SystemCallError
   false
 end
 
+# query を 2 つ渡して後ろに mutation を置く形を見落とさないよう、query がちょうど 1 つのときだけ
+# 読む。gh 2.103 は query の重複や query[x] を実行前にエラーにするが、その挙動には頼らない
 def graphql_query(fields)
-  query = fields.find { |f| f[:name] == "query" }
-  return nil unless query
+  queries = fields.select { |f| f[:name] == "query" || f[:name].to_s.start_with?("query[") }
+  return nil unless queries.size == 1 && queries[0][:name] == "query"
 
+  query = queries[0]
   query[:file] ? File.read(File.realpath(query[:file])) : query[:value]
 end
 
@@ -215,7 +218,7 @@ begin
   if req[:endpoint].delete_prefix("/") == "graphql"
     ask("gh api graphql の --input は中身を確かめられない") if req[:input]
     query = graphql_query(req[:fields])
-    ask("gh api graphql のクエリが無い") if query.nil?
+    ask("gh api graphql の query が無いか、1 つに定まらない") if query.nil?
     ask("gh api graphql の mutation は確認する") if query.match?(/\bmutation\b/)
     exit 0
   end
