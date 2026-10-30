@@ -73,15 +73,15 @@ end
 def needs_check?(cmd)
   # 引用符とバックスラッシュを落として g"h" や PAT""CH のような分け書きも拾う
   plain = cmd.delete("'\"\\")
-  # gh-api-patch-guard.rb のようなファイル名の一部を gh と読まないよう、前後のハイフンを除く。
-  # 直後が issue・pr のような英字だけのサブコマンドなら gh api ではないので対象外にする。
-  # gh ap? や gh $SUB のように api を展開で隠す形は、英字以外を含むので対象に残る
-  subcommands = plain.scan(/(?<![\w-])gh(?![\w-])\s*(\S*)/).flatten
-  return false if subcommands.all? { |s| s.match?(/\A[a-z][a-z-]*\z/) && s != "api" }
+  return false unless gh_api_like?(plain)
 
   # method を変数や置換で渡す形、PAT?H や {-,-}XPAT{CH,CH} のようにグロブやブレース展開で
-  # 組み立てる形は文字列から読めないので、それも候補にする
-  return true if unquoted_specials(cmd).intersect?(EXPANSION_CHARS)
+  # 組み立てる形は文字列から読めないので、それも候補にする。別の単純コマンドの展開は gh の
+  # 引数を変えられないので、for ループや python -c "...$n..." の $ では止めないよう、gh api に
+  # なりうる単純コマンドの中だけを見る
+  return true if simple_commands(cmd).any? do |seg|
+    gh_api_like?(seg.delete("'\"\\")) && unquoted_specials(seg).intersect?(EXPANSION_CHARS)
+  end
 
   # :// は、フラグを付けない GET でも URL のエンドポイントで GitHub 以外へ送れるため。
   # パイプの先の grep "https://..." のような別コマンドの URL を拾わないよう、gh api と同じ
@@ -98,6 +98,13 @@ def needs_check?(cmd)
   # 空白の直後に限るのは、my-fork のようなリポジトリ名の -f を拾わないため
   plain.match?(/\bapi\b/) &&
     (plain.match?(/patch/i) || plain.match?(/(?<=\s)(-[a-zA-Z]*[XfF]|--(method|field|raw-field|input|hostname)\b)/))
+end
+
+# gh-api-patch-guard.rb のようなファイル名の一部を gh と読まないよう、前後のハイフンを除く。
+# 直後が issue・pr のような英字だけのサブコマンドなら gh api ではないので対象外にする。
+# gh ap? や gh $SUB のように api を展開で隠す形は、英字以外を含むので対象に残る
+def gh_api_like?(plain)
+  plain.scan(/(?<![\w-])gh(?![\w-])\s*(\S*)/).flatten.any? { |s| s == "api" || !s.match?(/\A[a-z][a-z-]*\z/) }
 end
 
 # 引用符の外の ; & | などでコマンド文字列を区切る
