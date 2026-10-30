@@ -10,17 +10,14 @@
 # "Extend permissions with hooks"）。除外を書く構文も無いため、ask ルールを外して
 # 判定をこのフックに移した。フックが返す ask は auto mode でも確認を出す。
 #
-# 受け持つ範囲: allow `Bash(gh api:*)` に一致して auto mode の分類器を通らない単純コマンド、
-# つまり gh api として実行されるものだけを判定する。; & | 改行で区切った単純コマンドを語に
-# 分け、gh と api が別の語として並ぶものを、その単純コマンドの中で判定する。ほかの単純
-# コマンドは Claude Code が別に allow ルールか分類器で判定するので見ない。bash -c '...'・
-# eval・$G api のように gh を文字列や変数で隠す形も allow ルールに一致しないので、分類器に任せる。
+# 受け持つ範囲: allow `Bash(gh api:*)` に一致して auto mode の分類器を通らないもの、つまり
+# gh api として実行されるコマンド呼び出しだけを判定する。コミットメッセージや heredoc の本文に
+# 書いた gh api は実行されないので見ない。bash -c '...'・eval・$G api のように gh を文字列や
+# 変数で隠す形は allow ルールに一致しないので、分類器に任せる。
 #
-# シェルの構文（heredoc・コメント・エスケープ・引用符の付いたリダイレクトなど）を真似て
-# 読み分けると、真似きれなかった所でシェルとの解釈がずれ、実行される gh api を見落とす。
-# そのため細かくは読み分けず、引用符を外した全文に現れる gh api の数と、判定できた gh api の
-# 数が合わなければ確認に回す。コミットメッセージや heredoc の本文に gh api と書いただけの
-# コマンドにも確認が出るが、見落とすより安全な側に倒す。
+# コマンドの読み分けは shfmt の構文木に任せる。heredoc・コメント・行継続・引用符をこのフックで
+# 真似て読むと、真似きれなかった所でシェルとの解釈がずれ、実行される gh api を見落とし続けた。
+# shfmt が無い・構文を読めない（zsh だけの書き方など）ときは、gh api らしい文字列があれば確認に回す。
 #
 # 通すもの:
 #   - GET・HEAD（-X GET にフィールドを付けた検索も含む）
@@ -45,21 +42,23 @@
 #     mutation に差し替えられる
 #   - --hostname と URL のエンドポイント。GitHub 以外のホストへ送れる
 #   - --input。中身を確かめられない
-#   - gh api の単純コマンドの中の展開（-X $M、PAT?H、$(...)、プロセス置換）と、gh を
-#     xargs などから呼ぶ形。実行される引数を文字列から読めない
+#   - gh api の引数の展開（-X $M、PAT?H、{PATCH,}、$(...)）と、gh を xargs などから呼ぶ形・
+#     GH_HOST= のような代入を前に置く形。実行される引数や送り先を文字列から読めない
 #
 # 入力 : stdin に PreToolUse の JSON（.tool_input.command を使う）
 # 出力 : 確認に回すときだけ permissionDecision=ask を JSON で stdout。それ以外は無出力 exit 0
 #        （無出力なら settings の allow `Bash(gh api:*)` で通る）。
 
 require "json"
-require "shellwords"
+require "open3"
 
 ALLOWED_ENDPOINT = %r{\A/?repos/[^/]+/[^/]+/(issues/\d+|pulls/\d+|issues/comments/\d+)\z}
 # macOS では /tmp が /private/tmp への symlink なので、realpath で比べる
 SCRATCHPAD_ROOT = "/private/tmp/claude-#{Process.uid}/"
 # gh のプレースホルダー。シェルは , か .. を含まない { } を展開しないが、確実に安全なものだけ許す
 GH_PLACEHOLDER = /\{(owner|repo|branch)\}/
+# 引用符の外にあると zsh がブレース展開・グロブ・チルダ展開で語を書き換えうる文字
+GLOB_CHARS = /[{}*?\[\]~]/
 RAW_FIELD_FLAGS = %w[-f --raw-field].freeze
 # -F / --field は値が @ で始まるとファイル（@- は stdin）から読む
 FILE_FIELD_FLAGS = %w[-F --field].freeze
@@ -68,22 +67,8 @@ METHOD_FLAGS = %w[-X --method].freeze
 # gh api の値を取るフラグと値を取らないフラグ。ここに無いフラグは読み違えうるので確認に回す
 VALUE_FLAGS = (FIELD_FLAGS + METHOD_FLAGS + %w[-H --header --jq -q -t --template --hostname --cache -p --preview --input]).freeze
 BOOL_FLAGS = %w[-i --include --paginate --slurp --silent --verbose].freeze
-
-# 引用符の外でシェルが展開する文字。zsh ではブレース展開やグロブで語が書き換わる。
-# { } は gh のプレースホルダーを除くため、unquoted_specials で別に見る
-EXPANSION_CHARS = ["`", "$", "\\", "{", "}", "*", "?", "[", "]", "~", "!", "#"].freeze
-# 引用符の外でコマンドを連結・置換・リダイレクトする文字
-OPERATOR_CHARS = [";", "&", "|", "<", ">", "\n", "(", ")"].freeze
-# gh api の単純コマンドの中にあれば確認に回す文字。リダイレクトの < > は語から外して読むので含めない
-UNREADABLE_CHARS = (EXPANSION_CHARS + ["(", ")", "'"]).freeze
-# 単純コマンドの区切り。リダイレクトとプロセス置換の後ろも同じコマンドの語なので < > ( ) では区切らない
-SEPARATOR_CHARS = [";", "&", "|", "\n"].freeze
-# gh の前に置いても、gh が実行されるコマンドであることが変わらない語
-KEYWORDS = %w[do then else elif ! {].freeze
-REDIRECTION_OP = /\d*(>\||&>>?|>>?|>&|<&|<)/
-REDIRECTION = /\A#{REDIRECTION_OP}/
-# シェルが語の区切りにしない制御文字。Shellwords は区切りにするので、語の読み方がずれる
-CONTROL_CHARS = /[\x00-\x08\x0b-\x0d\x0e-\x1f\x7f]/
+# hook は GUI から起動した Claude Code の PATH で動くので、Homebrew の既定の場所も探す
+SHFMT_CANDIDATES = ["shfmt", "/opt/homebrew/bin/shfmt", "/usr/local/bin/shfmt", "/home/linuxbrew/.linuxbrew/bin/shfmt"].freeze
 
 class Unreadable < StandardError; end
 
@@ -98,134 +83,87 @@ def ask(reason)
   exit 0
 end
 
-# gh の直後の語が api か、ap? や $SUB のように展開で api になりうるか。全文の数え上げと
-# 単純コマンドの語の両方で同じ判定を使い、照合の数を揃える
-def api_like?(token)
-  token.match?(/\Aapi\b/) || token.match?(/[$`{}*?\[\]]/)
+# gh api を含みうるかの粗い判定。含まなければ shfmt を起動せずに通す。引用符とバックスラッシュを
+# 落として g"h" api も拾い、行継続（g\<改行>h）を消した形でも見る。ファイル名の gh-api-... は数えない
+def mentions_gh_api?(cmd)
+  [cmd, cmd.gsub("\\\n", "")].any? do |text|
+    text.delete("'\"\\").scan(/(?<![\w-])gh(?![\w-])(?=\s*(\S*))/).flatten.any? { |t| t.match?(/\Aapi\b|[$`{}*?\[\]]/) }
+  end
 end
 
-# 引用符とバックスラッシュを落とした全文に現れる gh api の数。g"h" api のような分け書きも
-# 数える。gh-api-patch-guard.rb のようなファイル名の一部を gh と読まないよう、前後のハイフンを除く。
-# 直後の語は先読みで見る。読み進めると echo gh;gh api の ;gh を直後の語として食い、後ろの gh を数え落とす
-def gh_api_count(plain)
-  plain.scan(/(?<![\w-])gh(?![\w-])(?=\s*(\S*))/).flatten.count { |t| api_like?(t) }
+def shfmt_ast(cmd)
+  SHFMT_CANDIDATES.each do |bin|
+    out, err, status = Open3.capture3(bin, "--to-json", "-ln", "bash", stdin_data: cmd)
+    return JSON.parse(out) if status.success?
+
+    raise Unreadable, "構文を読めなかった（#{err.lines.first.to_s.strip}）"
+  rescue Errno::ENOENT
+    next
+  end
+  raise Unreadable, "shfmt が見つからない"
 end
 
-# 引用符の外の ; & | と改行で単純コマンドに区切る。2>&1 や &> の & と >| の | はリダイレクトなので
-# 区切らない。\; や \' はエスケープされた文字なので、区切りにも引用符の始まりにもしない
-def simple_commands(cmd)
-  segments = [+""]
-  state = nil
-  escaped = false
-  cmd.each_char.with_index do |c, i|
-    if escaped
-      segments.last << c
-      escaped = false
-      next
-    end
-    if state.nil? && SEPARATOR_CHARS.include?(c) &&
-        !(c == "&" && (["<", ">"].include?(cmd[i - 1]) || cmd[i + 1] == ">")) &&
-        !(c == "|" && cmd[i - 1] == ">")
-      segments << +""
-      next
-    end
-    segments.last << c
-    if state.nil?
-      if c == "\\"
-        escaped = true
-      elsif ["'", '"'].include?(c)
-        state = c
+def each_call(node, &block)
+  case node
+  when Hash
+    yield node if node["Type"] == "CallExpr"
+    node.each_value { |v| each_call(v, &block) }
+  when Array
+    node.each { |v| each_call(v, &block) }
+  end
+end
+
+# 語の部品を、シェルが渡す文字列にする。変数展開・置換・$'...' のように文字列から値が決まらない
+# 部品があれば dynamic、引用符の外にグロブ・ブレース展開・=cmd 展開になりうる文字があれば glob
+def read_word(word)
+  text = +""
+  unquoted = +""
+  dynamic = false
+  word.fetch("Parts", []).each do |part|
+    case part["Type"]
+    when "Lit"
+      # shfmt は Lit の値にバックスラッシュを残すので、シェルと同じく外す。残すと g\h api を
+      # gh と読めず見落とす。グロブの判定は外す前の値で見て、\* なども確認に回る側に倒す
+      text << part["Value"].gsub("\\\n", "").gsub(/\\(.)/m, '\1')
+      unquoted << part["Value"]
+    when "SglQuoted"
+      dynamic = true if part["Dollar"]
+      text << part["Value"]
+    when "DblQuoted"
+      part.fetch("Parts", []).each do |inner|
+        # 二重引用符の中のバックスラッシュは $ ` " \ 改行の前でだけ外れる
+        if inner["Type"] == "Lit"
+          text << inner["Value"].gsub(/\\([$`"\\\n])/) { ($1 == "\n") ? "" : $1 }
+        else
+          dynamic = true
+        end
       end
-    elsif state == '"' && c == "\\"
-      escaped = true
-    elsif c == state
-      state = nil
+    else
+      dynamic = true
     end
   end
-  segments
+  glob = unquoted.gsub(GH_PLACEHOLDER, "").match?(GLOB_CHARS) || unquoted.start_with?("=")
+  {text: text, dynamic: dynamic, glob: glob}
 end
 
-# 引用符の状態を追いながら、シェルが特別に扱う文字のうち引用符の外（または二重引用符の
-# 中の展開）にあるものを集める。正規表現で引用符を落とすと "it's" のような組み合わせで
-# 読み違える。閉じていない引用符は "'" を含めて知らせる
-def unquoted_specials(cmd)
-  found = []
-  outside = +""
-  state = nil
-  cmd.each_char do |c|
-    case state
-    when "'" then state = nil if c == "'"
-    when '"'
-      found << c if ["$", "`", "\\"].include?(c)
-      state = nil if c == '"'
-    else
-      if ["'", '"'].include?(c)
-        state = c
-      else
-        outside << c
-        found << c if (EXPANSION_CHARS - ["{", "}"]).include?(c) || OPERATOR_CHARS.include?(c)
-      end
-    end
-  end
-  found << "'" unless state.nil?
-  # repos/{owner}/{repo} のような gh のプレースホルダーだけを除いて、残る { } を数える
-  found.concat(outside.gsub(GH_PLACEHOLDER, "").scan(/[{}]/))
-  found
+# gh の位置。$G のように値の決まらない語は、allow ルールにも一致しないので分類器に任せる。
+# {gh,} や =gh のように展開で gh になりうる語は数える。~/.claude/settings.json のような
+# パスまで拾わないよう、gh の文字と展開の記号だけでできた語に限る
+def gh_word?(word)
+  return false if word[:dynamic]
+
+  word[:text].match?(%r{(\A|/)gh\z}) || (word[:glob] && word[:text].match?(/\A[gh{},*?\[\]=]*g[gh{},*?\[\]=]*\z/))
 end
 
-# 単純コマンドの語のうち、gh api として実行されうる gh の位置をすべて返す。$(gh や (gh の
-# ように置換やサブシェルの中で呼ぶ gh と、{gh,} のように展開で gh になりうる語も数える
-def gh_api_indexes(words)
-  words.each_index.select do |i|
-    nxt = words[i + 1]
-    next false if nxt.nil?
+def api_like?(word)
+  return false if word.nil?
 
-    if words[i].match?(%r{(\A|[^\w-])gh\z})
-      api_like?(nxt)
-    else
-      # grep の ".*" や python -c のコードのような長い語を拾わないよう、展開で gh になりうる
-      # 短いトークンで、直後が文字どおり api のときだけ数える
-      nxt == "api" && words[i].match?(/\A[\w{},*?\[\]\/.-]+\z/) && words[i].include?("g") && words[i].match?(/[{}*?\[]/)
-    end
-  end
-end
-
-# 引用符の外にある文字だけをつないだ文字列
-def outside_quotes(cmd)
-  outside = +""
-  state = nil
-  cmd.each_char do |c|
-    if state
-      state = nil if c == state
-    elsif ["'", '"'].include?(c)
-      state = c
-    else
-      outside << c
-    end
-  end
-  outside
-end
-
-def strip_redirections(words)
-  out = []
-  skip = false
-  words.each do |w|
-    if skip
-      skip = false
-    elsif (m = w.match(REDIRECTION))
-      skip = m[0] == w
-    else
-      out << w
-    end
-  end
-  out
+  word[:text] == "api" || word[:dynamic] || (word[:glob] && word[:text].match?(/\A[api{},*?\[\]]+\z/))
 end
 
 # `gh api ...` の語を読み、method・エンドポイント・フィールド・--input と --hostname の
 # 有無を取り出す。知らないフラグや 2 つ目の位置引数があれば Unreadable を投げる
 def parse(words)
-  raise Unreadable, "gh api で始まっていない" unless words[0] == "gh" && words[1] == "api"
-
   method = nil
   endpoint = nil
   fields = []
@@ -296,24 +234,18 @@ def graphql_query(fields)
   queries[0][:value]
 end
 
-# 1 つの単純コマンドの中の gh api を判定し、見つけた数を返す。確認に回すときは ask で終了する
-def judge(segment)
-  words = Shellwords.split(segment)
-  indexes = gh_api_indexes(words)
-  return 0 if indexes.empty?
+# 1 つのコマンド呼び出しを判定する。gh api でなければ何もせず、確認に回すときは ask で終了する
+def judge(call)
+  words = call.fetch("Args", []).map { |w| read_word(w) }
+  idx = words.each_index.find { |i| gh_word?(words[i]) && api_like?(words[i + 1]) }
+  return if idx.nil?
 
-  idx = indexes.first
-  ask("gh を別のコマンドから呼んでいる（#{words[idx - 1]}）") unless indexes.size == 1 && words[0...idx].all? { |w| KEYWORDS.include?(w) }
-  # 展開・置換・プロセス置換を含む形は、語に分けても実際に実行される引数と一致する保証が無い
-  ask("gh api の中に展開・置換・閉じていない引用符がある") if unquoted_specials(segment).intersect?(UNREADABLE_CHARS)
-  # Shellwords は引用符を外すので、--jq '>' のように引用符で囲んだ > もリダイレクトに見え、読み飛ばすと
-  # 後ろのフラグと値の組み合わせがずれる。引用符の外のリダイレクト演算子と数が合わなければ確認に回す
-  redirect_words = words[idx..].count { |w| w.match?(REDIRECTION) }
-  ask("gh api のリダイレクトを読み取れなかった") if redirect_words != outside_quotes(segment).scan(REDIRECTION_OP).size ||
-    words.last.to_s.match?(/#{REDIRECTION}\z/o)
+  ask("gh を別のコマンドから呼んでいる（#{words[idx - 1][:text]}）") unless idx.zero?
+  ask("gh api の前に代入がある") if call["Assigns"]&.any?
+  ask("gh api の引数に展開・置換がある") if words.any? { |w| w[:dynamic] || w[:glob] }
 
   begin
-    req = parse(strip_redirections(words[idx..]))
+    req = parse(words.map { |w| w[:text] })
   rescue Unreadable => e
     ask("gh api の形を読み取れなかった（#{e.message}）")
   end
@@ -331,37 +263,28 @@ def judge(segment)
     query = graphql_query(req[:fields])
     ask("gh api graphql の query が無い・1 つに定まらない・ファイルで渡されている") if query.nil?
     ask("gh api graphql の mutation は確認する") if query.match?(/\bmutation\b/)
-    return 1
+    return
   end
 
-  return 1 if ["GET", "HEAD"].include?(method)
+  return if ["GET", "HEAD"].include?(method)
   ask("gh api の #{method} は確認する") unless method == "PATCH"
 
   ask("PATCH の対象が issue・PR の本文かコメントではない（#{req[:endpoint]}）") unless req[:endpoint].match?(ALLOWED_ENDPOINT)
   ask("--input で渡す中身は確かめられない") if req[:input]
   ask("body 以外のフィールドを送っている（#{req[:fields].map { |f| f[:name] }.join(", ")}）") unless req[:fields].map { |f| f[:name] } == ["body"]
-  1
-rescue ArgumentError
-  # 引用符が閉じていない単純コマンドは語に分けられない。そこに gh api があれば、全文との照合で確認に回る
-  0
 end
 
 begin
   data = JSON.parse($stdin.read.force_encoding(Encoding::UTF_8).scrub)
-  # 行継続はシェルが語を読む前に消すので、先に消す。残すと g\<改行>h api の gh を数え落とす。
-  # ただしコメントや引用符の中の \<改行> はシェルが消さないので、一律に消すと # x\<改行>gh api が
-  # xgh api になって数え落とす。消す前と後の両方で数え、多いほうと照合する
-  raw = data.dig("tool_input", "command").to_s
-  cmd = raw.gsub("\\\n", "")
-  expected = [gh_api_count(raw.delete("'\"\\")), gh_api_count(cmd.delete("'\"\\"))].max
-  exit 0 if expected.zero?
+  cmd = data.dig("tool_input", "command").to_s
+  exit 0 unless mentions_gh_api?(cmd)
 
-  ask("gh api のコマンドに制御文字がある") if cmd.match?(CONTROL_CHARS)
-
-  judged = simple_commands(cmd).sum { |segment| judge(segment) }
-  # コメント・heredoc・エスケープなどで区切りや語の読み方がシェルとずれると、実行される gh api を
-  # 単純コマンドの中に見つけられない。見つけた数が全文より少なければ、隠れた gh api があるとみなす
-  ask("gh api の書き方を読み取れなかった（全文に #{expected} 個、判定できたのは #{judged} 個）") if judged < expected
+  begin
+    ast = shfmt_ast(cmd)
+  rescue Unreadable => e
+    ask("gh api を含むコマンドの#{e.message}")
+  end
+  each_call(ast) { |call| judge(call) }
   exit 0
 rescue SystemExit
   raise

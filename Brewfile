@@ -7,6 +7,7 @@ brew "git"
 brew "git-delta"
 brew "leaf-markdown-viewer"
 brew "ripgrep"
+brew "shfmt"
 brew "zellij"
 
 if OS.mac?

@@ -31,6 +31,7 @@ class GhApiPatchGuardTest < Minitest::Test
     assert_all(:pass, [
       # 確認なしで通す書き込み: issue・PR の本文とコメントへの body だけの PATCH
       %(gh api -X PATCH #{R}/issues/1 -f body='hello'),
+      %(gh api -X PATCH #{R}/issues/1 -f "body=a \\"quoted\\" word"),
       %(gh api --method=PATCH /#{R}/pulls/1 --raw-field body=x),
       %(gh api -XPATCH #{R}/issues/comments/1 -fbody=x),
       %(gh api -X PATCH repos/{owner}/{repo}/issues/1 -f body=x),
@@ -50,6 +51,7 @@ class GhApiPatchGuardTest < Minitest::Test
       %(gh api graphql -f query='query { viewer { login } }' --jq .data; echo "EXIT=$?"),
       %(W=/w; grep -n -E "env:|if:.*ref" "$W/a.yaml" | head; gh api #{R}/environments),
       %(brew install gh && gh auth status),
+      %(ls -l ~/.claude/settings.json ~/.claude/hooks; gh api #{R}/issues/1),
       %(cat ~/.dotfiles/.claude/hooks/gh-api-patch-guard.rb; git diff),
       # gh 自身が実行前にエラーにする（gh 2.103.3 で確かめた）。-R は api の前に置けない
       %(gh -R o/r api -X PATCH #{CLOSE})
@@ -124,7 +126,13 @@ class GhApiPatchGuardTest < Minitest::Test
       "cat <<'E'OF\nbody\nEOF\ngh api -X PATCH #{CLOSE}\nE",
       "g\\\nh api -X PATCH #{CLOSE}",
       %(echo gh;gh api -X DELETE #{R}/issues/comments/1),
-      "gh api -X PATCH #{R}/issues/1 -f body=x\v-fstate=closed"
+      %(g\\h api -X PATCH #{CLOSE}),
+      %(gh a\\pi -X DELETE #{R}/issues/comments/1),
+      %(\\gh api -X DELETE #{R}/issues/comments/1),
+      %(gh api -X PATCH #{R}/issues/1 -f body=x -f st\\ate=closed),
+      %(gh api graphql -f query=mut\\ation\\ {\\ a\\ }),
+      "cat <<EOF\n$(gh api -X PATCH #{CLOSE})\nEOF",
+      %(for i (a b) gh api -X PATCH #{CLOSE}) # zsh だけの書き方は shfmt が読めないので確認に回す
     ])
   end
 
@@ -138,12 +146,15 @@ class GhApiPatchGuardTest < Minitest::Test
     ])
   end
 
-  # gh api を文字列として含むだけのコマンドも、全文との照合で確認に回る。シェルの構文を真似て
-  # 読み分けるより、見落とさない側に倒すと決めた代償として受け入れる
+  # gh api を文字列として含むだけのコマンドは、構文木ではコマンド呼び出しにならないので通す
   def test_mentions_only
-    assert_all(:ask, [
+    assert_all(:pass, [
       %(git commit -m 'fix: gh api -X PATCH の判定を直す'),
-      "git commit -F - <<'MSG'\nfix: gh api -X PATCH #{CLOSE}\nMSG"
+      "git commit -F - <<'MSG'\nfix: gh api -X PATCH #{CLOSE}\nMSG",
+      "python3 - <<'PY'\nprint(\"gh api -X PATCH #{CLOSE}\")\nPY",
+      %(bash -c 'gh api -X PATCH #{CLOSE}'), # bash -c は allow ルールに一致しないので分類器に任せる
+      "gh api -X PATCH #{R}/issues/1 -f body=x\v-fstate=closed", # シェルは \v で語を区切らないので body の値になる
+      %(ID=$(gh api #{R}/issues/1 --jq .id); echo "$ID")
     ])
   end
 
