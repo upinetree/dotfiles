@@ -83,11 +83,37 @@ def needs_check?(cmd)
   # 組み立てる形は文字列から読めないので、それも候補にする
   return true if unquoted_specials(cmd).intersect?(EXPANSION_CHARS)
 
+  # :// は、フラグを付けない GET でも URL のエンドポイントで GitHub 以外へ送れるため。
+  # パイプの先の grep "https://..." のような別コマンドの URL を拾わないよう、gh api と同じ
+  # 単純コマンドの中だけを見る
+  return true if simple_commands(cmd).any? do |seg|
+    s = seg.delete("'\"\\")
+    s.match?(/(?<![\w-])gh(?![\w-])/) && s.match?(/\bapi\b/) && s.include?("://")
+  end
+
   # -iXDELETE のように値を取らない短いフラグと -X・-f・-F をまとめて書く形もある。
   # 空白の直後に限るのは、my-fork のようなリポジトリ名の -f を拾わないため
-  # :// は、フラグを付けない GET でも URL のエンドポイントで GitHub 以外へ送れるため
   plain.match?(/\bapi\b/) &&
-    (plain.match?(/patch|:\/\//i) || plain.match?(/(?<=\s)(-[a-zA-Z]*[XfF]|--(method|field|raw-field|input|hostname)\b)/))
+    (plain.match?(/patch/i) || plain.match?(/(?<=\s)(-[a-zA-Z]*[XfF]|--(method|field|raw-field|input|hostname)\b)/))
+end
+
+# 引用符の外の ; & | などでコマンド文字列を区切る
+def simple_commands(cmd)
+  segments = [+""]
+  state = nil
+  cmd.each_char do |c|
+    if state.nil? && OPERATOR_CHARS.include?(c)
+      segments << +""
+      next
+    end
+    segments.last << c
+    if state.nil?
+      state = c if ["'", '"'].include?(c)
+    elsif c == state
+      state = nil
+    end
+  end
+  segments
 end
 
 # 引用符の外でシェルが展開する文字。zsh ではブレース展開やグロブで語が書き換わる。
