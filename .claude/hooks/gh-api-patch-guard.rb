@@ -85,10 +85,13 @@ def needs_check?(cmd)
 
   # :// は、フラグを付けない GET でも URL のエンドポイントで GitHub 以外へ送れるため。
   # パイプの先の grep "https://..." のような別コマンドの URL を拾わないよう、gh api と同じ
-  # 単純コマンドの中だけを見る
+  # 単純コマンドの中だけを見る。gh api は stdin から URL を読まないので、URL を外から渡すには
+  # cat x | xargs gh api のように gh を別のコマンドから呼ぶしかない。gh が単純コマンドの先頭の
+  # 語でなければ、その単純コマンドに :// が無くても候補にする
   return true if simple_commands(cmd).any? do |seg|
     s = seg.delete("'\"\\")
-    s.match?(/(?<![\w-])gh(?![\w-])/) && s.match?(/\bapi\b/) && s.include?("://")
+    s.match?(/(?<![\w-])gh(?![\w-])/) && s.match?(/\bapi\b/) &&
+      (s.include?("://") || s.strip.split(/\s+/).first != "gh")
   end
 
   # -iXDELETE のように値を取らない短いフラグと -X・-f・-F をまとめて書く形もある。
