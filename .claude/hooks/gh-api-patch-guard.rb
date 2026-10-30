@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# PreToolUse(Bash) hook: `gh api` の PATCH を、issue / PR の本文とコメントの本文の
-# 書き換えだけ確認なしで通し、それ以外は確認を出す。POST・PUT・DELETE も確認を出す。
+# PreToolUse(Bash) hook: `gh api` の書き込みと、ローカルのファイルを外へ送りうる形に確認を出す。
+# PATCH のうち issue / PR の本文とコメントの本文の書き換えは確認なしで通す。
 #
 # 背景: 以前は settings.json の ask ルール `Bash(gh api *-X PATCH*)` で PATCH を一律に
 # 確認していた。ask ルールは allow ルールより先に評価され、具体的な allow でも
@@ -10,17 +10,25 @@
 # "Extend permissions with hooks"）。除外を書く構文も無いため、ask ルールを外して
 # 判定をこのフックに移した。フックが返す ask は auto mode でも確認を出す。
 #
-# 通すもの: 次のエンドポイントへの PATCH で、送るフィールドが body だけのもの。
-#   repos/<o>/<r>/issues/<n>            issue の本文
-#   repos/<o>/<r>/pulls/<n>             PR の本文
-#   repos/<o>/<r>/issues/comments/<id>  issue・PR の会話のコメント
-# body だけに限るのは、同じエンドポイントで state・base・assignees なども変えられるため。
-# --input で JSON を渡す形は中身を見られないので確認に回す。
+# 通すもの:
+#   - GET・HEAD（-X GET にフィールドを付けた検索も含む）
+#   - gh api graphql の読み取り。GraphQL は書き込みに mutation キーワードが要るので、
+#     クエリにその語が無ければ読み取りとみなす
+#   - 次のエンドポイントへの PATCH で、送るフィールドが body だけのもの
+#       repos/<o>/<r>/issues/<n>            issue の本文
+#       repos/<o>/<r>/pulls/<n>             PR の本文
+#       repos/<o>/<r>/issues/comments/<id>  issue・PR の会話のコメント
+#     body だけに限るのは、同じエンドポイントで state・base・assignees なども変えられるため
 #
-# POST・PUT・DELETE は settings.json の ask ルール（`Bash(gh api *-X DELETE*)` など）にも
-# 残しているが、文字列の一致なので -X=DELETE や -XDELETE のような書き方を見落とす。
-# このフックは語に分けて読むので、その書き方もここで確認に回す。-X を書かずにフィールドを
-# 渡すと gh は POST にするが、gh api graphql の読み取りもその形なので対象にしていない。
+# 確認に回すもの:
+#   - POST・PUT・DELETE。settings.json の ask ルール（`Bash(gh api *-X DELETE*)` など）にも
+#     残しているが、文字列の一致なので -X=DELETE のような書き方を見落とす。-X を書かずに
+#     フィールドを渡すと gh は POST にするので、REST へのその形も含める
+#   - -F key=@<path> が /tmp の外のファイルを読む形。allow `Bash(gh api:*)` のもとでは、
+#     ~/.ssh などの中身を issue に書き込む流出の経路になる。本文を長く書くときは
+#     /tmp（scratchpad を含む）にファイルを置いて送る
+#   - --hostname と URL のエンドポイント。GitHub 以外のホストへ送れる
+#   - --input。中身を確かめられない
 #
 # 入力 : stdin に PreToolUse の JSON（.tool_input.command を使う）
 # 出力 : 確認に回すときだけ permissionDecision=ask を JSON で stdout。それ以外は無出力 exit 0
@@ -30,7 +38,12 @@ require "json"
 require "shellwords"
 
 ALLOWED_ENDPOINT = %r{\A/?repos/[^/]+/[^/]+/(issues/\d+|pulls/\d+|issues/comments/\d+)\z}
-FIELD_FLAGS = %w[-f -F --field --raw-field].freeze
+# macOS では /tmp が /private/tmp への symlink なので、realpath で比べる
+ALLOWED_FILE_DIRS = ["/private/tmp/", "/tmp/"].freeze
+RAW_FIELD_FLAGS = %w[-f --raw-field].freeze
+# -F / --field は値が @ で始まるとファイル（@- は stdin）から読む
+FILE_FIELD_FLAGS = %w[-F --field].freeze
+FIELD_FLAGS = (RAW_FIELD_FLAGS + FILE_FIELD_FLAGS).freeze
 METHOD_FLAGS = %w[-X --method].freeze
 # gh api の値を取るフラグと値を取らないフラグ。ここに無いフラグは読み違えうるので確認に回す
 VALUE_FLAGS = (FIELD_FLAGS + METHOD_FLAGS + %w[-H --header --jq -q -t --template --hostname --cache -p --preview --input]).freeze
@@ -49,24 +62,30 @@ def ask(reason)
   exit 0
 end
 
-# method の書き方は引用符やフラグのくっつけ方で何通りもあるので、ここでは粗く拾い、
-# 本当の method は parse で語に分けてから決める
-def maybe_write?(cmd)
+# method やフィールドの書き方は引用符やフラグのくっつけ方で何通りもあるので、ここでは粗く拾い、
+# 本当の中身は parse で語に分けてから決める
+def needs_check?(cmd)
   # 引用符とバックスラッシュを落として g"h" や PAT""CH のような分け書きも拾う
   plain = cmd.delete("'\"\\")
-  # gh-api-patch-guard.rb のようなファイル名の一部を gh と読まないよう、前後のハイフンを除く
-  return false unless plain.match?(/(?<![\w-])gh(?![\w-])/)
+  # gh-api-patch-guard.rb のようなファイル名の一部を gh と読まないよう、前後のハイフンを除く。
+  # 直後が issue・pr のような英字だけのサブコマンドなら gh api ではないので対象外にする。
+  # gh ap? や gh $SUB のように api を展開で隠す形は、英字以外を含むので対象に残る
+  subcommands = plain.scan(/(?<![\w-])gh(?![\w-])\s*(\S*)/).flatten
+  return false if subcommands.all? { |s| s.match?(/\A[a-z][a-z-]*\z/) && s != "api" }
 
   # method を変数や置換で渡す形、PAT?H や {-,-}XPAT{CH,CH} のようにグロブやブレース展開で
-  # 組み立てる形は文字列から読めないので、それも書き込みの候補にする
+  # 組み立てる形は文字列から読めないので、それも候補にする
   return true if unquoted_specials(cmd).intersect?(EXPANSION_CHARS)
 
-  # -iXDELETE のように値を取らない短いフラグと -X をまとめて書く形もある
-  plain.match?(/\bapi\b/) && (plain.match?(/patch/i) || plain.match?(/(?<!\w)-[a-zA-Z]*X|--method/))
+  # -iXDELETE のように値を取らない短いフラグと -X・-f・-F をまとめて書く形もある。
+  # 空白の直後に限るのは、my-fork のようなリポジトリ名の -f を拾わないため
+  plain.match?(/\bapi\b/) &&
+    (plain.match?(/patch/i) || plain.match?(/(?<=\s)(-[a-zA-Z]*[XfF]|--(method|field|raw-field|input|hostname)\b)/))
 end
 
-# 引用符の外でシェルが展開する文字。zsh ではブレース展開やグロブで語が書き換わる
-EXPANSION_CHARS = ["`", "$", "\\", "{", "}", "*", "?", "[", "]", "~", "!", "#"].freeze
+# 引用符の外でシェルが展開する文字。zsh ではブレース展開やグロブで語が書き換わる。
+# { } は , か .. を含むときだけ展開されるので、unquoted_specials で別に見る
+EXPANSION_CHARS = ["`", "$", "\\", "{", "*", "?", "[", "]", "~", "!", "#"].freeze
 # 引用符の外でコマンドを連結・置換・リダイレクトする文字
 OPERATOR_CHARS = [";", "&", "|", "<", ">", "\n", "(", ")"].freeze
 
@@ -75,6 +94,7 @@ OPERATOR_CHARS = [";", "&", "|", "<", ">", "\n", "(", ")"].freeze
 # 読み違える。閉じていない引用符は "'" を含めて知らせる
 def unquoted_specials(cmd)
   found = []
+  outside = +""
   state = nil
   cmd.each_char do |c|
     case state
@@ -83,11 +103,17 @@ def unquoted_specials(cmd)
       found << c if ["$", "`", "\\"].include?(c)
       state = nil if c == '"'
     else
-      found << c if EXPANSION_CHARS.include?(c) || OPERATOR_CHARS.include?(c)
-      state = c if ["'", '"'].include?(c)
+      if ["'", '"'].include?(c)
+        state = c
+      else
+        outside << c
+        found << c if (EXPANSION_CHARS - ["{"]).include?(c) || OPERATOR_CHARS.include?(c)
+      end
     end
   end
   found << "'" unless state.nil?
+  # repos/{owner}/{repo} のような gh のプレースホルダーは展開されないので通す
+  found << "{" if outside.match?(/\{[^{}]*(,|\.\.)[^{}]*\}/)
   found
 end
 
@@ -95,8 +121,8 @@ def shell_special?(cmd)
   unquoted_specials(cmd).any?
 end
 
-# 単独の `gh api ...` を語に分け、method・エンドポイント・フィールド名・--input の有無を取り出す。
-# 知らないフラグや 2 つ目の位置引数があれば Unreadable を投げる
+# 単独の `gh api ...` を語に分け、method・エンドポイント・フィールド・--input と --hostname の
+# 有無を取り出す。知らないフラグや 2 つ目の位置引数があれば Unreadable を投げる
 def parse(cmd)
   words = Shellwords.split(cmd)
   raise Unreadable, "gh api で始まっていない" unless words[0] == "gh" && words[1] == "api"
@@ -105,6 +131,7 @@ def parse(cmd)
   endpoint = nil
   fields = []
   input = false
+  hostname = false
   i = 2
   while i < words.size
     w = words[i]
@@ -129,8 +156,13 @@ def parse(cmd)
         raise Unreadable, "method を読み取れない（#{value}）" unless value.match?(/\A[A-Za-z]+\z/)
         method = value
       end
-      fields << value.split("=", 2).first if FIELD_FLAGS.include?(flag)
+      if FIELD_FLAGS.include?(flag)
+        name, val = value.split("=", 2)
+        file = val[1..] if FILE_FIELD_FLAGS.include?(flag) && val.to_s.start_with?("@")
+        fields << {name: name, value: val.to_s, file: file}
+      end
       input = true if flag == "--input"
+      hostname = true if flag == "--hostname"
     elsif BOOL_FLAGS.include?(flag) && value.nil?
       nil
     else
@@ -138,13 +170,30 @@ def parse(cmd)
     end
     i += 1
   end
-  {method: method.to_s.upcase, endpoint: endpoint.to_s, fields: fields, input: input}
+  {method: method.to_s.upcase, endpoint: endpoint.to_s, fields: fields, input: input, hostname: hostname}
+end
+
+# 相対パスは cwd 次第で、symlink は /tmp の外を指しうるので、絶対パスを realpath にして比べる
+def allowed_file?(path)
+  return false unless path.start_with?("/")
+
+  real = File.realpath(path)
+  ALLOWED_FILE_DIRS.any? { |dir| real.start_with?(dir) }
+rescue SystemCallError
+  false
+end
+
+def graphql_query(fields)
+  query = fields.find { |f| f[:name] == "query" }
+  return nil unless query
+
+  query[:file] ? File.read(File.realpath(query[:file])) : query[:value]
 end
 
 begin
   data = JSON.parse($stdin.read.force_encoding(Encoding::UTF_8).scrub)
   cmd = data.dig("tool_input", "command").to_s
-  exit 0 unless maybe_write?(cmd)
+  exit 0 unless needs_check?(cmd)
 
   # パイプ・連結・置換・エスケープ・ブレース展開・グロブを含む形は、語に分けても実際に実行される形と一致する保証が無い
   ask("書き込みを含みうる gh api のうち、展開・連結・閉じていない引用符を含むコマンドは確認する") if shell_special?(cmd)
@@ -154,12 +203,29 @@ begin
   rescue Unreadable, ArgumentError => e
     ask("gh api の形を読み取れなかった（#{e.message}）")
   end
-  exit 0 if ["", "GET", "HEAD"].include?(req[:method])
-  ask("gh api の #{req[:method]} は確認する") unless req[:method] == "PATCH"
+
+  ask("--hostname で GitHub 以外へ送りうる") if req[:hostname]
+  ask("エンドポイントが URL で、GitHub 以外へ送りうる（#{req[:endpoint]}）") if req[:endpoint].include?("://")
+  outside_files = req[:fields].filter_map { |f| f[:file] }.reject { |path| allowed_file?(path) }
+  ask("/tmp の外のファイル（または stdin）を送る（#{outside_files.join(", ")}）") if outside_files.any?
+
+  method = req[:method]
+  method = (req[:fields].any? || req[:input]) ? "POST" : "GET" if method.empty?
+
+  if req[:endpoint].delete_prefix("/") == "graphql"
+    ask("gh api graphql の --input は中身を確かめられない") if req[:input]
+    query = graphql_query(req[:fields])
+    ask("gh api graphql のクエリが無い") if query.nil?
+    ask("gh api graphql の mutation は確認する") if query.match?(/\bmutation\b/)
+    exit 0
+  end
+
+  exit 0 if ["GET", "HEAD"].include?(method)
+  ask("gh api の #{method} は確認する") unless method == "PATCH"
 
   ask("PATCH の対象が issue・PR の本文かコメントではない（#{req[:endpoint]}）") unless req[:endpoint].match?(ALLOWED_ENDPOINT)
   ask("--input で渡す中身は確かめられない") if req[:input]
-  ask("body 以外のフィールドを送っている（#{req[:fields].join(", ")}）") unless req[:fields] == ["body"]
+  ask("body 以外のフィールドを送っている（#{req[:fields].map { |f| f[:name] }.join(", ")}）") unless req[:fields].map { |f| f[:name] } == ["body"]
 
   exit 0
 rescue SystemExit
