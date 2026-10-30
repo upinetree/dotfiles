@@ -3,7 +3,8 @@
     "AGENT_SHELL": "1",
     "CLAUDECODE": "1",
     "CLAUDE_CODE_FORK_SUBAGENT": "1",
-    "VOICEVOX_VOLUME": "0.5"
+    "VOICEVOX_VOLUME": "0.5",
+    "YOMIYASU_STATE_DIR": "~/.cache/yomiyasu"
   },
   "attribution": {
     "commit": "",
