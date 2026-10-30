@@ -178,6 +178,10 @@
           },
           {
             "type": "command",
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/glob-option-guard.rb\""
+          },
+          {
+            "type": "command",
             "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/gh-api-patch-guard.rb\""
           }
         ]
