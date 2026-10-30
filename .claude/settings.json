@@ -82,11 +82,9 @@
       "Bash(zsh -c:*)",
       "Bash(brew:*)",
       "Bash(gh api *--method POST*)",
-      "Bash(gh api *--method PATCH*)",
       "Bash(gh api *--method PUT*)",
       "Bash(gh api *--method DELETE*)",
       "Bash(gh api *-X POST*)",
-      "Bash(gh api *-X PATCH*)",
       "Bash(gh api *-X PUT*)",
       "Bash(gh api *-X DELETE*)",
       "Bash(git config --global:*)",
@@ -176,6 +174,10 @@
           {
             "type": "command",
             "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/no-clobber-redirect.rb\""
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/gh-api-patch-guard.rb\""
           }
         ]
       }
