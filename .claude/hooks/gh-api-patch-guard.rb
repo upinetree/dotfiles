@@ -24,9 +24,13 @@
 #   - POST・PUT・DELETE。settings.json の ask ルール（`Bash(gh api *-X DELETE*)` など）にも
 #     残しているが、文字列の一致なので -X=DELETE のような書き方を見落とす。-X を書かずに
 #     フィールドを渡すと gh は POST にするので、REST へのその形も含める
-#   - -F key=@<path> が /tmp の外のファイルを読む形。allow `Bash(gh api:*)` のもとでは、
-#     ~/.ssh などの中身を issue に書き込む流出の経路になる。本文を長く書くときは
-#     /tmp（scratchpad を含む）にファイルを置いて送る
+#   - -F key=@<path> が Claude Code の scratchpad（/private/tmp/claude-<uid>/）の外のファイルを
+#     読む形。allow `Bash(gh api:*)` のもとでは、~/.ssh などの中身を issue に書き込む流出の
+#     経路になる。本文を長く書くときは scratchpad にファイルを置いて送る。共有の /tmp を
+#     許さないのは、ほかのユーザーが symlink を仕込めるため。確認してから gh が読むまでに
+#     自分の別のプロセスがファイルを差し替える形は防げない
+#   - gh api graphql の query をファイルで渡す形。読み取りのクエリで確認を通したあと、
+#     mutation に差し替えられる
 #   - --hostname と URL のエンドポイント。GitHub 以外のホストへ送れる
 #   - --input。中身を確かめられない
 #
@@ -39,7 +43,9 @@ require "shellwords"
 
 ALLOWED_ENDPOINT = %r{\A/?repos/[^/]+/[^/]+/(issues/\d+|pulls/\d+|issues/comments/\d+)\z}
 # macOS では /tmp が /private/tmp への symlink なので、realpath で比べる
-ALLOWED_FILE_DIRS = ["/private/tmp/", "/tmp/"].freeze
+SCRATCHPAD_ROOT = "/private/tmp/claude-#{Process.uid}/"
+# gh のプレースホルダー。シェルは , か .. を含まない { } を展開しないが、確実に安全なものだけ許す
+GH_PLACEHOLDER = /\{(owner|repo|branch)\}/
 RAW_FIELD_FLAGS = %w[-f --raw-field].freeze
 # -F / --field は値が @ で始まるとファイル（@- は stdin）から読む
 FILE_FIELD_FLAGS = %w[-F --field].freeze
@@ -79,13 +85,14 @@ def needs_check?(cmd)
 
   # -iXDELETE のように値を取らない短いフラグと -X・-f・-F をまとめて書く形もある。
   # 空白の直後に限るのは、my-fork のようなリポジトリ名の -f を拾わないため
+  # :// は、フラグを付けない GET でも URL のエンドポイントで GitHub 以外へ送れるため
   plain.match?(/\bapi\b/) &&
-    (plain.match?(/patch/i) || plain.match?(/(?<=\s)(-[a-zA-Z]*[XfF]|--(method|field|raw-field|input|hostname)\b)/))
+    (plain.match?(/patch|:\/\//i) || plain.match?(/(?<=\s)(-[a-zA-Z]*[XfF]|--(method|field|raw-field|input|hostname)\b)/))
 end
 
 # 引用符の外でシェルが展開する文字。zsh ではブレース展開やグロブで語が書き換わる。
-# { } は , か .. を含むときだけ展開されるので、unquoted_specials で別に見る
-EXPANSION_CHARS = ["`", "$", "\\", "{", "*", "?", "[", "]", "~", "!", "#"].freeze
+# { } は gh のプレースホルダーを除くため、unquoted_specials で別に見る
+EXPANSION_CHARS = ["`", "$", "\\", "{", "}", "*", "?", "[", "]", "~", "!", "#"].freeze
 # 引用符の外でコマンドを連結・置換・リダイレクトする文字
 OPERATOR_CHARS = [";", "&", "|", "<", ">", "\n", "(", ")"].freeze
 
@@ -107,13 +114,13 @@ def unquoted_specials(cmd)
         state = c
       else
         outside << c
-        found << c if (EXPANSION_CHARS - ["{"]).include?(c) || OPERATOR_CHARS.include?(c)
+        found << c if (EXPANSION_CHARS - ["{", "}"]).include?(c) || OPERATOR_CHARS.include?(c)
       end
     end
   end
   found << "'" unless state.nil?
-  # repos/{owner}/{repo} のような gh のプレースホルダーは展開されないので通す
-  found << "{" if outside.match?(/\{[^{}]*(,|\.\.)[^{}]*\}/)
+  # repos/{owner}/{repo} のような gh のプレースホルダーだけを除いて、残る { } を数える
+  found.concat(outside.gsub(GH_PLACEHOLDER, "").scan(/[{}]/))
   found
 end
 
@@ -173,24 +180,28 @@ def parse(cmd)
   {method: method.to_s.upcase, endpoint: endpoint.to_s, fields: fields, input: input, hostname: hostname}
 end
 
-# 相対パスは cwd 次第で、symlink は /tmp の外を指しうるので、絶対パスを realpath にして比べる
+# 相対パスは cwd 次第で、symlink は scratchpad の外を指しうるので、絶対パスを realpath にして比べる。
+# scratchpad の根が自分だけのもの（所有者が自分で、ほかの人に権限が無い）でなければ、どれも許さない
 def allowed_file?(path)
   return false unless path.start_with?("/")
 
+  root = File.stat(SCRATCHPAD_ROOT)
+  return false unless root.directory? && root.uid == Process.uid && (root.mode & 0o077).zero?
+
   real = File.realpath(path)
-  ALLOWED_FILE_DIRS.any? { |dir| real.start_with?(dir) }
+  real.start_with?(SCRATCHPAD_ROOT) && File.stat(real).file?
 rescue SystemCallError
   false
 end
 
 # query を 2 つ渡して後ろに mutation を置く形を見落とさないよう、query がちょうど 1 つのときだけ
-# 読む。gh 2.103 は query の重複や query[x] を実行前にエラーにするが、その挙動には頼らない
+# 読む。gh 2.103 は query の重複や query[x] を実行前にエラーにするが、その挙動には頼らない。
+# ファイルで渡す query は、ここで読んだあと gh が読むまでに差し替えられるので読まない
 def graphql_query(fields)
   queries = fields.select { |f| f[:name] == "query" || f[:name].to_s.start_with?("query[") }
-  return nil unless queries.size == 1 && queries[0][:name] == "query"
+  return nil unless queries.size == 1 && queries[0][:name] == "query" && queries[0][:file].nil?
 
-  query = queries[0]
-  query[:file] ? File.read(File.realpath(query[:file])) : query[:value]
+  queries[0][:value]
 end
 
 begin
@@ -210,7 +221,7 @@ begin
   ask("--hostname で GitHub 以外へ送りうる") if req[:hostname]
   ask("エンドポイントが URL で、GitHub 以外へ送りうる（#{req[:endpoint]}）") if req[:endpoint].include?("://")
   outside_files = req[:fields].filter_map { |f| f[:file] }.reject { |path| allowed_file?(path) }
-  ask("/tmp の外のファイル（または stdin）を送る（#{outside_files.join(", ")}）") if outside_files.any?
+  ask("scratchpad の外のファイル（または stdin）を送る（#{outside_files.join(", ")}）") if outside_files.any?
 
   method = req[:method]
   method = (req[:fields].any? || req[:input]) ? "POST" : "GET" if method.empty?
@@ -218,7 +229,7 @@ begin
   if req[:endpoint].delete_prefix("/") == "graphql"
     ask("gh api graphql の --input は中身を確かめられない") if req[:input]
     query = graphql_query(req[:fields])
-    ask("gh api graphql の query が無いか、1 つに定まらない") if query.nil?
+    ask("gh api graphql の query が無い・1 つに定まらない・ファイルで渡されている") if query.nil?
     ask("gh api graphql の mutation は確認する") if query.match?(/\bmutation\b/)
     exit 0
   end
