@@ -22,7 +22,6 @@ if OS.mac?
   brew "gnu-sed"
   brew "openssl"
   brew "readline"
-  brew "source-highlight"
   brew "vim"
   brew "watch"
   brew "zsh"
