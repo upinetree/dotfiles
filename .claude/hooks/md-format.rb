@@ -4,6 +4,22 @@
 require "json"
 require_relative "format-skip"
 
+PRETTIER_CANDIDATES = [
+  "prettier",
+  "/opt/homebrew/bin/prettier",
+  "/usr/local/bin/prettier",
+  "/home/linuxbrew/.linuxbrew/bin/prettier"
+].freeze
+
+def format_markdown(file)
+  PRETTIER_CANDIDATES.each do |command|
+    result = system(command, "--write", "--", file)
+    return result unless result.nil?
+  end
+
+  false
+end
+
 begin
   # Claude Desktop 起動の hook 環境には LANG/LC_* が無く default external が
   # US-ASCII になるため、UTF-8 を明示しないと日本語を含む入力の parse で落ちる
@@ -13,7 +29,7 @@ begin
   exit 0 unless file.end_with?(".md")
   exit 0 if FormatSkip.skip?(file, ".md")
 
-  system("/opt/homebrew/bin/prettier", "--write", "--", file)
+  format_markdown(file)
 rescue
   nil
 end
