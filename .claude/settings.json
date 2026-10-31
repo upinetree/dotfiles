@@ -78,9 +78,6 @@
       "Read(*.key)"
     ],
     "ask": [
-      "Bash(sh -c:*)",
-      "Bash(bash -c:*)",
-      "Bash(zsh -c:*)",
       "Bash(gh api *--method POST*)",
       "Bash(gh api *--method PUT*)",
       "Bash(gh api *--method DELETE*)",

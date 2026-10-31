@@ -56,7 +56,7 @@ When breaking the default, keep the logic minimal; if a script grows real logic,
 
 **`.claude/settings.json`** (symlinked to `~/.claude/settings.json`) — Claude Code configuration including:
 
-- Permission allow/deny/ask lists for Bash commands and file reads (POST-style `curl` and `git push` are gated by `ask`; `git checkout/switch/reset/rebase` are in `allow`)
+- Permission allow/deny/ask lists for Bash commands and file reads (POST-style `curl`, `gh api` writes, and force/delete forms of `git push` are gated by `ask`; `git checkout/switch/reset/rebase` are in `allow`)
 - PostToolUse hooks: auto-formats `.rb`/`.rake` files via `.claude/hooks/ruby-format.rb` (uses `standardrb --fix` when `standard` is in the bundle, falls back to `rubocop -A`), and `.md` files via `.claude/hooks/md-format.rb` (prettier). Format skipping is controlled by `.claude/hooks/format-skip.rb` — see **Formatter skip** below
 - Desktop notification hooks on Stop and Notification events via `.claude/hooks/desktop-notify.rb` (`osascript` on macOS, Windows PowerShell on WSL, `notify-send` on other Linux environments; unavailable notifications are skipped)
 - `report-session` auto-suggest hooks (scripts in `.claude/hooks/`, referenced via `$HOME/.claude/hooks/...`): a `UserPromptSubmit` hook fires on user satisfaction/completion phrases (gated by transcript length), and a `PostToolUse` Bash hook fires on `git commit`/`push`; both inject `additionalContext` nudging Claude to offer running `/report-session`, with the final go/no-go left to the model
