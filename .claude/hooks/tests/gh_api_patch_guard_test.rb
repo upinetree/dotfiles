@@ -166,6 +166,33 @@ class GhApiPatchGuardTest < Minitest::Test
     assert_equal :ask, decision(%(gh api -X PATCH #{R}/issues/1 -f body='本文' -f state=closed), env)
   end
 
+  # 値を直書きした for の変数は値を当てはめて読む。ループの中で変数を書き換えうるコマンドなら当てはめない
+  def test_loops
+    assert_all(:pass, [
+      %(for n in 324 219; do echo "=== \#$n"; gh api #{R}/pulls/$n -q '.title + "\n" + (.body // "")' | head -25; done; cat .ruby-version),
+      %(for f in a.tf b.tf; do gh api #{R}/contents/dir/${f} -q .content | base64 -d; done),
+      %(for m in GET HEAD; do gh api -X $m #{R}/issues/1; done)
+    ])
+    assert_all(:ask, [
+      %(for m in GET DELETE; do gh api -X $m #{R}/issues/comments/1; done),
+      %(for m in GET; do m=DELETE; gh api -X $m #{R}/issues/comments/1; done),
+      %(for m in GET; do read m; gh api -X $m #{R}/issues/comments/1; done),
+      %(for m in GET; do printf -vm DELETE; gh api -X $m #{R}/issues/comments/1; done),
+      %(for m in GET; do eval 'm=DELETE'; gh api -X $m #{R}/issues/comments/1; done),
+      %(for m in GET; do : ${m:=x}; gh api -X $m #{R}/issues/comments/1; done),
+      %(for n in "1 -X DELETE"; do gh api #{R}/issues/comments/$n; done), # bash では $n が単語分割される
+      %(for n in 1*; do gh api #{R}/issues/comments/$n; done),
+      %(for n in 1; do gh api #{R}/issues/$n; done; gh api -X $n #{R}/issues/comments/1), # ループの外は当てはめない
+      %(for n; do gh api -X $n #{R}/issues/comments/1; done),
+      %(D=/tmp/x; for f in a; do gh api #{R}/contents/$f -q .content > $D/$f; done), # 代入があるので当てはめない
+      %(for m in GET; do for m in DELETE; do echo; done; gh api -X $m #{R}/issues/comments/1; done), # 内側のループが書き換える
+      %(for IFS in a; do for n in 1a-XDELETE; do gh api #{R}/issues/comments/$n; done; done), # bash で $n が a で分割される
+      %(for id in 1; do gh api #{R}/issues/$id; done) # 小文字 1 文字でない名前は当てはめない
+    ])
+    values = (1..40).to_a.join(" ")
+    assert_equal :ask, decision(%(for a in #{values}; do for b in #{values}; do gh api #{R}/issues/$a; done; done))
+  end
+
   # -F key=@path で読めるのは scratchpad の中の普通のファイルだけ
   def test_files
     root = begin
