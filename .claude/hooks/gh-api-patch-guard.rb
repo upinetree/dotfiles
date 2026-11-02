@@ -94,6 +94,10 @@ end
 def shfmt_ast(cmd)
   SHFMT_CANDIDATES.each do |bin|
     out, err, status = Open3.capture3(bin, "--to-json", "-ln", "bash", stdin_data: cmd)
+    # 出力は default external で読まれ、LANG の無い hook 環境では US-ASCII になる。
+    # 日本語を含むコマンドで JSON.parse が InvalidByteSequenceError を投げ、読み取りまで確認に回っていた
+    out.force_encoding(Encoding::UTF_8)
+    err.force_encoding(Encoding::UTF_8)
     return JSON.parse(out) if status.success?
 
     raise Unreadable, "構文を読めなかった（#{err.lines.first.to_s.strip}）"

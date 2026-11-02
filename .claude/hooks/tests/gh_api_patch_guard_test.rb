@@ -16,8 +16,8 @@ class GhApiPatchGuardTest < Minitest::Test
   CLOSE = "#{R}/issues/1 -f state=closed"
   SCRATCHPAD_ROOT = "/private/tmp/claude-#{Process.uid}/"
 
-  def decision(cmd)
-    out, status = Open3.capture2(RbConfig.ruby, HOOK, stdin_data: JSON.generate(tool_name: "Bash", tool_input: {command: cmd}))
+  def decision(cmd, env = {})
+    out, status = Open3.capture2(env, RbConfig.ruby, HOOK, stdin_data: JSON.generate(tool_name: "Bash", tool_input: {command: cmd}))
     assert status.success?, "hook exited #{status.exitstatus}: #{cmd}"
     out.strip.empty? ? :pass : JSON.parse(out).dig("hookSpecificOutput", "permissionDecision").to_sym
   end
@@ -156,6 +156,14 @@ class GhApiPatchGuardTest < Minitest::Test
       "gh api -X PATCH #{R}/issues/1 -f body=x\v-fstate=closed", # シェルは \v で語を区切らないので body の値になる
       %(ID=$(gh api #{R}/issues/1 --jq .id); echo "$ID")
     ])
+  end
+
+  # Claude Desktop から起動した hook には LANG が無く、Ruby が外部の出力を US-ASCII で読む。
+  # 日本語を含むコマンドで shfmt の出力を読めず、読み取りまで確認に回っていた
+  def test_without_locale
+    env = {"LANG" => nil, "LC_ALL" => nil, "LC_CTYPE" => nil}
+    assert_equal :pass, decision(%(gh api #{R}/issues/1/comments -q '.[] | select(.body | test("100 秒"))'), env)
+    assert_equal :ask, decision(%(gh api -X PATCH #{R}/issues/1 -f body='本文' -f state=closed), env)
   end
 
   # -F key=@path で読めるのは scratchpad の中の普通のファイルだけ
