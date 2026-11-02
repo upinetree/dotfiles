@@ -15,6 +15,14 @@
 # 書いた gh api は実行されないので見ない。bash -c '...'・eval・$G api のように gh を文字列や
 # 変数で隠す形は allow ルールに一致しないので、分類器に任せる。
 #
+# 引数に変数展開・コマンド置換（$(...) と `...`）・$'...' を含む gh api も、Claude Code は allow
+# ルールで許可せず分類器に回すので、判定せずに通す。フックが ask を返すと分類器の前に確認が出て、
+# 値を直書きした for ループの読み取りまで止めていた。一方 $((...)) の算術展開は allow ルールに
+# 一致して分類器を通らないので、確認に回す側に残す。この振り分けはドキュメントに書かれておらず、
+# Claude Code 2.1.316 で、同じコマンドの展開ありと展開なしを実行し、transcript の
+# permissionDecision.reasonType（classifier か subcommandResults か）を比べて確かめた。版を上げて
+# 疑わしくなったら同じ方法で測り直す。
+#
 # コマンドの読み分けは shfmt の構文木に任せる。heredoc・コメント・行継続・引用符をこのフックで
 # 真似て読むと、真似きれなかった所でシェルとの解釈がずれ、実行される gh api を見落とし続けた。
 # shfmt が無い・構文を読めない（zsh だけの書き方など）ときは、gh api らしい文字列があれば確認に回す。
@@ -42,10 +50,8 @@
 #     mutation に差し替えられる
 #   - --hostname と URL のエンドポイント。GitHub 以外のホストへ送れる
 #   - --input。中身を確かめられない
-#   - gh api の引数の展開（-X $M、PAT?H、{PATCH,}、$(...)）と、gh を xargs などから呼ぶ形・
-#     GH_HOST= のような代入を前に置く形。実行される引数や送り先を文字列から読めない。
-#     ただし for n in 1 2; do ... $n ...; done のように値を直書きしたループの変数は、ループの中で
-#     書き換えられないコマンドに限って値を当てはめて読む（LOOP_SAFE_TYPES の上のコメント）
+#   - gh api の引数の算術展開・グロブ・ブレース展開（$((...))、PAT?H、{PATCH,}）と、gh を xargs
+#     などから呼ぶ形・GH_HOST= のような代入を前に置く形。実行される引数や送り先を文字列から読めない
 #
 # 入力 : stdin に PreToolUse の JSON（.tool_input.command を使う）
 # 出力 : 確認に回すときだけ permissionDecision=ask を JSON で stdout。それ以外は無出力 exit 0
@@ -109,109 +115,26 @@ def shfmt_ast(cmd)
   raise Unreadable, "shfmt が見つからない"
 end
 
-# コマンド呼び出しを、その位置で値の決まるループ変数と組にして渡す。値を直書きした for の中は、
-# 値ごとに 1 回ずつ渡す（loops が false なら変数を置き換えず、展開として確認に回す）
-def each_call(node, loops, bindings = {}, &block)
+def each_call(node, &block)
   case node
   when Hash
-    if loops && (values = loop_values(node))
-      name = node.dig("Loop", "Name", "Value")
-      values.each { |v| each_call(node["Do"], loops, bindings.merge(name => v), &block) }
-      return
-    end
-    yield node, bindings if node["Type"] == "CallExpr"
-    node.each_value { |v| each_call(v, loops, bindings, &block) }
+    yield node if node["Type"] == "CallExpr"
+    node.each_value { |v| each_call(v, &block) }
   when Array
-    node.each { |v| each_call(v, loops, bindings, &block) }
+    node.each { |v| each_call(v, &block) }
   end
-end
-
-# for n in 324 219; do gh api .../$n; done のように値を直書きしたループは、値を当てはめて判定する。
-# ただしループの中で n を書き換えられると、当てはめた値と実行される値がずれる（m=DELETE、read m、
-# printf -vm DELETE、eval 'm=DELETE' のあとの gh api -X $m）。書き換え方は bash と zsh で多く
-# （zsh の print -v・vared など）列挙しきれないので、書き換えられるものが無いコマンドに限る:
-# 代入・算術・ループ変数の素の展開以外の展開を含まず、呼ぶのは LOOP_SAFE_COMMANDS だけ
-LOOP_SAFE_TYPES = %w[File CallExpr ForClause WordIter BinaryCmd Lit SglQuoted DblQuoted ParamExp].freeze
-# 外部コマンドはシェルの変数を書き換えられない。echo は組み込みだが変数を書き換えない。
-# 足すときも、変数を書き換えうる組み込み（read・printf・print・eval など）は入れない
-LOOP_SAFE_COMMANDS = %w[gh echo cat head tail base64 jq wc grep sort uniq cut tr].freeze
-PLAIN_PARAM_KEYS = %w[Type Pos End Dollar Rbrace Short Param].freeze
-# 入れ子のループは値の組み合わせの数だけ判定するので、ループで hook の判定を長引かせられないよう上限を置く
-MAX_JUDGED_CALLS = 1000
-
-def plain_param?(part)
-  part["Type"] == "ParamExp" && (part.keys - PLAIN_PARAM_KEYS).empty?
-end
-
-def bound_value(part, bindings)
-  bindings[part.dig("Param", "Value")] if plain_param?(part)
-end
-
-def loop_names(node, names = [])
-  case node
-  when Hash
-    names << node.dig("Loop", "Name", "Value") if node["Type"] == "ForClause"
-    node.each_value { |v| loop_names(v, names) }
-  when Array
-    node.each { |v| loop_names(v, names) }
-  end
-  names
-end
-
-# ループの名前も、当てはめた値と実行される値をずらせる。IFS なら bash で $n を任意の文字で分割し、
-# 同じ名前の内側のループは外側の変数を書き換える。特殊変数の名前は bash と zsh（path・fpath など
-# 小文字のものもある）で列挙しきれないので、どちらにも特殊変数の無い小文字 1 文字に限り、
-# 同じ名前のループが 2 つあれば当てはめない
-def loops_bindable?(ast)
-  names = loop_names(ast)
-  names.uniq.size == names.size && names.all? { |n| n.match?(/\A[a-z]\z/) } && loops_unwritable?(ast, names)
-end
-
-def loops_unwritable?(node, names)
-  case node
-  when Hash
-    type = node["Type"]
-    return false if type && !LOOP_SAFE_TYPES.include?(type)
-    return false if type == "SglQuoted" && node["Dollar"]
-    return false if type == "ParamExp" && !(plain_param?(node) && names.include?(node.dig("Param", "Value")))
-    if type == "CallExpr"
-      return false if node["Assigns"]&.any? || node.fetch("Args", []).empty?
-      command = read_word(node["Args"][0])
-      return false if command[:dynamic] || command[:glob] || !LOOP_SAFE_COMMANDS.include?(command[:text])
-    end
-    node.each_value.all? { |v| loops_unwritable?(v, names) }
-  when Array
-    node.all? { |v| loops_unwritable?(v, names) }
-  else
-    true
-  end
-end
-
-# 置き換えた値が bash でも zsh でも 1 つの語のまま渡るよう、空・空白・グロブになりうる文字を含む値は
-# 当てはめない（for n; do のように値を書かないループも）
-def loop_values(node)
-  return nil unless node["Type"] == "ForClause" && node.dig("Loop", "Type") == "WordIter"
-
-  items = node.dig("Loop", "Items").to_a.map { |w| read_word(w) }
-  return nil if items.empty?
-  return nil unless items.all? { |w| !w[:dynamic] && !w[:glob] && w[:text].match?(/\A[^\s=]/) && !w[:text].match?(/\s|#{GLOB_CHARS}/o) }
-
-  items.map { |w| w[:text] }
 end
 
 # 語の部品を、シェルが渡す文字列にする。変数展開・置換・$'...' のように文字列から値が決まらない
-# 部品があれば dynamic、引用符の外にグロブ・ブレース展開・=cmd 展開になりうる文字があれば glob。
-# bindings は値の決まったループ変数で、その素の $n・${n} は値に置き換える
-def read_word(word, bindings = {})
+# 部品があれば dynamic、そのうち Claude Code が分類器に回す種類（冒頭のコメント）なら classified、
+# 引用符の外にグロブ・ブレース展開・=cmd 展開になりうる文字があれば glob
+def read_word(word)
   text = +""
   unquoted = +""
   dynamic = false
+  classified = false
   word.fetch("Parts", []).each do |part|
-    if (value = bound_value(part, bindings))
-      text << value
-      next
-    end
-
+    classified ||= classified_part?(part)
     case part["Type"]
     when "Lit"
       # shfmt は Lit の値にバックスラッシュを残すので、シェルと同じく外す。残すと g\h api を
@@ -226,10 +149,9 @@ def read_word(word, bindings = {})
         # 二重引用符の中のバックスラッシュは $ ` " \ 改行の前でだけ外れる
         if inner["Type"] == "Lit"
           text << inner["Value"].gsub(/\\([$`"\\\n])/) { ($1 == "\n") ? "" : $1 }
-        elsif (value = bound_value(inner, bindings))
-          text << value
         else
           dynamic = true
+          classified ||= classified_part?(inner)
         end
       end
     else
@@ -237,7 +159,11 @@ def read_word(word, bindings = {})
     end
   end
   glob = unquoted.gsub(GH_PLACEHOLDER, "").match?(GLOB_CHARS) || unquoted.start_with?("=")
-  {text: text, dynamic: dynamic, glob: glob}
+  {text: text, dynamic: dynamic, classified: classified, glob: glob}
+end
+
+def classified_part?(part)
+  %w[ParamExp CmdSubst].include?(part["Type"]) || (part["Type"] == "SglQuoted" && part["Dollar"])
 end
 
 # gh の位置。$G のように値の決まらない語は、allow ルールにも一致しないので分類器に任せる。
@@ -329,10 +255,11 @@ def graphql_query(fields)
 end
 
 # 1 つのコマンド呼び出しを判定する。gh api でなければ何もせず、確認に回すときは ask で終了する
-def judge(call, bindings)
-  words = call.fetch("Args", []).map { |w| read_word(w, bindings) }
+def judge(call)
+  words = call.fetch("Args", []).map { |w| read_word(w) }
   idx = words.each_index.find { |i| gh_word?(words[i]) && api_like?(words[i + 1]) }
   return if idx.nil?
+  return if words.any? { |w| w[:classified] }
 
   ask("gh を別のコマンドから呼んでいる（#{words[idx - 1][:text]}）") unless idx.zero?
   ask("gh api の前に代入がある") if call["Assigns"]&.any?
@@ -378,11 +305,7 @@ begin
   rescue Unreadable => e
     ask("gh api を含むコマンドの#{e.message}")
   end
-  judged = 0
-  each_call(ast, loops_bindable?(ast)) do |call, bindings|
-    ask("ループの値の組み合わせが多すぎる") if (judged += 1) > MAX_JUDGED_CALLS
-    judge(call, bindings)
-  end
+  each_call(ast) { |call| judge(call) }
   exit 0
 rescue SystemExit
   raise
