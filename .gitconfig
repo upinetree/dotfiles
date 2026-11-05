@@ -111,7 +111,5 @@
 	syntax-theme = Dracula
 	navigate = true
 
-[url "ssh://git@github.com/heyinc/"]
-	insteadOf = https://github.com/heyinc/
 [init]
 	defaultBranch = main
