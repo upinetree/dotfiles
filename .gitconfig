@@ -113,3 +113,16 @@
 
 [init]
 	defaultBranch = main
+
+# jubilee-works は会社のアカウントの鍵（~/.ssh/config の github-work）で繋ぎ、会社のメールでコミットする。
+# hasconfig は insteadOf で書き換える前の URL に当たるので、書き換え前の 2 形式と書き換え後の 1 形式を並べる。
+# includeIf は後に書いた値が勝つので、[user] より後のこの位置に置く。
+[url "git@github-work:jubilee-works/"]
+	insteadOf = ssh://git@github.com/jubilee-works/
+	insteadOf = git@github.com:jubilee-works/
+[includeIf "hasconfig:remote.*.url:ssh://git@github.com/jubilee-works/**"]
+	path = ~/.gitconfig-work
+[includeIf "hasconfig:remote.*.url:git@github.com:jubilee-works/**"]
+	path = ~/.gitconfig-work
+[includeIf "hasconfig:remote.*.url:git@github-work:jubilee-works/**"]
+	path = ~/.gitconfig-work
