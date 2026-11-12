@@ -185,7 +185,8 @@
           },
           {
             "type": "command",
-            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/gh-api-patch-guard.rb\""
+            "command": "\"$HOME/.local/share/mise/installs/ruby/latest/bin/ruby\" \"$HOME/.claude/hooks/gh-api-patch-guard.rb\"",
+            "onFailure": "block"
           }
         ]
       }
