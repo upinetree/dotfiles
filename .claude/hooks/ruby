@@ -1,0 +1,8 @@
+#!/bin/sh
+# Claude Code と Codex の hook が使う Ruby。どの Ruby で動かすかをここ 1 か所で決める。
+#
+# mise の shim は作業ディレクトリの設定から版を選ぶので、入っていない版を指すリポジトリでは
+# その版をインストールしに行くか失敗する。hook は標準ライブラリしか使わないので、作業ディレクトリ
+# によらず mise が入れた最新の Ruby で動かす。onFailure: block の hook では、ここが失敗すると
+# その hook の対象になるツールの呼び出しがすべて止まる（make doctor がこのファイルを runtime として確かめる）
+exec "$HOME/.local/share/mise/installs/ruby/latest/bin/ruby" "$@"
