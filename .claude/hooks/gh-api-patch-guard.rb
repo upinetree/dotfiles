@@ -86,7 +86,10 @@ SHFMT_CANDIDATES = ["shfmt", "/opt/homebrew/bin/shfmt", "/usr/local/bin/shfmt", 
 
 class Unreadable < StandardError; end
 
+# 理由にはコマンドの語や例外のメッセージを埋め込むので、不正な UTF-8 を置き換えてから JSON にする。
+# ここで例外が出るとフックが異常終了し、Claude Code はそれを止める扱いにせず allow で通してしまう
 def ask(reason)
+  reason = reason.dup.force_encoding(Encoding::UTF_8).scrub("?")
   puts JSON.generate(
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
@@ -350,6 +353,11 @@ if $PROGRAM_NAME == __FILE__
     raise
   rescue => e
     # 判定に失敗したら通さずに確認へ倒す（以前の ask ルールと同じ側に失敗させる）
-    ask("gh-api-patch-guard の判定がエラーで止まった（#{e.class}: #{e.message.lines.first.to_s.strip[0, 120]}）。フックの不具合なので、承認してよいかはコマンドで判断する")
+    detail = begin
+      "（#{e.class}: #{e.message.dup.force_encoding(Encoding::UTF_8).scrub("?").lines.first.to_s.strip[0, 120]}）"
+    rescue
+      ""
+    end
+    ask("gh-api-patch-guard の判定がエラーで止まった#{detail}。フックの不具合なので、承認してよいかはコマンドで判断する")
   end
 end

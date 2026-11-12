@@ -118,6 +118,15 @@ class GhApiPatchGuardTest < Minitest::Test
     ])
   end
 
+  # 理由に不正な UTF-8 が混じっても ask を返す。JSON にするところで例外が出るとフックが異常終了し、
+  # Claude Code はそれを止める扱いにしないので、allow に一致するコマンドが確認なしで通る
+  def test_ask_survives_invalid_utf8
+    script = %(require #{HOOK.dump}; ask("bad \\xFF\\xFE".dup.force_encoding("UTF-8")))
+    out, status = Open3.capture2(RbConfig.ruby, "-e", script)
+    assert status.success?, "ask が異常終了した"
+    assert_equal "ask", JSON.parse(out).dig("hookSpecificOutput", "permissionDecision")
+  end
+
   # gh に増えたフラグは、フックが知らないフラグとして確認に回す（値を取るかで読み方が変わるため）。
   # 実際のセッションで確認が出て初めて気づくことが無いよう、gh の --help と一覧を突き合わせる
   def test_knows_every_gh_api_flag
