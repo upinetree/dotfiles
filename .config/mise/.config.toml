@@ -1,5 +1,5 @@
 [settings]
-ruby.default_packages_file = "./default-gems"
+ruby.default_packages_file = "~/.config/mise/default-gems"
 
 minimum_release_age = "7d"
 
