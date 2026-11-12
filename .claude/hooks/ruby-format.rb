@@ -14,10 +14,15 @@ begin
   exit 0 unless ext.match?(/\A\.(rb|rake)\z/)
   exit 0 if FormatSkip.skip?(file, ext)
 
-  if system("bundle", "show", "standard", out: File::NULL, err: File::NULL)
-    system("bundle", "exec", "standardrb", "--fix", "--", file)
+  # このフック自体は .claude/hooks/ruby（mise が入れた最新の Ruby）で動くが、整形は作業ディレクトリの
+  # Ruby と bundle で行う。PATH では最新の Ruby の bin が shim より前にあることがあり、そのまま bundle を
+  # 引くと別の版の bundle になって整形が黙って止まるので、版を作業ディレクトリから選ぶ shim を呼ぶ
+  shim = File.expand_path("~/.local/share/mise/shims/bundle")
+  bundle = File.executable?(shim) ? shim : "bundle"
+  if system(bundle, "show", "standard", out: File::NULL, err: File::NULL)
+    system(bundle, "exec", "standardrb", "--fix", "--", file)
   else
-    system("bundle", "exec", "rubocop", "--force-exclusion", "-A", "--", file)
+    system(bundle, "exec", "rubocop", "--force-exclusion", "-A", "--", file)
   end
 rescue
   nil

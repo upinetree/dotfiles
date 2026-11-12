@@ -33,7 +33,7 @@ doctor:
 	@"$(HOME)/.local/share/mise/shims/ruby" ./scripts/doctor.rb
 
 doctor-notify:
-	@"$(HOME)/.local/share/mise/shims/ruby" ./.claude/hooks/desktop-notify.rb --doctor
+	@./.claude/hooks/ruby ./.claude/hooks/desktop-notify.rb --doctor
 
 pull:
 	@test -x "$(HOME)/.local/share/mise/shims/ruby" || { echo "FAIL: mise の Ruby shim が見つからないか実行できません。mise のセットアップを確認してください。"; exit 1; }
