@@ -6,6 +6,7 @@ require "open3"
 require "rbconfig"
 require "tmpdir"
 require "fileutils"
+require_relative "../gh-api-patch-guard"
 
 # gh-api-patch-guard.rb を PreToolUse と同じ形の JSON で起動し、確認に回すか（ask）通すか（pass）を見る。
 # ケースは仕組みごとに代表を置く。ask の多くは自動のセキュリティレビューで見つかった抜け道の回帰で、
@@ -45,6 +46,7 @@ class GhApiPatchGuardTest < Minitest::Test
       "gh api #{R}/issues/1 \\\n  --jq .title",
       %(gh api graphql -f query='query { viewer { login } }'),
       %(gh api graphql -f query='{ repository(owner:"o", name:"r") { id } }'),
+      %(gh api --allow-escape-sequences #{R}/actions/jobs/1/logs | grep -i error),
       # gh api の外の単純コマンドの ; | $ や URL では止めない（実際のセッションで誤検知だった形）
       %(gh api #{R}/issues/1 --jq .body | grep -nE "https://github.com|mutation" | head),
       %(for n in 1 2; do gh issue view $n --json body | python3 -c "print($n)"; done; gh api #{R}/issues/1),
@@ -105,11 +107,26 @@ class GhApiPatchGuardTest < Minitest::Test
       %(gh api -X $'PATCH' #{CLOSE}),
       %(gh api -X "${M:-PATCH}" #{CLOSE}),
       %(gh api #{R}/issues/1 2>/dev/null $A),
-      %(for n in 324 219; do echo "=== \#$n"; gh api #{R}/pulls/$n -q .title | head -25; done)
+      %(for n in 324 219; do echo "=== \#$n"; gh api #{R}/pulls/$n -q .title | head -25; done),
+      # 前に置く代入も、値に置換・展開があれば分類器に回る
+      %(GH_TOKEN=$(gh auth token -u someone) gh api -X PATCH #{CLOSE}),
+      %(GH_HOST="$H" gh api /x)
     ])
     assert_all(:ask, [
-      %(gh api -X PATCH #{R}/issues/$((1)) -f body=x) # issues/1 なら通る形
+      %(gh api -X PATCH #{R}/issues/$((1)) -f body=x), # issues/1 なら通る形
+      %(LANG=C gh api -X PATCH #{CLOSE}) # LANG の代入は外して照合され、allow に一致する
     ])
+  end
+
+  # gh に増えたフラグは、フックが知らないフラグとして確認に回す（値を取るかで読み方が変わるため）。
+  # 実際のセッションで確認が出て初めて気づくことが無いよう、gh の --help と一覧を突き合わせる
+  def test_knows_every_gh_api_flag
+    help, status = Open3.capture2e("gh", "api", "--help")
+    skip "gh が無い" unless status.success?
+
+    gh_flags = help.scan(/^\s+(?:(-\w), )?(--[a-z][a-z-]+)/).flatten.compact.uniq - ["--help"]
+    assert_operator gh_flags.size, :>, 10, "--help からフラグを読めていない:\n#{help}"
+    assert_empty gh_flags - VALUE_FLAGS - BOOL_FLAGS, "フックの知らない gh api のフラグ（gh #{`gh --version`[/[\d.]+/]}）"
   end
 
   # gh を別のコマンドから呼ぶ形。xargs なら URL を stdin から渡せる

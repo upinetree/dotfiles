@@ -23,6 +23,11 @@
 # permissionDecision.reasonType（classifier か subcommandResults か）を比べて確かめた。版を上げて
 # 疑わしくなったら同じ方法で測り直す。
 #
+# 前に置く代入も同じ線で分ける。値に展開・置換があれば分類器に回り、値を直書きした代入は確認に
+# 回す。Claude Code は LANG のような一部の変数の代入を外して allow ルールと照合するので、
+# LANG=C gh api ... は分類器を通らない。外す変数の一覧は公開されていないので、名前では分けない
+# （2.1.319 で LANG=C と LANG=$(echo C) を比べて確かめた）。
+#
 # コマンドの読み分けは shfmt の構文木に任せる。heredoc・コメント・行継続・引用符をこのフックで
 # 真似て読むと、真似きれなかった所でシェルとの解釈がずれ、実行される gh api を見落とし続けた。
 # shfmt が無い・構文を読めない（zsh だけの書き方など）ときは、gh api らしい文字列があれば確認に回す。
@@ -51,7 +56,8 @@
 #   - --hostname と URL のエンドポイント。GitHub 以外のホストへ送れる
 #   - --input。中身を確かめられない
 #   - gh api の引数の算術展開・グロブ・ブレース展開（$((...))、PAT?H、{PATCH,}）と、gh を xargs
-#     などから呼ぶ形・GH_HOST= のような代入を前に置く形。実行される引数や送り先を文字列から読めない
+#     などから呼ぶ形・GH_HOST=x のような値を直書きした代入を前に置く形。実行される引数や送り先を
+#     文字列から読めない
 #
 # 入力 : stdin に PreToolUse の JSON（.tool_input.command を使う）
 # 出力 : 確認に回すときだけ permissionDecision=ask を JSON で stdout。それ以外は無出力 exit 0
@@ -74,7 +80,7 @@ FIELD_FLAGS = (RAW_FIELD_FLAGS + FILE_FIELD_FLAGS).freeze
 METHOD_FLAGS = %w[-X --method].freeze
 # gh api の値を取るフラグと値を取らないフラグ。ここに無いフラグは読み違えうるので確認に回す
 VALUE_FLAGS = (FIELD_FLAGS + METHOD_FLAGS + %w[-H --header --jq -q -t --template --hostname --cache -p --preview --input]).freeze
-BOOL_FLAGS = %w[-i --include --paginate --slurp --silent --verbose].freeze
+BOOL_FLAGS = %w[-i --include --paginate --slurp --silent --verbose --allow-escape-sequences].freeze
 # hook は GUI から起動した Claude Code の PATH で動くので、Homebrew の既定の場所も探す
 SHFMT_CANDIDATES = ["shfmt", "/opt/homebrew/bin/shfmt", "/usr/local/bin/shfmt", "/home/linuxbrew/.linuxbrew/bin/shfmt"].freeze
 
@@ -259,7 +265,8 @@ def judge(call)
   words = call.fetch("Args", []).map { |w| read_word(w) }
   idx = words.each_index.find { |i| gh_word?(words[i]) && api_like?(words[i + 1]) }
   return if idx.nil?
-  return if words.any? { |w| w[:classified] }
+  assigned = call.fetch("Assigns", []).filter_map { |a| a["Value"] }.map { |w| read_word(w) }
+  return if (words + assigned).any? { |w| w[:classified] }
 
   ask("gh を別のコマンドから呼んでいる（#{words[idx - 1][:text]}）") unless idx.zero?
   ask("gh api の前に代入がある") if call["Assigns"]&.any?
@@ -295,21 +302,24 @@ def judge(call)
   ask("body 以外のフィールドを送っている（#{req[:fields].map { |f| f[:name] }.join(", ")}）") unless req[:fields].map { |f| f[:name] } == ["body"]
 end
 
-begin
-  data = JSON.parse($stdin.read.force_encoding(Encoding::UTF_8).scrub)
-  cmd = data.dig("tool_input", "command").to_s
-  exit 0 unless mentions_gh_api?(cmd)
-
+# テストがフラグの一覧を gh と突き合わせるために require するので、直接起動したときだけ判定する
+if $PROGRAM_NAME == __FILE__
   begin
-    ast = shfmt_ast(cmd)
-  rescue Unreadable => e
-    ask("gh api を含むコマンドの#{e.message}")
+    data = JSON.parse($stdin.read.force_encoding(Encoding::UTF_8).scrub)
+    cmd = data.dig("tool_input", "command").to_s
+    exit 0 unless mentions_gh_api?(cmd)
+
+    begin
+      ast = shfmt_ast(cmd)
+    rescue Unreadable => e
+      ask("gh api を含むコマンドの#{e.message}")
+    end
+    each_call(ast) { |call| judge(call) }
+    exit 0
+  rescue SystemExit
+    raise
+  rescue
+    # 判定に失敗したら通さずに確認へ倒す（以前の ask ルールと同じ側に失敗させる）
+    ask("gh-api-patch-guard の判定に失敗した")
   end
-  each_call(ast) { |call| judge(call) }
-  exit 0
-rescue SystemExit
-  raise
-rescue
-  # 判定に失敗したら通さずに確認へ倒す（以前の ask ルールと同じ側に失敗させる）
-  ask("gh-api-patch-guard の判定に失敗した")
 end
