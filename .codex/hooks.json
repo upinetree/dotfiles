@@ -15,11 +15,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/ruby-format.rb\""
+            "command": "\"$HOME/.local/share/mise/installs/ruby/latest/bin/ruby\" \"$HOME/.claude/hooks/ruby-format.rb\""
           },
           {
             "type": "command",
-            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/md-format.rb\""
+            "command": "\"$HOME/.local/share/mise/installs/ruby/latest/bin/ruby\" \"$HOME/.claude/hooks/md-format.rb\""
           }
         ]
       }
@@ -39,11 +39,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/desktop-notify.rb\" \"done!\" \"Codex\" \"Glass\""
+            "command": "\"$HOME/.local/share/mise/installs/ruby/latest/bin/ruby\" \"$HOME/.claude/hooks/desktop-notify.rb\" \"done!\" \"Codex\" \"Glass\""
           },
           {
             "type": "command",
-            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/voicevox-speak.rb\""
+            "command": "\"$HOME/.local/share/mise/installs/ruby/latest/bin/ruby\" \"$HOME/.claude/hooks/voicevox-speak.rb\""
           }
         ]
       }
@@ -54,11 +54,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/no-clobber-redirect.rb\""
+            "command": "\"$HOME/.local/share/mise/installs/ruby/latest/bin/ruby\" \"$HOME/.claude/hooks/no-clobber-redirect.rb\""
           },
           {
             "type": "command",
-            "command": "\"$HOME/.local/share/mise/shims/ruby\" \"$HOME/.claude/hooks/glob-option-guard.rb\""
+            "command": "\"$HOME/.local/share/mise/installs/ruby/latest/bin/ruby\" \"$HOME/.claude/hooks/glob-option-guard.rb\""
           }
         ]
       }
