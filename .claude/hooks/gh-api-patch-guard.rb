@@ -276,9 +276,9 @@ def judge(call)
   # このフックが判定せずに止めた理由を後ろに添える
   unless idx.zero?
     prefix = words[0...idx].map { |w| w[:text] }.join(" ")
-    ask("#{prefix} を通して呼ぶ gh api が書き込みにならないか確認してください。#{prefix} が設定する環境変数や足す引数" \
-        "（xargs なら stdin から渡る URL や -X）をフックは判定できず、Claude Code は xargs などを外して allow と照合するので、" \
-        "分類器も通らないことがあります")
+    ask("#{prefix} を通して呼ぶ gh api が、書き込みや送り先・認証の変更にならないか確認してください。#{prefix} が" \
+        "環境変数や引数を足すとき（env なら GH_HOST など、xargs なら stdin から渡る URL や -X）はフックがそれを判定できず、" \
+        "Claude Code は xargs などを外して allow と照合するので、分類器も通らないことがあります")
   end
   if call["Assigns"]&.any?
     names = call["Assigns"].map { |a| a.dig("Name", "Value") }.join(", ")
