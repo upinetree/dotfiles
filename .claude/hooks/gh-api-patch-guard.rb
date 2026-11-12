@@ -114,11 +114,11 @@ def shfmt_ast(cmd)
     err.force_encoding(Encoding::UTF_8)
     return JSON.parse(out) if status.success?
 
-    raise Unreadable, "構文を読めなかった（#{err.lines.first.to_s.strip}）"
+    raise Unreadable, "構文を shfmt が読めなかった（#{err.lines.first.to_s.strip}。zsh だけの書き方など）"
   rescue Errno::ENOENT
     next
   end
-  raise Unreadable, "shfmt が見つからない"
+  raise Unreadable, "構文を読む shfmt が見つからなかった（brew install shfmt で入る）"
 end
 
 def each_call(node, &block)
@@ -229,7 +229,7 @@ def parse(words)
     elsif BOOL_FLAGS.include?(flag) && value.nil?
       nil
     else
-      raise Unreadable, "知らないフラグ（#{w}）"
+      raise Unreadable, "知らないフラグ #{w}（値を取るかどうかで後ろの引数の読み方が変わる。gh に増えたフラグならフックの一覧に足す）"
     end
     i += 1
   end
@@ -268,38 +268,68 @@ def judge(call)
   assigned = call.fetch("Assigns", []).filter_map { |a| a["Value"] }.map { |w| read_word(w) }
   return if (words + assigned).any? { |w| w[:classified] }
 
-  ask("gh を別のコマンドから呼んでいる（#{words[idx - 1][:text]}）") unless idx.zero?
-  ask("gh api の前に代入がある") if call["Assigns"]&.any?
-  ask("gh api の引数に展開・置換がある") if words.any? { |w| w[:dynamic] || w[:glob] }
+  # 確認の理由はダイアログでユーザーが読む。何を見つけたかを実際の語で示し、なぜ止めるかを添える
+  unless idx.zero?
+    ask("gh を #{words[0][:text]} から呼んでいる。#{words[0][:text]} が足す引数（stdin から渡る URL や -X など）は" \
+        "コマンドから読めず、Claude Code は xargs などを外して allow と照合するので分類器も通らない")
+  end
+  if call["Assigns"]&.any?
+    names = call["Assigns"].map { |a| a.dig("Name", "Value") }.join(", ")
+    ask("gh api の前で #{names} に値を直書きしている。LANG のように外して allow と照合される変数があり分類器を通らないことがあるうえ、" \
+        "GH_HOST・GH_TOKEN のように送り先や認証を変える変数もある（値を $(...) で作る形は分類器に任せている）")
+  end
+  globbed = words.select { |w| w[:glob] }.map { |w| w[:text] }
+  if globbed.any?
+    ask("gh api の引数 #{globbed.join(" ")} に引用符の外のグロブ・ブレース展開の文字がある。シェルが実行時に別の語へ書き換えうるので" \
+        "実際の引数を読めず、この形は allow に一致して分類器も通らない。引用符で囲めば通る")
+  end
+  if words.any? { |w| w[:dynamic] }
+    ask("gh api の引数に算術展開 $((...)) などがある。実行時に値が決まるので実際の引数を読めず、この形は allow に一致して分類器も通らない")
+  end
 
   begin
     req = parse(words.map { |w| w[:text] })
   rescue Unreadable => e
-    ask("gh api の形を読み取れなかった（#{e.message}）")
+    ask("gh api の形を読み取れなかった: #{e.message}。読み違えたまま判定すると書き込みを読み取りとして通しうる")
   end
 
-  ask("--hostname で GitHub 以外へ送りうる") if req[:hostname]
-  ask("エンドポイントが URL で、GitHub 以外へ送りうる（#{req[:endpoint]}）") if req[:endpoint].include?("://")
-  outside_files = req[:fields].filter_map { |f| f[:file] }.reject { |path| allowed_file?(path) }
-  ask("scratchpad の外のファイル（または stdin）を送る（#{outside_files.join(", ")}）") if outside_files.any?
+  ask("--hostname で送り先のホストを変えている。GitHub 以外へ送りうる") if req[:hostname]
+  ask("エンドポイントが URL（#{req[:endpoint]}）で、GitHub 以外へ送りうる") if req[:endpoint].include?("://")
+  outside = req[:fields].select { |f| f[:file] && !allowed_file?(f[:file]) }
+  if outside.any?
+    ask("-F #{outside.map { |f| "#{f[:name]}=@#{f[:file]}" }.join(" ")} でファイル（@- は stdin）の中身を送る。" \
+        "~/.ssh などの中身を GitHub へ書き出す経路になるので、Claude Code の scratchpad の中の普通のファイルだけを確認なしで通している")
+  end
 
   method = req[:method]
-  method = (req[:fields].any? || req[:input]) ? "POST" : "GET" if method.empty?
+  implied = method.empty?
+  method = (req[:fields].any? || req[:input]) ? "POST" : "GET" if implied
 
   if req[:endpoint].delete_prefix("/") == "graphql"
-    ask("gh api graphql の --input は中身を確かめられない") if req[:input]
+    ask("gh api graphql に --input で本文を渡している。mutation（書き込み）かどうかを中身で確かめられない") if req[:input]
     query = graphql_query(req[:fields])
-    ask("gh api graphql の query が無い・1 つに定まらない・ファイルで渡されている") if query.nil?
-    ask("gh api graphql の mutation は確認する") if query.match?(/\bmutation\b/)
+    if query.nil?
+      ask("gh api graphql の query が無い・2 つ以上ある・ファイルで渡されている。mutation（書き込み）かどうかを本文で確かめられない")
+    end
+    ask("gh api graphql の mutation（書き込み）。確認なしで通すのは query（読み取り）だけ") if query.match?(/\bmutation\b/)
     return
   end
 
   return if ["GET", "HEAD"].include?(method)
-  ask("gh api の #{method} は確認する") unless method == "PATCH"
+  unless method == "PATCH"
+    ask("gh api の #{method}（書き込み）#{"。-X が無くてもフィールドを付けると gh は POST で送る" if implied}。" \
+        "確認なしで通すのは、issue・PR の本文とコメントの body だけを書き換える PATCH")
+  end
 
-  ask("PATCH の対象が issue・PR の本文かコメントではない（#{req[:endpoint]}）") unless req[:endpoint].match?(ALLOWED_ENDPOINT)
-  ask("--input で渡す中身は確かめられない") if req[:input]
-  ask("body 以外のフィールドを送っている（#{req[:fields].map { |f| f[:name] }.join(", ")}）") unless req[:fields].map { |f| f[:name] } == ["body"]
+  unless req[:endpoint].match?(ALLOWED_ENDPOINT)
+    ask("PATCH の対象（#{req[:endpoint]}）が issue・PR の本文かコメントではない。確認なしで通す PATCH はこの 3 つに限っている")
+  end
+  ask("PATCH の本文を --input で渡している。body 以外のフィールドを含むかを確かめられない") if req[:input]
+  names = req[:fields].map { |f| f[:name] }
+  unless names == ["body"]
+    ask("PATCH で body 以外のフィールド（#{names.join(", ")}）を送っている。同じエンドポイントで state・assignees なども変えられるので、" \
+        "確認なしで通すのは body だけ")
+  end
 end
 
 # テストがフラグの一覧を gh と突き合わせるために require するので、直接起動したときだけ判定する
@@ -312,14 +342,14 @@ if $PROGRAM_NAME == __FILE__
     begin
       ast = shfmt_ast(cmd)
     rescue Unreadable => e
-      ask("gh api を含むコマンドの#{e.message}")
+      ask("gh api を含むコマンドの#{e.message}。どの語が実行される gh api かを読めないので、書き込みでないと確かめられない")
     end
     each_call(ast) { |call| judge(call) }
     exit 0
   rescue SystemExit
     raise
-  rescue
+  rescue => e
     # 判定に失敗したら通さずに確認へ倒す（以前の ask ルールと同じ側に失敗させる）
-    ask("gh-api-patch-guard の判定に失敗した")
+    ask("gh-api-patch-guard の判定がエラーで止まった（#{e.class}: #{e.message.lines.first.to_s.strip[0, 120]}）。フックの不具合なので、承認してよいかはコマンドで判断する")
   end
 end
