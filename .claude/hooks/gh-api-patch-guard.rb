@@ -87,7 +87,8 @@ SHFMT_CANDIDATES = ["shfmt", "/opt/homebrew/bin/shfmt", "/usr/local/bin/shfmt", 
 class Unreadable < StandardError; end
 
 # 理由にはコマンドの語や例外のメッセージを埋め込むので、不正な UTF-8 を置き換えてから JSON にする。
-# ここで例外が出るとフックが異常終了し、Claude Code はそれを止める扱いにせず allow で通してしまう
+# ここで例外が出るとフックが異常終了し、確認で済むコマンドまで止まる（settings の onFailure: block。
+# block が無ければ、逆に allow で確認なしに通ってしまう）
 def ask(reason)
   reason = reason.dup.force_encoding(Encoding::UTF_8).scrub("?")
   puts JSON.generate(
@@ -274,8 +275,10 @@ def judge(call)
   # 確認の理由はダイアログでユーザーが読む。先頭で何を確かめてほしいかを実際の語で示し、
   # このフックが判定せずに止めた理由を後ろに添える
   unless idx.zero?
-    ask("#{words[0][:text]} が gh api に足す引数（stdin から渡る URL や -X など）が書き込みにならないか確認してください。" \
-        "足される引数はコマンドに現れず、Claude Code は #{words[0][:text]} を外して allow と照合するので分類器も通りません")
+    prefix = words[0...idx].map { |w| w[:text] }.join(" ")
+    ask("#{prefix} を通して呼ぶ gh api が書き込みにならないか確認してください。#{prefix} が設定する環境変数や足す引数" \
+        "（xargs なら stdin から渡る URL や -X）をフックは判定できず、Claude Code は xargs などを外して allow と照合するので、" \
+        "分類器も通らないことがあります")
   end
   if call["Assigns"]&.any?
     names = call["Assigns"].map { |a| a.dig("Name", "Value") }.join(", ")
@@ -298,7 +301,9 @@ def judge(call)
     ask("gh api が書き込みでないか、コマンドを読んで確認してください。フックが形を読み取れませんでした: #{e.message}")
   end
 
-  ask("--hostname #{req[:hostname]} が意図した送り先か確認してください。GitHub 以外へも送れます") if req[:hostname]
+  if req[:hostname]
+    ask("--hostname #{req[:hostname].empty? ? "（空）" : req[:hostname]} が意図した送り先か確認してください。GitHub 以外へも送れます")
+  end
   if req[:endpoint].include?("://")
     ask("エンドポイントの URL #{req[:endpoint]} が意図した送り先か確認してください。GitHub 以外へも送れます")
   end
@@ -341,6 +346,9 @@ def judge(call)
     ask("PATCH #{req[:endpoint]} に --input で渡す本文が、body 以外を変えないか確認してください。中身はコマンドから読めません")
   end
   names = req[:fields].map { |f| f[:name] }
+  if names.empty?
+    ask("PATCH #{req[:endpoint]} を実行してよいか確認してください。送るフィールドが無いので、body だけの書き換えではありません")
+  end
   unless names == ["body"]
     ask("PATCH #{req[:endpoint]} で #{names.join(", ")} を変えてよいか確認してください。" \
         "同じエンドポイントで state・assignees なども変えられるので、確認なしで通すのは body だけです")
