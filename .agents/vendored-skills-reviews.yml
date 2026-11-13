@@ -133,3 +133,64 @@
     - [info] lint / diff の追加行は大半が正規表現と判定ロジック。外部送信・コード実行・難読化なし。削除行で入力上限・
       パス検証・例外処理は消えていない。hook が組み立てるコマンドの可変部分はすべて shlex.quote 済み（yomiyasu_hook.py:372）
     - 未確認: 実行しての確認（上の low 1・2 の経路、書き込み先）、ReDoS の実測、CVE-2023-6597 との対応（番号は記憶による）
+- skill: yomiyasu
+  ref: v3.1.0
+  tree_sha: 85d7fdff3e38dd8181d835e29cf42b278431658f
+  reviewed_at: 2026-11-14
+  verdict: ok-with-notes
+  method: |
+    headless claude（--restricted、tools: Read,Grep,Glob）による独立 2 系統の自動レビューを 2 回走らせた（.agents/skills/vendored-skill-review/SKILL.md）。
+    範囲: 差分（レビュー済みの tree c38e31ece9ee7b17e4553708f324f07489bcfe28 から）。どちらの回も、両系統ともカナリアを high で検出した。
+    1 回目（通常、各 $4）: A（claude-opus-5-5、$1.58）は ok-with-notes、B（claude-sonnet-5-5、$0.67）は ok で、系統どうしが一致せず記録されなかった。
+    両系統ともスクリプトの差分（1.2MB）は Grep と該当箇所の前後だけで確かめた。
+    2 回目（DEEP=1、各 $15）: A（$10.71）は変更のあったスクリプト 5 本（markdown_visibility / check / diff / hook / lint、計約 26,000 行）と
+    指示テキストを全文 Read し、全文 Read と引用の突き合わせの機械的な確認を通った。B（$0.67）はスクリプトを
+    「context に収まらない」として Grep で済ませ、全文 Read の確認で落ちた。系統どうしも一致せず、記録されなかった。
+    この規模の差分では sonnet の系統が DEEP=1 を通らないため、手で記録した。根拠は 2 回目の A（全文を読み、機械的な確認を通った唯一の系統）とし、
+    1 回目の A が挙げた allowed-tools の指摘を足した。
+    手での確認（メインのセッション）: 読んだのは SKILL.md の差分の冒頭（frontmatter と本文の数行）と yomiyasu_check.py:806-814 だけで、
+    スクリプトの本体は読んでいない。yomiyasu_check.py:810 の引用が実物と一致すること、実際の tree の scripts/ が既存の 5 本だけであることを確かめた。
+    allowed-tools の挙動は Claude Code の公式ドキュメント（code.claude.com/docs/en/skills.md、2026-11-14 取得）で確かめた。
+    settings.json に python を許可するルールが無いことも確かめた。scratch での実行確認はしていない。
+  notes: |
+    2 回目の系統 A（DEEP）: 変更のあった SKILL.md、references 17 本、スクリプト 5 本を全文読んだ。カナリアを除くと high は無い。
+    外部通信は無く、subprocess は check.py の Popen（sys.executable で同梱の lint / diff を固定引数・shell なしで起動）だけ。
+    動的 import は同梱スクリプトの spec_from_file_location だけ。.md / .txt に HTML コメント・ゼロ幅文字・双方向制御文字は無かった。
+    .codex-plugin/plugin.json は削除された。
+    1 回目の系統 B と 2 回目の系統 B: カナリア以外の指摘は info の allowed-tools 1 件だけ（1 回目）。スクリプトは全文を読んでいない。
+
+    指摘:
+    - [medium] SKILL.md:2（1 回目の系統 A。B は info、2 回目の A は挙げず。重大度は手での確認で medium とした）v3 で allowed-tools が加わった。
+      yomiyasu_lint.py と yomiyasu_check.py を python3 / python / py -3 で、引数を問わず確認なしに実行できる。
+      公式ドキュメントによれば、許可はこの skill を呼んだターンのあいだだけで、次のメッセージで消え、deny / ask のルールが優先する
+      （skills.md:618、790）。settings.json には python を許可するルールが無いので、その範囲では確認が出なくなる。
+      引数が * なので、そのターンのあいだは --state-dir で任意の場所への書き込みも確認なしに通る。
+    - [medium] scripts/yomiyasu_check.py:810（2 回目の系統 A）状態フォルダ（原稿の全文の写し、レポート、記録の書き込み先）が
+      --state-dir か環境変数 YOMIYASU_STATE_DIR で任意の場所に変わる（頭の ~ はホームに展開する）。既定は git の最上位の .yomiyasu/ で、
+      作るときは .gitignore（*）を置く。指定先には .gitignore を置かない場合がある。前回からの挙動。
+    - [low] scripts/yomiyasu_check.py:3187（2 回目の系統 A）run のたびに原文・資料・最終稿の全文を .yomiyasu/inputs/<sha256>.bin に残す
+      （--no-record のときは一時フォルダに置き、終了時に消す）。
+    - [low] scripts/yomiyasu_hook.py:143（2 回目の系統 A）任意のフックは YOMIYASU_STATE_DIR と CLAUDE_PROJECT_DIR を読み、
+      状態フォルダの hook-errors.log と armed/*.json に書く。設定ファイルは書き換えず、--print-config は JSON を出すだけ。
+    - [low] references/fact-recovery.md:22（1 回目の系統 A。2 回目の A は info）原稿か会話に名前の出たファイルを 3 つまで読み、
+      読むだけの git diff / git log -p -1 を 1 回動かすことを許す。認証情報らしいファイル、書き込み、ネットワークは禁じている。
+      原稿にファイル名を書けば、読ませるファイルを選べる。
+    - [low] scripts/yomiyasu_check.py:812（1 回目の系統 A）v3 で、状態フォルダの指定の頭の ~ をホームに展開するようになった。
+    - [info] SKILL.md:98（2 回目の系統 A）git の最上位（または作業フォルダ）の .yomiyasu-words/ の allow.txt・flag.txt・flag-patterns.txt を読む。
+      flag-patterns.txt の正規表現は markdown_visibility.check_pattern で長さ・繰り返し・コストを制限してからコンパイルする。
+    - [info] SKILL.md:16（2 回目の系統 A）名前だけで呼ばれたときは作業フォルダ直下の .md / .txt から推敲対象を選び、
+      最終稿を原文と同じフォルダに新しい名前で保存する。
+
+    使う上で知っておくこと:
+    - /yomiyasu を呼んだターンでは、同梱の lint / check スクリプトが確認なしで動く（SKILL.md:2）。
+    - run のたびに原稿の全文の写しが状態フォルダ（既定は git の最上位の .yomiyasu/）に残る。残したくなければ --no-record を頼む
+      （scripts/yomiyasu_check.py:3187、references/fact-recovery-details.md:144）。
+    - 事実の確かめでは、最終稿と同じフォルダに『最終稿の名前.material.txt』が作られる（references/fact-recovery.md:25）。
+    - リポジトリの .yomiyasu-words/ は推敲の判断を変える入力になる（SKILL.md:98）。
+    - フック（scripts/yomiyasu_hook.py）は自動では登録されない。導入すると gh pr / issue / release / api の投稿を検査記録と照合して止めることがある。
+
+    確認できなかったこと:
+    - 差分の外にある未変更ファイル（doc-types の article / formal / incident / minutes / pr / promo / proposal / script、references/lists/*.txt、
+      LICENSE、UNICODE-LICENSE.txt、assets/algo-artis.png）は全文を読んでいない（.md / .txt の隠し文字の Grep だけ）。
+    - 2 回目の B がスクリプトを読み切れなかったため、スクリプト全文の読解は 1 系統（opus）だけ。
+    - 実行して確かめるべきこと: scratch ディレクトリで run / verify を一度動かし、書き込み先が .yomiyasu/（または --state-dir）に限られるかを観察する。
