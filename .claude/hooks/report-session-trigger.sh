@@ -38,6 +38,14 @@ else
   exit 0
 fi
 
+# --- ゲート0: 人の発言でないもの ---------------------------------------------
+# UserPromptSubmit は通知・定期実行・別セッションからのメッセージでも発火し、その文面
+# （"completed" や「完了」）がシグナルに当たる。hook の入力に出どころの項目は無い
+# （claude 2.1.323 で確認）ので、過去の transcript で人以外が送っていた書き出しで見分ける
+case "${prompt#"${prompt%%[![:space:]]*}"}" in
+  '<task-notification'* | '<scheduled-task'* | 'Another Claude session sent a message:'*) exit 0 ;;
+esac
+
 # --- ゲート1: 満足/完了シグナル ---------------------------------------------
 if ! printf '%s' "$prompt" | grep -iqE "$SIGNAL_REGEX"; then
   exit 0
