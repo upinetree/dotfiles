@@ -2,6 +2,10 @@
 
 実体は `~/.dotfiles/.claude/CLAUDE.md`、`~/.claude/CLAUDE.md` から symlink される。編集はこの dotfiles 側で行う。このファイルは `~/.codex/AGENTS.md` からも symlink され、Codex のグローバルルールを兼ねる（二重管理しない）。
 
+## 返答の言語
+
+ユーザーへの返答は、表・見出し・補足まで含めて常に日本語で書く。英語のツール出力やサブエージェントの報告を受けた直後は英語に引きずられやすいので、書き出す前に確かめる。サブエージェントに頼むときは、報告も日本語で返すよう指示に書く。
+
 ## Claude の設定・hooks・skills を変更するとき
 
 `~/.claude`・`~/.agents`・`~/.codex` 配下の設定は dotfiles からの symlink である（`~/.dotfiles/scripts/link.sh` の `DOTFILE_PAIRS`、`make link` で適用）。
