@@ -11,7 +11,7 @@
 #   - このセッションで report-session を起動済み。2 回目の起動は更新か分割かをユーザーに聞く作りなので
 #     自動にしない
 
-REPORT_SESSION_CTX_DIR="${REPORT_SESSION_CTX_DIR:-/tmp/claude-statusline}"
+REPORT_SESSION_CTX_DIR="${REPORT_SESSION_CTX_DIR:-$HOME/.cache/claude-statusline}"
 REPORT_SESSION_AUTO_MIN_REMAINING="${REPORT_SESSION_AUTO_MIN_REMAINING:-50}"
 
 # 引数: hook の入力 JSON。stdout に auto か suggest を出す。

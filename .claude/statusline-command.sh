@@ -20,16 +20,24 @@ used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 
 # hook の入力には context_window が無いので、hook が読めるよう session ごとに書き出す
 # （読み手は hooks/report-session-mode.sh。置き場所を変えるときは両方そろえる）。
+# 自動実行の判定に使うので、他のユーザーが書ける /tmp ではなくホームの下に置く。
 # 書きかけを読まれないよう一時ファイルから mv で置き換える。失敗しても表示は止めない
-ctx_dir="${REPORT_SESSION_CTX_DIR:-/tmp/claude-statusline}"
+ctx_dir="${REPORT_SESSION_CTX_DIR:-$HOME/.cache/claude-statusline}"
 session_id=$(echo "$input" | jq -r '.session_id // empty')
 case "$session_id" in
   "" | *[!A-Za-z0-9_-]*) ;;
   *)
-    if mkdir -p "$ctx_dir" 2>/dev/null; then
-      ctx_tmp="$ctx_dir/.$session_id.$$"
-      if echo "$input" | jq -c '.context_window // {}' >|"$ctx_tmp" 2>/dev/null; then
-        mv -f "$ctx_tmp" "$ctx_dir/$session_id.json" 2>/dev/null
+    if mkdir -p -m 700 "$ctx_dir" 2>/dev/null; then
+      # ホームの下は OS が片付けないので、新しい session の初回だけ古いものを消す
+      if [ ! -e "$ctx_dir/$session_id.json" ]; then
+        find "$ctx_dir" -maxdepth 1 -type f -mtime +7 -delete 2>/dev/null
+      fi
+      if ctx_tmp=$(mktemp "$ctx_dir/.ctx.XXXXXX" 2>/dev/null); then
+        if echo "$input" | jq -c '.context_window // {}' >|"$ctx_tmp" 2>/dev/null; then
+          mv -f "$ctx_tmp" "$ctx_dir/$session_id.json" 2>/dev/null
+        else
+          rm -f "$ctx_tmp"
+        fi
       fi
     fi
     ;;
