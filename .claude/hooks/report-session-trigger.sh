@@ -2,11 +2,11 @@
 #
 # UserPromptSubmit hook: report-session の自動提案トリガー
 #
-# 役割（=「いつ判断させるか」の安いゲートだけを担う。学びの有無の判定はしない）:
+# 役割（=「いつ判断させるか」の安いゲートだけを担う。区切りか・学びがあるかの判定はしない）:
 #   1. ユーザー発言に満足/完了シグナルが含まれるか
 #   2. 会話が一定長を超えているか（1〜2ターンの短い会話は除外）
-#   両方を満たしたときだけ、Claude に「学びがあれば /report-session を一行で提案せよ」
-#   という追加コンテキストを注入する。最終的に書く価値があるかはモデルが判断する。
+#   両方を満たしたときだけ、Claude に判断を促す追加コンテキストを注入する。
+#   判断の観点と、提案か自動実行かの分岐は report-session-mode.sh。
 #
 # 入力 : stdin に UserPromptSubmit の JSON（.prompt / .transcript_path を使う）
 # 出力 : 条件一致時のみ additionalContext を JSON で stdout に出す。それ以外は無出力 exit 0。
@@ -50,18 +50,8 @@ if (( lines < MIN_TRANSCRIPT_LINES )); then
 fi
 
 # --- コンテキスト注入 --------------------------------------------------------
-read -r -d '' CONTEXT <<'EOF' || true
-[report-session 自動トリガー]
-ユーザーの直近の発言に満足/完了のシグナルが含まれ、かつ会話が十分に積み上がっている。
-このセッションに「後から参照する価値のある学び・調査結果・設計判断」が実際に蓄積されているか自分で評価せよ。
-
-- 価値のある学びがある場合のみ、通常の応答の最後に一行だけ「このセッションの学びを /report-session でまとめておきますか？」と提案する。ユーザーが承認したら実行する。
-- 単なる作業完了で記録に値する知見がなければ、提案しない（何もしない）。
-- すでにこの会話で同じ提案をしていて未応答なら、繰り返さない。
-EOF
-
-if command -v jq >/dev/null 2>&1; then
-  jq -nc --arg ctx "$CONTEXT" \
-    '{hookSpecificOutput: {hookEventName: "UserPromptSubmit", additionalContext: $ctx}}'
-fi
+source "$(dirname "${BASH_SOURCE[0]}")/report-session-mode.sh"
+report_session_emit "$input" UserPromptSubmit \
+  'ユーザーの直近の発言に満足/完了のシグナルらしき語が含まれ、会話も十分に積み上がっている。' \
+  'その発言が作業全体の完了や満足を示しているか（途中経過への相づちや、次の依頼の前置きではないか）を確かめる。'
 exit 0

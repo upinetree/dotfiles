@@ -85,6 +85,7 @@ listup_dotfiles() {
     "default-gems:~/.config/mise/default-gems"
     ".claude/settings.json:~/.claude/settings.json"
     ".claude/hooks:~/.claude/hooks"
+    ".claude/statusline-command.sh:~/.claude/statusline-command.sh"
     ".claude/CLAUDE.md:~/.claude/CLAUDE.md"
     # Codex は AGENTS.md を読むが、内容はグローバル CLAUDE.md と共有する（二重管理を避ける）
     ".claude/CLAUDE.md:~/.codex/AGENTS.md"
