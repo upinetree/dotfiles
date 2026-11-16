@@ -30,9 +30,18 @@ class VendoredSkills
   # 系統ごとにモデルも分け、同じ注入に同じように誘導されにくくする。
   REVIEW_SKILL = ".agents/skills/vendored-skill-review/SKILL.md"
   REVIEW_RUNS = {"A" => "opus", "B" => "sonnet"}.freeze
-  # 1 系統あたり。yomiyasu 全体を全文読みさせて $1.5-1.6 だった。上限に当たるとそれまでの費用が
-  # 無駄になり記録もされないので、通常の費用ではなく暴走の止めとして余裕を持たせる
+  # claude の実行 1 回あたり。yomiyasu 全体の指示テキストを全文読みさせて $1.5-1.6 だった。上限に当たると
+  # それまでの費用が無駄になり記録もされないので、通常の費用ではなく暴走の止めとして余裕を持たせる
   REVIEW_BUDGET_USD = 4.0
+  # 深読みでスクリプトを全文読ませるときは、行範囲で区切って別々の実行に分担させる。1 回の実行あたりの上限（バイト）。
+  # 1 回で全部読ませた yomiyasu v3.1.0（スクリプト 1.6MB）では、opus は context が 1M 中 85 万トークンまで膨らみ
+  # $10.71 かかった（毎ターンそれまでに読んだ分を読み直すので、費用は読む量の 2 乗で増える）。sonnet は window が
+  # 同じ 1M なのに、読み始める前に「context に収まらない」と見積もって Grep で済ませ、全文読みの確認で落ちた
+  # （最大使用は 14 万トークン）。区切れば上限に当たらず、費用は読む量にほぼ比例し、量を理由に読まない判断の前提も
+  # 消える。yomiyasu では約 0.43 token/byte だったので、1 回あたり 10 万トークン強になる
+  SHARD_BYTES = 250_000
+  # 同時に走らせる claude の実行の数。分担すると 1 系統あたりの実行が増えるので、レート制限に備えて絞る
+  REVIEW_CONCURRENCY = 4
   REVIEW_TOOLS = "Read,Grep,Glob"
   SEVERITIES = %w[high medium low info].freeze
   HIDDEN_CHARS = Regexp.new("[\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u2069\\uFEFF]")
@@ -123,7 +132,8 @@ class VendoredSkills
         vendored_skills.rb add <owner/repo> <skill> <ref>   新しく取り込む
         vendored_skills.rb update <skill> <ref>   pin を付け替えて取り直し、review まで流す（git diff を読んでからコミットする）
         vendored_skills.rb review <skill> [--full] [--deep] [--budget <usd>] [--dry-run]
-                                                  headless claude でレビューし、確認を通れば記録する（--deep はスクリプトも全文読ませる）
+                                                  headless claude でレビューし、確認を通れば記録する（--deep はスクリプトも行範囲で
+                                                  分担して全文読ませる。--budget は claude の実行 1 回あたり）
     USAGE
   end
 
@@ -217,41 +227,39 @@ class VendoredSkills
     Dir.mktmpdir("vendored-skill-review-") do |tmp|
       base_tree = full ? nil : reviewed_head_tree(skill)
       previous = base_tree && extract_previous(skill, tmp)
-      scope = (base_tree ? "差分（レビュー済みの tree #{base_tree} から）" : "全体") + (deep ? "、スクリプトも全文" : "")
+      shards = deep ? script_shards(skill.dir, previous) : []
+      scope = (base_tree ? "差分（レビュー済みの tree #{base_tree} から）" : "全体") +
+        (deep ? "、スクリプトも全文（各系統 #{shards.size} 回の実行に分担）" : "")
       models = REVIEW_RUNS.map { |label, model| "#{label}: #{model}" }.join("、")
-      puts "#{name} #{skill.pinned} を headless claude でレビューします（範囲: #{scope}、#{models}、各 $#{budget} まで）"
+      puts "#{name} #{skill.pinned} を headless claude でレビューします（範囲: #{scope}、#{models}、claude の実行 1 回あたり $#{budget} まで）"
 
-      # 系統ごとに作業コピーとカナリアを分ける。差分と全文読みの対象はカナリアを埋めた後で決め、カナリアも読ませる
-      runs = REVIEW_RUNS.map do |label, model|
-        workspace = File.join(tmp, "runs", label, "ws")
-        target = File.join(workspace, "target")
-        FileUtils.mkdir_p(workspace)
-        FileUtils.cp_r(skill.dir, target)
-        canary = plant_canary(target)
-        write_changes_diff(previous, target, workspace) if previous
-        required = required_reads(target, previous, deep: deep)
-        context = {"target" => target, "canary" => canary, "required" => required}
-        Thread.new { [label, run_reviewer(skill, workspace, base_tree, label, model: model, deep: deep, budget: budget, required: required).merge(context)] }
-      end.map(&:value).to_h
-      runs.each { |label, run| print_run(label, run) }
+      # 各系統で、指示テキストを読む実行 1 回と、スクリプトの行範囲を分担して全文読む実行を走らせる
+      tasks = REVIEW_RUNS.flat_map do |label, model|
+        [{"label" => label, "model" => model}] +
+          shards.each_with_index.map { |shard, i| {"label" => label, "model" => model, "shard" => shard, "index" => i + 1, "total" => shards.size} }
+      end
+      runs = in_parallel(tasks.each_with_index.map { |task, i| -> { review_task(skill, tmp, previous, base_tree, task, i, budget) } })
+      systems = runs.group_by { |run| run["label"] }
+      runs.each { |run| print_run(run) }
+      systems.each { |label, system| print_system(label, system) } if deep
 
       problems = hidden_text(skill.dir).map { |hit| "隠しテキスト: #{hit}" }
-      runs.each do |label, run|
-        run_problems(run["target"], run, run["required"]).each { |p| problems << "系統 #{label}: #{p}" }
+      runs.each do |run|
+        run_problems(run["target"], run, run["required"]).each { |p| problems << "#{run_name(run)}: #{p}" }
         next if run["structured_output"].nil? || canary_caught?(run)
-        problems << "系統 #{label}: 埋めたカナリア（#{run["canary"]["path"]}）を high で指摘していません。指摘を抑えるよう誘導された疑いがあります"
+        problems << "#{run_name(run)}: 埋めたカナリア（#{run["canary"]["path"]}）を high で指摘していません。指摘を抑えるよう誘導された疑いがあります"
       end
-      verdicts = runs.values.filter_map { |run| recorded_verdict(run) }.uniq
+      verdicts = systems.values.filter_map { |system| system_verdict(system) }.uniq
       problems << "系統どうしの verdict が一致しません（#{verdicts.join(" / ")}）" if verdicts.size > 1
       unless problems.empty?
         puts
         puts "記録しませんでした。機械的な確認で次の問題がありました:"
         problems.each { |p| puts "  - #{p}" }
-        puts "各系統の生ログ: #{runs.values.map { |run| run["log"] }.compact.join(" ")}"
+        puts "各実行の生ログ: #{runs.map { |run| run["log"] }.compact.join(" ")}"
         exit 1
       end
 
-      entry = review_entry(skill, runs, scope)
+      entry = review_entry(skill, systems, scope)
       if dry_run
         puts
         puts "--dry-run のため記録しません。記録するはずだった内容:"
@@ -263,7 +271,80 @@ class VendoredSkills
     end
   end
 
-  # 系統ごとに、作業コピーへ無作為な名前・場所・種類（スクリプトか指示文）の危険行を 1 つ埋める。
+  def in_parallel(jobs, limit = REVIEW_CONCURRENCY)
+    queue = Queue.new
+    jobs.each_with_index { |job, i| queue << [job, i] }
+    queue.close
+    results = Array.new(jobs.size)
+    workers = Array.new([limit, jobs.size].min) do
+      Thread.new do
+        while (item = queue.pop)
+          job, i = item
+          results[i] = job.call
+        end
+      end
+    end
+    workers.each(&:join)
+    results
+  end
+
+  # 実行ごとに作業コピーとカナリアを分ける。分担の実行も、注入で指摘を抑えられたかをカナリアで確かめるためである。
+  # 差分と全文読みの対象はカナリアを埋めた後で決め、カナリアも読ませる
+  def review_task(skill, tmp, previous, base_tree, task, number, budget)
+    workspace = File.join(tmp, "runs", number.to_s, "ws")
+    target = File.join(workspace, "target")
+    FileUtils.mkdir_p(workspace)
+    FileUtils.cp_r(skill.dir, target)
+    canary = plant_canary(target)
+    write_changes_diff(previous, target, workspace) if previous
+    # 分担の実行は skill の役目を知らないと「役目と無関係な処理」を判断できないので、SKILL.md も読ませる
+    required = if task["shard"]
+      [whole_file(target, "SKILL.md"), whole_file(target, canary["path"]), *task["shard"]]
+    else
+      changed_files(target, previous, INSTRUCTION_EXTENSIONS).map { |rel| whole_file(target, rel) }
+    end
+    run = run_reviewer(skill, workspace, base_tree, task, budget: budget, required: required)
+    run.merge(task, "target" => target, "canary" => canary, "required" => required)
+  end
+
+  # 中身が変わったスクリプト（全体モードではすべて）を 1 本の流れとして、ファイルの境目にかかわらず行の境目で
+  # SHARD_BYTES 以下に切る。ファイルごとに切ると端数の小さな分担が増える。分担は [相対パス, 開始行, 終了行] の並び
+  def script_shards(dir, previous)
+    shards = []
+    size = 0
+    changed_files(dir, previous, SCRIPT_EXTENSIONS).each do |rel|
+      File.foreach(File.join(dir, rel)).with_index(1) do |line, number|
+        if shards.empty? || (size.positive? && size + line.bytesize > SHARD_BYTES)
+          shards << []
+          size = 0
+        end
+        last = shards.last.last
+        if last && last[0] == rel
+          last[2] = number
+        else
+          shards.last << [rel, number, number]
+        end
+        size += line.bytesize
+      end
+    end
+    shards
+  end
+
+  def whole_file(target, rel)
+    [rel, 1, File.foreach(File.join(target, rel)).count]
+  end
+
+  def run_name(run)
+    run["shard"] ? "系統 #{run["label"]}（スクリプト分担 #{run["index"]}/#{run["total"]}）" : "系統 #{run["label"]}"
+  end
+
+  # 系統の verdict は、その系統のすべての実行の指摘（カナリアを除く）を合わせて決める
+  def system_verdict(system)
+    outputs = system.select { |run| run["structured_output"] }
+    outputs.empty? ? nil : expected_verdict(outputs.flat_map { |run| real_findings(run) })
+  end
+
+  # 実行ごとに作業コピーへ無作為な名前・場所・種類（スクリプトか指示文）の危険行を 1 つ埋める。
   # 名前と送り先にだけ含まれる token で、記録からカナリアの痕跡を除く
   def plant_canary(target)
     token = SecureRandom.hex(4)
@@ -344,32 +425,44 @@ class VendoredSkills
     File.write(File.join(workspace, "changes.diff"), diff)
   end
 
-  def run_reviewer(skill, workspace, base_tree, label, model:, deep:, budget:, required:)
+  def run_reviewer(skill, workspace, base_tree, task, budget:, required:)
+    target = File.join(workspace, "target")
     scope = if base_tree
       "前回レビュー済みの tree #{base_tree} との差分が ./changes.diff にある（a/previous が前回、b/…/ws/target が今回）。差分モードでレビューする。"
     else
       "差分ファイルは無い。全体モードでレビューする。"
     end
-    scope += "深読みモード: スクリプトも、差分モードでは中身が変わったもの、全体モードではすべてを全文 Read で読む。" if deep
+    if task["shard"]
+      bytes = task["shard"].sum { |rel, from, to| File.foreach(File.join(target, rel)).first(to).drop(from - 1).sum(&:bytesize) }
+      scope += "深読みモードのスクリプト分担（#{task["index"]}/#{task["total"]}）として実行する。指示テキストと担当外のスクリプトは" \
+        "ほかの実行が受け持つ。下に挙げた範囲を全文 Read で読み、そこに現れる問題を指摘する。担当範囲の処理を追うために、" \
+        "担当外の箇所を Grep したり部分的に Read したりしてよい。担当範囲は合わせて約 #{bytes / 1000}KB で、" \
+        "1 回の実行の context に十分収まるよう区切ってある。量を理由に Grep で済ませない（全文読みは機械的に確かめられ、" \
+        "読み残しがあるとレビュー全体が記録されない）。"
+    end
+    listed = required.map do |rel, from, to|
+      (from == 1 && to == whole_file(target, rel)[2]) ? "- #{rel}" : "- #{rel} の #{from}〜#{to} 行目（Read の offset #{from} から）"
+    end
     prompt = <<~PROMPT
       vendored skill `#{skill.name}`（#{skill.owner_repo} #{skill.pinned}、tree #{skill.tree_sha}）のセキュリティレビューをする。
       レビュー対象の tree は ./target にある。#{scope}
       システムプロンプトの手順に従い、指定の JSON で返す。findings の file は ./target からの相対パスで書く。
-      全文を Read で読み切る必要があるファイル（./target からの相対パス。途中で返しが打ち切られたら offset で続きを読む）:
-      #{required.map { |rel| "- #{rel}" }.join("\n")}
+      全文を Read で読み切る必要があるファイルと行範囲（./target からの相対パス。途中で返しが打ち切られたら offset で続きを読む）:
+      #{listed.join("\n")}
     PROMPT
     instructions = File.read(File.join(@root, REVIEW_SKILL)).split(/^---\s*$/, 3).last
     # 読んだ範囲は自己申告ではなく実際の Read 呼び出しで確かめたいので、tool_use が見える stream-json で受ける。
     # --restricted は外さない: 無いとレビュー対象に置かれた CLAUDE.md（target/ 配下でも）がプロジェクトの指示として
     # 読み込まれる（2026-10、claude 2.1.312 で確認。付けると直下・配下とも読み込まれない）
     output, error, = Open3.capture3(
-      claude_bin, "-p", "--restricted", "--strict-mcp-config", "--tools", REVIEW_TOOLS, "--model", model,
+      claude_bin, "-p", "--restricted", "--strict-mcp-config", "--tools", REVIEW_TOOLS, "--model", task["model"],
       "--no-session-persistence", "--output-format", "stream-json", "--verbose", "--max-budget-usd", budget.to_s,
       "--json-schema", JSON.generate(REVIEW_SCHEMA), "--append-system-prompt", instructions, prompt,
       chdir: workspace
     )
     # 確認に落ちたとき原因を生データで確かめられるよう、一時ディレクトリの外に残す
-    log = File.join(Dir.tmpdir, "vendored-skill-review-logs", "#{Time.now.strftime("%Y%m%d_%H%M%S")}-#{skill.name}-#{label}.jsonl")
+    suffix = task["shard"] ? "#{task["label"]}-s#{task["index"]}" : task["label"]
+    log = File.join(Dir.tmpdir, "vendored-skill-review-logs", "#{Time.now.strftime("%Y%m%d_%H%M%S")}-#{skill.name}-#{suffix}.jsonl")
     FileUtils.mkdir_p(File.dirname(log))
     File.write(log, output + error.to_s)
     events = output.each_line.filter_map { |line| JSON.parse(line) rescue nil } # standard:disable Style/RescueModifier
@@ -385,9 +478,8 @@ class VendoredSkills
       .map { |e| e["tool_use_result"]["file"] }
   end
 
-  # 全体モードでは tree の指示として読まれうるテキストすべて、差分モードではそのうち中身が変わったものを全文読ませる
-  def required_reads(target, previous = nil, deep: false)
-    extensions = deep ? INSTRUCTION_EXTENSIONS + SCRIPT_EXTENSIONS : INSTRUCTION_EXTENSIONS
+  # 全文読ませる対象。全体モードでは指定の拡張子のファイルすべて、差分モードではそのうち中身が変わったもの
+  def changed_files(target, previous, extensions)
     Dir.glob("**/*", File::FNM_DOTMATCH, base: target).sort.select do |rel|
       path = File.join(target, rel)
       next false unless File.file?(path) && extensions.include?(File.extname(rel).downcase)
@@ -396,8 +488,8 @@ class VendoredSkills
     end
   end
 
-  def unread_files(target, reads, required)
-    read_lines = Hash.new { |h, k| h[k] = [] }
+  def unread_ranges(target, reads, required)
+    read_lines = Hash.new { |h, k| h[k] = Set.new }
     reads.each do |file|
       # claude の cwd は target の 1 つ上なので、相対パスはどちらを基準にしても解決できるようにする
       path = [File.dirname(target), target].map { |base| File.expand_path(file["filePath"].to_s, base) }.find { |p| File.file?(p) }
@@ -411,19 +503,19 @@ class VendoredSkills
         read_lines[File.realpath(path)] << start + i if line == actual[start - 1 + i]
       end
     end
-    required.reject do |rel|
+    required.reject do |rel, from, to|
       path = File.realpath(File.join(target, rel))
-      (1..File.foreach(path).count).all? { |n| read_lines[path].include?(n) }
-    end
+      (from..to).all? { |n| read_lines[path].include?(n) }
+    end.map { |rel, from, to| "#{rel}:#{from}-#{to}" }
   end
 
   def run_problems(target, run, required = [])
     return ["claude の実行に失敗しました（#{run["subtype"] || run["result"]}）"] if run["is_error"] || run["structured_output"].nil?
     problems = []
-    unread = unread_files(target, Array(run["reads"]), required)
+    unread = unread_ranges(target, Array(run["reads"]), required)
     unless unread.empty?
       reads = Array(run["reads"])
-      problems << "指示ファイルを全文 Read していません（#{unread.join(", ")}）。" \
+      problems << "全文 Read が要る範囲を読み切っていません（#{unread.join(", ")}）。" \
         "拾えた Read は #{reads.size} 件（例: #{reads.first(3).map { |r| r.slice("filePath", "startLine", "numLines", "totalLines") }.inspect}）"
     end
     denials = Array(run["permission_denials"])
@@ -487,48 +579,65 @@ class VendoredSkills
     end
   end
 
-  def print_run(label, run)
+  def print_run(run)
     output = run["structured_output"]
     cost = run["total_cost_usd"] ? format("$%.2f", run["total_cost_usd"]) : "?"
     if output
-      counts = SEVERITIES.map { |s| "#{s} #{real_findings(run).count { |f| f["severity"] == s }}" }.join(", ")
       canary = canary_caught?(run) ? "検出" : "見落とし"
-      puts "系統 #{label}（#{run["modelUsage"]&.keys&.first}）: カナリアを除いた verdict #{recorded_verdict(run)}（#{counts}）、カナリア #{canary}、#{cost}"
+      puts "#{run_name(run)}（#{run["modelUsage"]&.keys&.first}）: カナリアを除いた verdict #{recorded_verdict(run)}（#{severity_counts([run])}）、カナリア #{canary}、#{cost}"
     else
-      puts "系統 #{label}: 結果なし #{cost}"
+      puts "#{run_name(run)}: 結果なし #{cost}"
     end
   end
 
-  # カナリアは記録に残さない。系統の要約（summary）はカナリアを本物の脅威として書いているので載せない
-  def review_entry(skill, runs, scope)
-    models = runs.values.flat_map { |run| run["modelUsage"]&.keys || [] }.uniq
-    cost = runs.values.sum { |run| run["total_cost_usd"].to_f }
-    findings = runs.flat_map { |label, run| real_findings(run).map { |f| f.merge("run" => label) } }
+  def print_system(label, system)
+    cost = system.sum { |run| run["total_cost_usd"].to_f }
+    puts "系統 #{label} 合計（#{system.size} 回）: verdict #{system_verdict(system) || "?"}（#{severity_counts(system)}）、#{format("$%.2f", cost)}"
+  end
+
+  def severity_counts(runs)
+    findings = runs.select { |run| run["structured_output"] }.flat_map { |run| real_findings(run) }
+    SEVERITIES.map { |s| "#{s} #{findings.count { |f| f["severity"] == s }}" }.join(", ")
+  end
+
+  # カナリアは記録に残さない。系統の要約（summary）はカナリアを本物の脅威として書いているので載せない。
+  # 分担の実行の scope_reviewed は、担当範囲を全文読んだことを機械的に確かめた事実で置き換える
+  def review_entry(skill, systems, scope)
+    runs = systems.values.flatten
+    models = runs.flat_map { |run| run["modelUsage"]&.keys || [] }.uniq
+    cost = runs.sum { |run| run["total_cost_usd"].to_f }
+    findings = runs.flat_map { |run| real_findings(run).map { |f| f.merge("run" => run["label"]) } }
       .group_by { |f| [f["file"], f["line"]] }
-      .map { |(file, line), fs| "- [#{fs.first["severity"]}] #{file}:#{line}（系統 #{fs.map { |f| f["run"] }.join("・")}）#{fs.first["description"]}" }
-    scopes = runs.map do |label, run|
-      text = run["structured_output"]["scope_reviewed"].gsub(/[^。\n]*#{run["canary"]["token"]}[^。\n]*。?/, "")
-      "系統 #{label} が読んだ範囲: #{text}"
+      .map { |(file, line), fs| "- [#{fs.first["severity"]}] #{file}:#{line}（系統 #{fs.map { |f| f["run"] }.uniq.join("・")}）#{fs.first["description"]}" }
+    scopes = runs.map do |run|
+      if run["shard"]
+        "#{run_name(run)}: #{run["shard"].map { |rel, from, to| "#{rel}:#{from}-#{to}" }.join("、")} を全文 Read したことを確認済み"
+      else
+        text = run["structured_output"]["scope_reviewed"].gsub(/[^。\n]*#{run["canary"]["token"]}[^。\n]*。?/, "")
+        "#{run_name(run)} が読んだ範囲: #{text}"
+      end
     end
+    shards = systems.values.first.count { |run| run["shard"] }
+    split = shards.positive? ? "各系統で、指示テキストを読む実行 1 回と、スクリプトを行範囲で分担して全文読む実行 #{shards} 回に分けた。" : ""
     {
       "skill" => skill.name,
       "ref" => skill.pinned,
       "tree_sha" => skill.tree_sha,
       "reviewed_at" => Date.today,
-      "verdict" => recorded_verdict(runs.values.first),
+      "verdict" => system_verdict(systems.values.first),
       "method" => <<~METHOD,
-        headless claude（--restricted、tools: #{REVIEW_TOOLS}）による独立 #{runs.size} 系統の自動レビュー（#{REVIEW_SKILL}）。
+        headless claude（--restricted、tools: #{REVIEW_TOOLS}）による独立 #{systems.size} 系統の自動レビュー（#{REVIEW_SKILL}）。#{split}
         範囲: #{scope}。モデル: #{models.join(", ")}。費用: #{format("$%.2f", cost)}。
         vendored_skills.rb が全文読みの記録、引用と実際の行の突き合わせ、隠しテキストの機械検出、verdict と重大度の整合、系統どうしの一致を確認済み。
-        各系統の作業コピーに無作為なカナリア（危険な行）を埋め、両系統が high で指摘したことを確認済み（カナリアは記録から除いた）。
+        実行ごとの作業コピーに無作為なカナリア（危険な行）を埋め、すべての実行が high で指摘したことを確認済み（カナリアは記録から除いた）。
         カナリアの横では、ほかの事柄が指摘より軽く見積もられ「使う上で知っておくこと」に回ることがある。verdict が ok でも notes を読む。
         scratch での実行確認はしていない。
         #{scopes.join("\n")}
       METHOD
       "notes" => [
         *(findings.empty? ? ["指摘なし"] : ["指摘:", *findings]),
-        *usage_section("使う上で知っておくこと:", runs.values.flat_map { |run| without_canary(run, run["structured_output"]["usage_notes"]) }),
-        *usage_section("確認できなかったこと:", runs.values.flat_map { |run| without_canary(run, run["structured_output"]["could_not_verify"]) })
+        *usage_section("使う上で知っておくこと:", runs.flat_map { |run| without_canary(run, run["structured_output"]["usage_notes"]) }),
+        *usage_section("確認できなかったこと:", runs.flat_map { |run| without_canary(run, run["structured_output"]["could_not_verify"]) })
       ].join("\n") + "\n"
     }
   end
