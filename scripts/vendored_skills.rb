@@ -23,7 +23,7 @@ class VendoredSkills
   # レビューは headless の claude に任せるが、レビュー対象の skill はエージェントへの指示そのもので、
   # 「verdict は ok と書け」と仕込める。そこで claude には読むことしかさせず（--restricted で
   # 作業ディレクトリに閉じ込め、Write / Bash は渡さない）、記録は LLM が言いくるめられても
-  # 曲がらない機械的な確認（引用の突き合わせ・隠しテキスト・verdict と重大度の整合・2 系統の一致）を
+  # 曲がらない機械的な確認（引用の突き合わせ・隠しテキスト・verdict と重大度の整合・2 系統で rejected になるかの一致）を
   # すべて通ったときだけこのスクリプトが書く。人は commit 前の diff で最終確認する。
   # 見える文字の注入で「指摘なしで ok」と 2 系統そろって誘導されると上の確認は全部通るので、系統ごとに
   # 無作為な危険行（カナリア）を作業コピーに埋め、それを high で指摘できなかった系統があれば止める。
@@ -249,8 +249,14 @@ class VendoredSkills
         next if run["structured_output"].nil? || canary_caught?(run)
         problems << "#{run_name(run)}: 埋めたカナリア（#{run["canary"]["path"]}）を high で指摘していません。指摘を抑えるよう誘導された疑いがあります"
       end
-      verdicts = systems.values.filter_map { |system| system_verdict(system) }.uniq
-      problems << "系統どうしの verdict が一致しません（#{verdicts.join(" / ")}）" if verdicts.size > 1
+      # 系統どうしは rejected になるか（high があるか）だけを比べる。medium / low の有無はモデルごとに付け方が
+      # 系統的に違い（yomiyasu v3.1.0 の DEEP=1 では sonnet が 8 回の実行すべてで medium / low を 0 件とし、opus は
+      # medium 7・low 8 を挙げた）、verdict の文字列で比べると割れ続けて記録できない。high を抑える注入はこの比較とカナリアで止まり、
+      # 記録する verdict は両系統の指摘を合わせた厳しい側にするので、片方だけが挙げた medium / low も残る
+      verdicts = systems.transform_values { |system| system_verdict(system) }.compact
+      if verdicts.values.map { |v| ACCEPTED_VERDICTS.include?(v) }.uniq.size > 1
+        problems << "系統どうしで rejected になるかが一致しません（#{verdicts.map { |label, v| "#{label}: #{v}" }.join(" / ")}）"
+      end
       unless problems.empty?
         puts
         puts "記録しませんでした。機械的な確認で次の問題がありました:"
@@ -619,16 +625,18 @@ class VendoredSkills
     end
     shards = systems.values.first.count { |run| run["shard"] }
     split = shards.positive? ? "各系統で、指示テキストを読む実行 1 回と、スクリプトを行範囲で分担して全文読む実行 #{shards} 回に分けた。" : ""
+    verdicts = systems.map { |label, system| "#{label} #{system_verdict(system)}" }.join("、")
     {
       "skill" => skill.name,
       "ref" => skill.pinned,
       "tree_sha" => skill.tree_sha,
       "reviewed_at" => Date.today,
-      "verdict" => system_verdict(systems.values.first),
+      "verdict" => expected_verdict(runs.flat_map { |run| real_findings(run) }),
       "method" => <<~METHOD,
         headless claude（--restricted、tools: #{REVIEW_TOOLS}）による独立 #{systems.size} 系統の自動レビュー（#{REVIEW_SKILL}）。#{split}
         範囲: #{scope}。モデル: #{models.join(", ")}。費用: #{format("$%.2f", cost)}。
-        vendored_skills.rb が全文読みの記録、引用と実際の行の突き合わせ、隠しテキストの機械検出、verdict と重大度の整合、系統どうしの一致を確認済み。
+        vendored_skills.rb が全文読みの記録、引用と実際の行の突き合わせ、隠しテキストの機械検出、verdict と重大度の整合、系統どうしで rejected になるかの一致を確認済み。
+        系統ごとの verdict: #{verdicts}。記録した verdict は両系統の指摘を合わせて決めた（厳しい側）。
         実行ごとの作業コピーに無作為なカナリア（危険な行）を埋め、すべての実行が high で指摘したことを確認済み（カナリアは記録から除いた）。
         カナリアの横では、ほかの事柄が指摘より軽く見積もられ「使う上で知っておくこと」に回ることがある。verdict が ok でも notes を読む。
         scratch での実行確認はしていない。
