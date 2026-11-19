@@ -1,6 +1,11 @@
 ---
 name: squash
-description: Squash branch commits into one with a why-centered commit message
+description: >-
+  Squash branch commits into one with a why-centered commit message.
+  複数のコミットを 1 つにまとめ、元コミットの why を選び直してメッセージを書く。
+  「コミットを畳んで」「squash して」「コミットをまとめて」「1 コミットにして」などで使う。
+  作業ツリーの変更を直前のコミット 1 本に足すだけなら `git commit --amend` で足り、このスキルは要らない。
+  一時ファイルの片付けや出力の折りたたみのような、コミット以外の「畳む」「まとめる」には使わない。
 ---
 
 # Squash
