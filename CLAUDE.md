@@ -52,6 +52,16 @@ Breaking the Ruby default is fine in these cases:
 
 When breaking the default, keep the logic minimal; if a script grows real logic, move it to Ruby.
 
+## Public repository
+
+This repository is public. Keep anything specific to the user's employer out of it, in files and in commit messages alike:
+
+- Skills and settings tied to work (meetings, the organization, internal tools and services) live in a separate private repository, `~/.dotfiles-for-work`, and are linked into `~/.claude/skills` from there. Only general-purpose or personal skills belong here.
+- Diffs and commit messages here must not carry internal identifiers: names of private repositories, PR / issue / ADR numbers in them, internal service names. When the motivation came from internal work, describe it in general terms (e.g. "reviewing actual commits showed …").
+- Before committing, grep the staged diff and the commit message for such identifiers, with a pattern you have first seen match on a file that does contain them.
+
+The Claude user memory and the Obsidian vault are private, so this applies only to what is committed here.
+
 ## Key configurations
 
 **`.claude/settings.json`** (symlinked to `~/.claude/settings.json`) — Claude Code configuration including:
