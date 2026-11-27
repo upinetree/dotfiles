@@ -3,7 +3,7 @@
 # PostToolUse(Bash) hook: git commit / push と gh pr merge を区切りの候補として report-session の判断を促す。
 #
 # hook はタイミングを知らせるだけで、本当に区切りか・学びがあるかは会話全体を持つモデルが判断する
-# （判断の観点と、提案か自動実行かの分岐は report-session-mode.sh）。
+# （判断の観点（注入文）は report-session-mode.sh）。
 #
 # 入力 : stdin に PostToolUse の JSON（.tool_input.command を使う）
 # 出力 : 一致時のみ additionalContext を JSON で stdout。それ以外は無出力 exit 0。
@@ -32,7 +32,7 @@ if printf '%s' "$cmd" | grep -qE -- '--dry-run'; then
 fi
 
 source "$(dirname "${BASH_SOURCE[0]}")/report-session-mode.sh"
-report_session_emit "$input" PostToolUse \
+report_session_emit PostToolUse \
   'git commit / push か gh pr merge らしきコマンドが実行された。' \
   'コマンドが成功し、ひとまとまりの作業を出荷したところか（複数コミットに分ける作業の途中ではないか）を確かめる。'
 exit 0

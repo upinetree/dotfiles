@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# UserPromptSubmit hook: report-session の自動提案トリガー
+# UserPromptSubmit hook: report-session の自動トリガー
 #
 # 役割（=「いつ判断させるか」の安いゲートだけを担う。区切りか・学びがあるかの判定はしない）:
 #   1. ユーザー発言に満足/完了シグナルが含まれるか
 #   2. 会話が一定長を超えているか（1〜2ターンの短い会話は除外）
 #   両方を満たしたときだけ、Claude に判断を促す追加コンテキストを注入する。
-#   判断の観点と、提案か自動実行かの分岐は report-session-mode.sh。
+#   判断の観点（注入文）は report-session-mode.sh。
 #
 # 入力 : stdin に UserPromptSubmit の JSON（.prompt / .transcript_path を使う）
 # 出力 : 条件一致時のみ additionalContext を JSON で stdout に出す。それ以外は無出力 exit 0。
@@ -62,7 +62,7 @@ fi
 
 # --- コンテキスト注入 --------------------------------------------------------
 source "$(dirname "${BASH_SOURCE[0]}")/report-session-mode.sh"
-report_session_emit "$input" UserPromptSubmit \
+report_session_emit UserPromptSubmit \
   'ユーザーの直近の発言に満足/完了のシグナルらしき語が含まれ、会話も十分に積み上がっている。' \
   'その発言が作業全体の完了や満足を示しているか（途中経過への相づちや、次の依頼の前置きではないか）を確かめる。'
 exit 0
